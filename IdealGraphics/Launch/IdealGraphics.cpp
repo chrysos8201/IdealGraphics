@@ -42,7 +42,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg = {};
 
-    EngineTest2 engine(g_hWnd);
+    EngineTest2 engine(g_hWnd,1280,960);
     engine.Init();
 
 	while (msg.message != WM_QUIT)

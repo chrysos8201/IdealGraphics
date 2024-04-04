@@ -1,11 +1,11 @@
 #include "Engine/EngineTest2.h"
-
+#include <DirectXColors.h>
 EngineTest2::EngineTest2(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_frameBufferWidth(width),
 	m_frameBufferHeight(height)
 {
-	
+
 }
 
 EngineTest2::~EngineTest2()
@@ -15,7 +15,21 @@ EngineTest2::~EngineTest2()
 
 void EngineTest2::Init()
 {
-
+	bool isSucceed = true;
+	isSucceed = CreateDevice();
+	assert(isSucceed);
+	isSucceed = CreateCommandQueue();
+	assert(isSucceed);
+	isSucceed = CreateSwapChain();
+	assert(isSucceed);
+	isSucceed = CreateCommandList();
+	assert(isSucceed);
+	isSucceed = CreateFence();
+	assert(isSucceed);
+	CreateViewport();
+	CreateScissorRect();
+	CreateRenderTarget();
+	CreateDepthStencil();
 }
 
 void EngineTest2::Tick()
@@ -25,32 +39,74 @@ void EngineTest2::Tick()
 
 void EngineTest2::Render()
 {
-
+	BeginRender();
+	EndRender();
 }
 
 void EngineTest2::BeginRender()
 {
+	m_currentRenderTarget = m_renderTargets[m_currentBackBufferIndex].Get();
 
+	m_allocator[m_currentBackBufferIndex]->Reset();
+	m_commandList->Reset(m_allocator[m_currentBackBufferIndex].Get(), nullptr);
+
+	m_commandList->RSSetViewports(1, &m_viewport);
+	m_commandList->RSSetScissorRects(1, &m_scissorRect);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE currentRTVHandle = m_RTVHeap->GetCPUDescriptorHandleForHeapStart();
+	currentRTVHandle.ptr += m_currentBackBufferIndex * m_rtvDescriptorSize;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE currentDSVHandle = m_DSVHeap->GetCPUDescriptorHandleForHeapStart();
+
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_currentRenderTarget,
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	m_commandList->ResourceBarrier(1, &barrier);
+
+	m_commandList->OMSetRenderTargets(1, &currentRTVHandle, FALSE, &currentDSVHandle);
+
+	m_commandList->ClearRenderTargetView(currentRTVHandle, DirectX::Colors::AliceBlue, 0, nullptr);
+	m_commandList->ClearDepthStencilView(currentDSVHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
 
 void EngineTest2::EndRender()
 {
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_currentRenderTarget,
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
 
+	m_commandList->ResourceBarrier(1, &barrier);
+
+	m_commandList->Close();
+
+	// 명령들 실행
+	ID3D12CommandList* cmdLists[] = { m_commandList.Get() };
+	m_commendQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	HRESULT hr = m_swapChain->Present(1, 0);
+	if (FAILED(hr)) assert(false);
+	WaitRender();
+
+	m_currentBackBufferIndex = m_swapChain->GetCurrentBackBufferIndex();
 }
 
 ID3D12Device6* EngineTest2::GetDevice()
 {
-
+	return m_device.Get();
 }
 
 ID3D12GraphicsCommandList* EngineTest2::GetCommandList()
 {
-
+	return m_commandList.Get();
 }
 
 uint32 EngineTest2::CurrentBackBufferIndex()
 {
-
+	return m_currentBackBufferIndex;
 }
 
 bool EngineTest2::CreateDevice()
@@ -73,7 +129,7 @@ bool EngineTest2::CreateCommandQueue()
 
 	HRESULT hr = m_device->CreateCommandQueue(
 		&desc,
-		IID_PPV_ARGS(m_queue.ReleaseAndGetAddressOf())
+		IID_PPV_ARGS(m_commendQueue.ReleaseAndGetAddressOf())
 	);
 
 	return SUCCEEDED(hr);
@@ -107,7 +163,7 @@ bool EngineTest2::CreateSwapChain()
 	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	ComPtr<IDXGISwapChain> swapChain = nullptr;
-	hr = dxgiFactory->CreateSwapChain(m_queue.Get(), &desc, &swapChain);
+	hr = dxgiFactory->CreateSwapChain(m_commendQueue.Get(), &desc, &swapChain);
 	if (FAILED(hr))
 	{
 		return false;
@@ -151,7 +207,7 @@ bool EngineTest2::CreateCommandList()
 	{
 		return false;
 	}
-	
+
 	// commandList는 열린 상태로 생성되니 닫아야한다.
 	m_commandList->Close();
 
@@ -160,7 +216,11 @@ bool EngineTest2::CreateCommandList()
 
 bool EngineTest2::CreateFence()
 {
-	ZeroMemory(m_fenceValue, sizeof(uint64) * FRAME_BUFFER_COUNT);
+	//ZeroMemory(m_fenceValue, sizeof(uint64) * FRAME_BUFFER_COUNT);
+	for (auto i = 0U; i < FRAME_BUFFER_COUNT; i++)
+	{
+		m_fenceValue[i] = 0;
+	}
 	HRESULT hr = m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 	{
@@ -208,15 +268,15 @@ bool EngineTest2::CreateRenderTarget()
 	}
 	// 서술자 크기 얻기
 	m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_RTVHeap->GetCPUDescriptorHandleForHeapStart();
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVHeap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_RTVHeap->GetCPUDescriptorHandleForHeapStart();
+	//CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVHeap->GetCPUDescriptorHandleForHeapStart());
 
 	for (uint32 i = 0; i < FRAME_BUFFER_COUNT; i++)
 	{
 		m_swapChain->GetBuffer(i, IID_PPV_ARGS(m_renderTargets[i].ReleaseAndGetAddressOf()));
 		m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
-		//rtvHandle.ptr += m_rtvDescriptorSize;
-		rtvHandle.Offset(1, m_rtvDescriptorSize);
+		rtvHandle.ptr += m_rtvDescriptorSize;
+		//rtvHandle.Offset(1, m_rtvDescriptorSize);
 	}
 	// -> 위의 CD3DX12_CPU_DESCRIPTOR_HANDLE은 편의성을 위한 d3dx12의 함수이다!!!
 
@@ -256,6 +316,15 @@ bool EngineTest2::CreateDepthStencil()
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE
 	);
 
+	hr = m_device->CreateCommittedResource(
+		&heapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&dsvClearValue,
+		IID_PPV_ARGS(m_depthStencilBuffer.ReleaseAndGetAddressOf())
+	);
+
 	if (FAILED(hr))
 	{
 		return false;
@@ -270,5 +339,28 @@ bool EngineTest2::CreateDepthStencil()
 
 void EngineTest2::WaitRender()
 {
+	const uint64 fenceValue = m_fenceValue[m_currentBackBufferIndex];
+	HRESULT hr = m_commendQueue->Signal(m_fence.Get(), fenceValue);
+	if (FAILED(hr))
+	{
+		return;
+	}
+	m_fenceValue[m_currentBackBufferIndex]++;
 
+	uint64 val = m_fence->GetCompletedValue();
+	if (m_fence->GetCompletedValue() < fenceValue)
+	{
+		auto hr = m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
+		if (FAILED(hr))
+		{
+			return;
+		}
+
+		// 대기 처리
+		if (WAIT_OBJECT_0 != WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE))
+		{
+			int a = 3;
+			return;
+		}
+	}
 }

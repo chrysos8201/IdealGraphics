@@ -40,7 +40,7 @@ private:
 	uint32 m_currentBackBufferIndex = 0;
 
 	ComPtr<ID3D12Device6> m_device = nullptr;
-	ComPtr<ID3D12CommandQueue> m_queue = nullptr;
+	ComPtr<ID3D12CommandQueue> m_commendQueue = nullptr;
 	ComPtr<IDXGISwapChain3> m_swapChain = nullptr;
 	ComPtr<ID3D12CommandAllocator> m_allocator[FRAME_BUFFER_COUNT] = { nullptr };
 	ComPtr<ID3D12GraphicsCommandList> m_commandList = nullptr;

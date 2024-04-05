@@ -132,7 +132,9 @@
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Defines.h" />
     <ClInclude Include="Core\Types.h" />
-    <ClInclude Include="Engine\EngineTest2.h" />
+    <ClInclude Include="RenderTest\D3D12Resource.h" />
+    <ClInclude Include="Engine\TestGraphics.h" />
+    <ClInclude Include="Engine\IEngine.h" />
     <ClInclude Include="RenderTest\D3D12ThirdParty.h" />
     <ClInclude Include="Engine\EngineTest.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -141,16 +143,21 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Launch\IdealGraphics.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="VertexInfo.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\EngineTest2.cpp" />
+    <ClCompile Include="RenderTest\D3D12Resource.cpp" />
+    <ClCompile Include="Engine\TestGraphics.cpp" />
     <ClCompile Include="Engine\EngineTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Engine\IEngine.cpp" />
     <ClCompile Include="Launch\IdealGraphics.cpp" />
+    <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="VertexInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc" />

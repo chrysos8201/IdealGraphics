@@ -480,7 +480,7 @@ void EngineTest::FlushCommendQueue()
 void EngineTest::BuildBoxGeometry()
 {
 	// Vertex¿Í Index Á¤º¸
-	std::array<Vertex1, 8> vertices;
+	std::array<Vertex, 8> vertices;
 	vertices[0] = { Vector3(-1.f,-1.f,-1.f), Vector4(DirectX::Colors::White) };
 	vertices[1] = { Vector3(-1.f, 1.f,-1.f), Vector4(DirectX::Colors::Black) };
 	vertices[2] = { Vector3(1.f, 1.f,-1.f), Vector4(DirectX::Colors::Red) };
@@ -510,7 +510,7 @@ void EngineTest::BuildBoxGeometry()
 		4,3,7
 	};
 
-	const uint32 vbByteSize = (uint32)vertices.size() * sizeof(Vertex1);
+	const uint32 vbByteSize = (uint32)vertices.size() * sizeof(Vertex);
 	const uint32 ibByteSize = (uint32)indices.size() * sizeof(uint16);
 
 	m_boxGeometry = std::make_unique<MeshGeometry>();
@@ -530,7 +530,7 @@ void EngineTest::BuildBoxGeometry()
 		m_d3dDevice.Get(), m_commandList.Get(), indices.data(), ibByteSize, m_boxGeometry->IndexBufferUploader
 	);
 
-	m_boxGeometry->VertexByteStride = sizeof(Vertex1);
+	m_boxGeometry->VertexByteStride = sizeof(Vertex);
 	m_boxGeometry->VertexBufferByteSize = vbByteSize;
 	m_boxGeometry->IndexFormat = DXGI_FORMAT_R16_UINT;
 	m_boxGeometry->IndexBufferByteSize = ibByteSize;
@@ -545,7 +545,7 @@ void EngineTest::BuildBoxGeometry()
 
 void EngineTest::CreateVertexBuffer()
 {
-	const uint64 byteSize = sizeof(Vertex1) * 8;
+	const uint64 byteSize = sizeof(Vertex) * 8;
 	ComPtr<ID3D12Resource> VertexBufferGPU = nullptr;
 	ComPtr<ID3D12Resource> VertexBufferUploader = nullptr;
 	//VertexBufferGPU = 

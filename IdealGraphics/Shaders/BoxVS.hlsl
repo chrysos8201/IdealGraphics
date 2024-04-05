@@ -1,8 +1,15 @@
 #include "Common.hlsli"
 
-void VS(float3 iPosL : POSITION, float4 iColor : COLOR, out float4 oPosH : SV_Position, out float4 oColor : COLOR)
+VSOutput VS(VSInput input)
 {
-    oPosH = mul(float4(iPosL, 1.0f), gWorldViewProj);
-    
-    oColor = iColor;
+    VSOutput output = (VSOutput)0;
+
+    float4 localPos = float4(input.pos, 1.f);
+    float4 worldPos = mul(World, localPos);
+    float4 viewPos = mul(View, worldPos);
+    float4 projPos = mul(Proj, viewPos);
+
+    output.svpos = projPos;
+    output.color = input.color;
+    return output;
 }

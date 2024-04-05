@@ -1,6 +1,6 @@
 #include "Common.hlsli"
 
-float4 PS(float4 posH : SV_POSITION, float4 color : COLOR) : SV_Target
+float4 PS(VSOutput input) : SV_TARGET
 {
-    return color;
+    return input.color;
 }

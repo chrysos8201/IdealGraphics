@@ -2,14 +2,16 @@
 #include "Core/Core.h"
 #include "RenderTest/D3D12ThirdParty.h"
 
-class EngineTest2
+class IEngine;
+
+class TestGraphics
 {
 public:
 	enum { FRAME_BUFFER_COUNT = 2 };	// 더블 버퍼링
 
 public:
-	EngineTest2(HWND hwnd, uint32 width, uint32 height);
-	virtual ~EngineTest2();
+	TestGraphics(HWND hwnd, uint32 width, uint32 height);
+	virtual ~TestGraphics();
 
 public:
 	void Init();
@@ -65,7 +67,10 @@ private:
 private:
 	ID3D12Resource* m_currentRenderTarget = nullptr;
 	void WaitRender();
+
+private:
+	//std::shared_ptr<ISceneTest> m_scene = nullptr;
 };
 
-extern EngineTest2* g_Engine;
+//extern EngineTest2* g_Engine;
 

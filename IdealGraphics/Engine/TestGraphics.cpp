@@ -1,6 +1,9 @@
-#include "Engine/EngineTest2.h"
+#include "Engine/TestGraphics.h"
 #include <DirectXColors.h>
-EngineTest2::EngineTest2(HWND hwnd, uint32 width, uint32 height)
+
+#include "Engine/Engine.h"
+
+TestGraphics::TestGraphics(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_frameBufferWidth(width),
 	m_frameBufferHeight(height)
@@ -8,12 +11,12 @@ EngineTest2::EngineTest2(HWND hwnd, uint32 width, uint32 height)
 
 }
 
-EngineTest2::~EngineTest2()
+TestGraphics::~TestGraphics()
 {
 
 }
 
-void EngineTest2::Init()
+void TestGraphics::Init()
 {
 	bool isSucceed = true;
 	isSucceed = CreateDevice();
@@ -32,18 +35,17 @@ void EngineTest2::Init()
 	CreateDepthStencil();
 }
 
-void EngineTest2::Tick()
+void TestGraphics::Tick()
 {
 
 }
 
-void EngineTest2::Render()
+void TestGraphics::Render()
 {
-	BeginRender();
-	EndRender();
+
 }
 
-void EngineTest2::BeginRender()
+void TestGraphics::BeginRender()
 {
 	m_currentRenderTarget = m_renderTargets[m_currentBackBufferIndex].Get();
 
@@ -67,11 +69,12 @@ void EngineTest2::BeginRender()
 
 	m_commandList->OMSetRenderTargets(1, &currentRTVHandle, FALSE, &currentDSVHandle);
 
-	m_commandList->ClearRenderTargetView(currentRTVHandle, DirectX::Colors::AliceBlue, 0, nullptr);
+	//m_commandList->ClearRenderTargetView(currentRTVHandle, DirectX::Colors::AliceBlue, 0, nullptr);
+	m_commandList->ClearRenderTargetView(currentRTVHandle, DirectX::Colors::GreenYellow, 0, nullptr);
 	m_commandList->ClearDepthStencilView(currentDSVHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
 
-void EngineTest2::EndRender()
+void TestGraphics::EndRender()
 {
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_currentRenderTarget,
@@ -94,22 +97,22 @@ void EngineTest2::EndRender()
 	m_currentBackBufferIndex = m_swapChain->GetCurrentBackBufferIndex();
 }
 
-ID3D12Device6* EngineTest2::GetDevice()
+ID3D12Device6* TestGraphics::GetDevice()
 {
 	return m_device.Get();
 }
 
-ID3D12GraphicsCommandList* EngineTest2::GetCommandList()
+ID3D12GraphicsCommandList* TestGraphics::GetCommandList()
 {
 	return m_commandList.Get();
 }
 
-uint32 EngineTest2::CurrentBackBufferIndex()
+uint32 TestGraphics::CurrentBackBufferIndex()
 {
 	return m_currentBackBufferIndex;
 }
 
-bool EngineTest2::CreateDevice()
+bool TestGraphics::CreateDevice()
 {
 	HRESULT hr = D3D12CreateDevice(
 		nullptr,
@@ -119,7 +122,7 @@ bool EngineTest2::CreateDevice()
 	return SUCCEEDED(hr);
 }
 
-bool EngineTest2::CreateCommandQueue()
+bool TestGraphics::CreateCommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC desc = {};
 	desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -135,7 +138,7 @@ bool EngineTest2::CreateCommandQueue()
 	return SUCCEEDED(hr);
 }
 
-bool EngineTest2::CreateSwapChain()
+bool TestGraphics::CreateSwapChain()
 {
 	ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
 	HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory));
@@ -181,7 +184,7 @@ bool EngineTest2::CreateSwapChain()
 	return true;
 }
 
-bool EngineTest2::CreateCommandList()
+bool TestGraphics::CreateCommandList()
 {
 	HRESULT hr;
 	for (uint32 i = 0; i < FRAME_BUFFER_COUNT; i++)
@@ -214,7 +217,7 @@ bool EngineTest2::CreateCommandList()
 	return true;
 }
 
-bool EngineTest2::CreateFence()
+bool TestGraphics::CreateFence()
 {
 	//ZeroMemory(m_fenceValue, sizeof(uint64) * FRAME_BUFFER_COUNT);
 	for (auto i = 0U; i < FRAME_BUFFER_COUNT; i++)
@@ -235,7 +238,7 @@ bool EngineTest2::CreateFence()
 	return (m_fenceEvent != nullptr);
 }
 
-void EngineTest2::CreateViewport()
+void TestGraphics::CreateViewport()
 {
 	m_viewport.TopLeftX = 0;
 	m_viewport.TopLeftY = 0;
@@ -245,7 +248,7 @@ void EngineTest2::CreateViewport()
 	m_viewport.MaxDepth = 1.0f;
 }
 
-void EngineTest2::CreateScissorRect()
+void TestGraphics::CreateScissorRect()
 {
 	m_scissorRect.left = 0;
 	m_scissorRect.right = m_frameBufferWidth;
@@ -253,7 +256,7 @@ void EngineTest2::CreateScissorRect()
 	m_scissorRect.bottom = m_frameBufferHeight;
 }
 
-bool EngineTest2::CreateRenderTarget()
+bool TestGraphics::CreateRenderTarget()
 {
 	// RTV용 서술자 힙 만들기
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -283,7 +286,7 @@ bool EngineTest2::CreateRenderTarget()
 	return true;
 }
 
-bool EngineTest2::CreateDepthStencil()
+bool TestGraphics::CreateDepthStencil()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 	heapDesc.NumDescriptors = 1;
@@ -337,7 +340,7 @@ bool EngineTest2::CreateDepthStencil()
 	return true;
 }
 
-void EngineTest2::WaitRender()
+void TestGraphics::WaitRender()
 {
 	const uint64 fenceValue = m_fenceValue[m_currentBackBufferIndex];
 	HRESULT hr = m_commendQueue->Signal(m_fence.Get(), fenceValue);

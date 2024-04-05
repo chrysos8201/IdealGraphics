@@ -48,6 +48,20 @@ private:
 	void operator=(const ConstantBuffer&) = delete;
 };
 
+template <typename BufferType>
+class ConstantBuffer2
+{
+public:
+	ConstantBuffer2(std::shared_ptr<TestGraphics> engine, uint64 size)
+	{
+
+	}
+
+private:
+	ComPtr<ID3D12Resource> m_buffer;
+	BufferType m_bufferData;
+};
+
 //struct ID3D12RootSignature;
 class RootSignature
 {

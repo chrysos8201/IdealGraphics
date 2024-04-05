@@ -29,5 +29,8 @@ private:
 
 	uint32 m_width;
 	uint32 m_height;
+
+private:
+	float m_rotateY = 0.f;
 };
 

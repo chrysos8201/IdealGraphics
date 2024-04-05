@@ -19,6 +19,7 @@ bool Engine::Init()
 	m_graphics->Init();
 
 #pragma region 정점 정리
+	// 정점 버퍼를 만드려면 당연히 정점에 대한 정보가 있어야겠지?
 	Vertex vertices[3] = {};
 	vertices[0].Pos= Vector3(-1.0f, -1.0f, 0.0f);
 	vertices[0].Color = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -29,8 +30,12 @@ bool Engine::Init()
 	vertices[2].Pos= Vector3(0.0f, 1.0f, 0.0f);
 	vertices[2].Color = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 
+	// 총 정점 배열의 사이즈
 	auto vertexSize = sizeof(Vertex) * std::size(vertices);
+	// 간격의 사이즈도 필요하다.
 	auto vertexStride = sizeof(Vertex);
+
+	//
 	m_vertexBuffer = std::make_shared<VertexBuffer>(m_graphics, vertexSize, vertexStride, vertices);
 	if (!m_vertexBuffer->IsValid())
 	{
@@ -96,6 +101,11 @@ bool Engine::Init()
 
 void Engine::Tick()
 {
+	m_rotateY += 0.02f;
+	auto currentIndex = m_graphics->CurrentBackBufferIndex();	// 현재 프레임 번호 얻기
+	Transform* currentTransform = m_constantBuffer[currentIndex]->GetPtr<Transform>();
+	currentTransform->World = Matrix::CreateRotationY(m_rotateY);
+
 	m_graphics->Tick();
 }
 

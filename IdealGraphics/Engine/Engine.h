@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/IEngine.h"
 #include "RenderTest/D3D12ThirdParty.h"
-#include "VertexInfo.h"
+#include "RenderTest/VertexInfo.h"
 #include "Engine/TestGraphics.h"
 #include "RenderTest/D3D12Resource.h"
 
@@ -20,6 +20,7 @@ private:
 	std::shared_ptr<TestGraphics> m_graphics;
 private:
 	std::shared_ptr<VertexBuffer> m_vertexBuffer;
+	std::shared_ptr<IndexBuffer> m_indexBuffer;
 	//std::shared_ptr<ConstantBuffer> m_constantBuffer[TestGraphics::FRAME_BUFFER_COUNT];
 	std::vector<std::shared_ptr<ConstantBuffer>> m_constantBuffer;
 	std::shared_ptr<RootSignature> m_rootSignature;

@@ -20,7 +20,7 @@ bool Engine::Init()
 
 #pragma region 정점 정리
 	// 정점 버퍼를 만드려면 당연히 정점에 대한 정보가 있어야겠지?
-	Vertex vertices[3] = {};
+	/*Vertex vertices[3] = {};
 	vertices[0].Pos= Vector3(-1.0f, -1.0f, 0.0f);
 	vertices[0].Color = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
 
@@ -28,7 +28,18 @@ bool Engine::Init()
 	vertices[1].Color = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	vertices[2].Pos= Vector3(0.0f, 1.0f, 0.0f);
-	vertices[2].Color = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[2].Color = Vector4(1.0f, 0.0f, 0.0f, 1.0f);*/
+
+	Vertex vertices[8] = {
+		{ DirectX::SimpleMath::Vector3(-1.0f, -1.0f,  0.0f), Vector3(1.f,0.f,0.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(-1.0f, +1.0f,  0.0f), Vector3(0.f,1.f,0.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(+1.0f, +1.0f,  0.0f), Vector3(0.f,0.f,1.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(+1.0f, -1.0f,  0.0f), Vector3(1.f,1.f,0.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(-1.0f, -1.0f, +1.0f), Vector3(1.f,0.f,1.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(-1.0f, +1.0f, +1.0f), Vector3(0.f,1.f,1.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(+1.0f, +1.0f, +1.0f), Vector3(0.f,0.f,0.f), Vector2() },
+		{ DirectX::SimpleMath::Vector3(+1.0f, -1.0f, +1.0f), Vector3(1.f,1.f,1.f), Vector2() }
+	};
 
 	// 총 정점 배열의 사이즈
 	auto vertexSize = sizeof(Vertex) * std::size(vertices);
@@ -43,6 +54,39 @@ bool Engine::Init()
 		return false;
 	}
 #pragma  endregion
+
+#pragma region 인덱스 버퍼
+	{
+		uint32 indices[36] = {
+			0, 1, 2,
+			0, 2, 3,
+
+			4, 6, 5,
+			4, 7, 6,
+
+			4, 5, 1,
+			4, 1, 0,
+
+			3, 2, 6,
+			3, 6, 7,
+
+			1, 5, 6,
+			1, 6, 2,
+
+			4, 0, 3,
+			4, 3, 7
+		};
+		auto indexSize = sizeof(uint32) * std::size(indices);
+		auto stride = sizeof(uint32);
+
+		m_indexBuffer = std::make_shared<IndexBuffer>(m_graphics, indexSize, indices);
+		if (!m_indexBuffer->IsValid())
+		{
+			assert(false);
+			return false;
+		}
+	}
+#pragma endregion
 
 #pragma region 상수 버퍼
 	m_constantBuffer = std::vector<std::shared_ptr<ConstantBuffer>>(TestGraphics::FRAME_BUFFER_COUNT);
@@ -96,6 +140,8 @@ bool Engine::Init()
 	}
 
 #pragma endregion
+
+
 	return true;
 }
 
@@ -117,6 +163,7 @@ void Engine::Render()
 		auto currentIndex = m_graphics->CurrentBackBufferIndex();
 		auto commandList = m_graphics->GetCommandList();
 		auto vbView = m_vertexBuffer->View();
+		auto ibView = m_indexBuffer->View();
 
 		commandList->SetGraphicsRootSignature(m_rootSignature->Get());
 		commandList->SetPipelineState(m_pipelineState->Get());
@@ -124,8 +171,11 @@ void Engine::Render()
 
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->IASetVertexBuffers(0, 1, &vbView);
-
-		commandList->DrawInstanced(3,1,0,0);
+		commandList->IASetIndexBuffer(&ibView);
+		//commandList->DrawInstanced(36,1,0,0);
+		//commandList->DrawInstanced(6,1,0,0);
+		commandList->DrawIndexedInstanced(36,1,0,0,0);
+		//commandList->DrawInstanced(6,1,0,0);
 	}
 
 	m_graphics->EndRender();

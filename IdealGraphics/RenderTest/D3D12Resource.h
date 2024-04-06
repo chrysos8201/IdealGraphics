@@ -22,6 +22,23 @@ private:
 	void operator=(const VertexBuffer&) = delete;
 };
 
+class IndexBuffer
+{
+public:
+	IndexBuffer(std::shared_ptr<TestGraphics> engine, uint64 size, const void* initData);
+	D3D12_INDEX_BUFFER_VIEW View() const;
+
+	bool IsValid();
+
+private:
+	bool m_isValid = false;
+	ComPtr<ID3D12Resource> m_buffer = nullptr;
+	D3D12_INDEX_BUFFER_VIEW m_view;
+
+	IndexBuffer(const IndexBuffer&) = delete;
+	void operator=(const IndexBuffer&) = delete;
+};
+
 class ConstantBuffer
 {
 public:

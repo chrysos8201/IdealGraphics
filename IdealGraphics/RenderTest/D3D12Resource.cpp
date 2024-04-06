@@ -54,6 +54,62 @@ bool VertexBuffer::IsValid()
 	return m_isValid;
 }
 
+////////////////////////////////////////////
+
+IndexBuffer::IndexBuffer(std::shared_ptr<TestGraphics> engine, uint64 size, const void* initData)
+{
+	// desc heap을 만들어야한다.
+	// upload heap
+	CD3DX12_HEAP_PROPERTIES prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+	HRESULT hr = engine->GetDevice()->CreateCommittedResource(
+		&prop,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		//D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(m_buffer.GetAddressOf())
+	);
+	if (FAILED(hr))
+	{
+		assert(false);
+		return;
+	}
+	// index buffer view 설정?
+	m_view.BufferLocation = m_buffer->GetGPUVirtualAddress();
+	m_view.Format = DXGI_FORMAT_R32_UINT;
+	m_view.SizeInBytes = static_cast<uint32>(size);
+
+	if (initData != nullptr)
+	{
+		void* ptr = nullptr;
+		hr = m_buffer->Map(0, nullptr, &ptr);
+		if (FAILED(hr))
+		{
+			assert(false);
+			return;
+		}
+
+		memcpy(ptr, initData, size);
+
+		m_buffer->Unmap(0, nullptr);
+	}
+
+	m_isValid = true;
+}
+
+D3D12_INDEX_BUFFER_VIEW IndexBuffer::View() const
+{
+	return m_view;
+}
+
+bool IndexBuffer::IsValid()
+{
+	return m_isValid;
+}
+
 ////////////////////////////////////////////////
 
 ConstantBuffer::ConstantBuffer(std::shared_ptr<TestGraphics> engine, uint64 size) 
@@ -89,6 +145,7 @@ ConstantBuffer::ConstantBuffer(std::shared_ptr<TestGraphics> engine, uint64 size
 	}
 	
 	// UnMap이 없는데?
+	//m_buffer->Unmap(0, nullptr);
 
 	m_desc = {};
 	m_desc.BufferLocation = m_buffer->GetGPUVirtualAddress();

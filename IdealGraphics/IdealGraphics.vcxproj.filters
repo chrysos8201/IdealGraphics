@@ -61,9 +61,6 @@
     <ClInclude Include="RenderTest\D3D12ThirdParty.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="VertexInfo.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\TestGraphics.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -71,7 +68,24 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
-    <ClInclude Include="RenderTest\D3D12Resource.h" />
+    <ClInclude Include="RenderTest\ModelTest.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTest\D3D12Resource.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTest\MeshTest.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTest\ASEParser.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTest\VertexInfo.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Engine2.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -100,8 +114,24 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
-    <ClCompile Include="RenderTest\D3D12Resource.cpp" />
-    <ClCompile Include="VertexInfo.cpp" />
+    <ClCompile Include="RenderTest\ModelTest.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTest\D3D12Resource.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTest\MeshTest.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTest\ASEParser.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTest\VertexInfo.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Engine2.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

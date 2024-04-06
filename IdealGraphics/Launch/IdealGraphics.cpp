@@ -4,7 +4,9 @@
 #include "framework.h"
 #include "Launch/IdealGraphics.h"
 #include "Core/Core.h"
+
 #include "Engine/Engine.h"
+#include "Engine/Engine2.h"
 
 #define MAX_LOADSTRING 100
 
@@ -42,7 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg = {};
 
-    Engine engine(g_hWnd,1280,960);
+    Engine2 engine(g_hWnd,1280,960);
     engine.Init();
 
 	while (msg.message != WM_QUIT)

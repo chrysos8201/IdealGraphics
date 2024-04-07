@@ -41,7 +41,7 @@ void MeshTest::Create(std::shared_ptr<TestGraphics> graphics)
 #pragma region CS
 	m_constantBuffer = std::vector<std::shared_ptr<ConstantBuffer>>(TestGraphics::FRAME_BUFFER_COUNT);
 
-	Vector3 eyePos(0.f, 0.f, 5.f);
+	Vector3 eyePos(0.f, 0.f, -800.f);
 	Vector3 targetPos = Vector3::Zero;
 	Vector3 upward(0.f, 1.f, 0.f);
 

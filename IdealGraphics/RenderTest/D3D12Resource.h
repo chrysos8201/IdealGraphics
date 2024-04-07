@@ -116,3 +116,51 @@ private:
 	ComPtr<ID3DBlob> m_vsBlob;
 	ComPtr<ID3DBlob> m_psBlob;
 };
+
+class DescriptorHandle
+{
+public:
+	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;
+};
+
+class Texture2D;
+
+class DescriptorHeap
+{
+public:
+	DescriptorHeap(std::shared_ptr<TestGraphics> graphics);
+	ID3D12DescriptorHeap* GetHeap();
+	DescriptorHandle* Register(Texture2D* texture);
+
+private:
+	bool m_isValid = false;
+	uint32 m_incrementSize = 0;
+	ComPtr<ID3D12DescriptorHeap> m_heap = nullptr;
+	std::vector<DescriptorHandle*> m_handles;
+
+	std::shared_ptr<TestGraphics> m_graphics;
+};
+
+class Texture2D
+{
+public:
+	static Texture2D* Get(std::string path);
+	static Texture2D* GetWhite();
+	bool IsValid();
+
+	ID3D12Resource* Resource();
+	D3D12_SHADER_RESOURCE_VIEW_DESC ViewDesc();
+
+private:
+	bool m_isValid = false;
+	Texture2D(std::string path);
+	Texture2D(ID3D12Resource* buffer);
+	ComPtr<ID3D12Resource> m_resource;
+	bool Load(std::string& path);
+	
+	static ID3D12Resource* GetDefaultResource(uint64 width, uint64 height);
+
+	Texture2D(const Texture2D&) = delete;
+	void operator=(const Texture2D&) = delete;
+};

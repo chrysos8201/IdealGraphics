@@ -12,8 +12,8 @@ struct VSInput
     float3 Pos : POSITION;
     float3 Normal : NORMAL;
     float2 UV : TEXCOORD;
-    //float3 tangent : TANGENT;
-    //float4 color : COLOR;
+    float3 tangent : TANGENT;
+    float4 color : COLOR;
 };
 
 struct VSOutput

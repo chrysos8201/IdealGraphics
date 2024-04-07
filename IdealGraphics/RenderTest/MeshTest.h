@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "RenderTest/D3D12ThirdParty.h"
 #include "RenderTest/D3D12Resource.h"
-#include "RenderTest/ASEParser.h"
+#include "Misc/ASEParser.h"
 #include "RenderTest/VertexInfo.h"
 #include "Engine/TestGraphics.h"
 
@@ -24,12 +24,14 @@ private:
 	std::shared_ptr<RootSignature> m_rootSignature;
 	std::shared_ptr<PipelineState> m_pipelineState;
 
-private:
+public:
 	// Vertices
 	// Indices
 	std::vector<Vertex> m_vertices;
 	std::vector<uint32> m_indices;
+	std::wstring m_diffuseMap;
 
 	std::shared_ptr<TestGraphics> m_graphics;
+
 };
 

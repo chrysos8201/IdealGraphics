@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -120,7 +120,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,11 +131,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Misc\AssimpLoader.h" />
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Defines.h" />
     <ClInclude Include="Core\Types.h" />
     <ClInclude Include="Engine\Engine2.h" />
-    <ClInclude Include="RenderTest\ASEParser.h" />
+    <ClInclude Include="Misc\ASEParser.h" />
     <ClInclude Include="RenderTest\MeshTest.h" />
     <ClInclude Include="RenderTest\ModelTest.h" />
     <ClInclude Include="RenderTest\D3D12Resource.h" />
@@ -151,10 +153,12 @@
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="RenderTest\VertexInfo.h" />
+    <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Misc\AssimpLoader.cpp" />
     <ClCompile Include="Engine\Engine2.cpp" />
-    <ClCompile Include="RenderTest\ASEParser.cpp" />
+    <ClCompile Include="Misc\ASEParser.cpp" />
     <ClCompile Include="RenderTest\MeshTest.cpp" />
     <ClCompile Include="RenderTest\ModelTest.cpp" />
     <ClCompile Include="RenderTest\D3D12Resource.cpp" />

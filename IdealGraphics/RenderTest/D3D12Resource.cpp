@@ -1,4 +1,5 @@
 #include "RenderTest/D3D12Resource.h"
+#include "ThirdParty/DirectXTex/DirectXTex.h"
 
 VertexBuffer::VertexBuffer(std::shared_ptr<TestGraphics> engine, uint64 size, uint64 stride, const void* initData)
 {
@@ -316,4 +317,142 @@ void PipelineState::Create()
 ID3D12PipelineState* PipelineState::Get()
 {
 	return m_pipelineState.Get();
+}
+
+////////////////////////////////////////////////////////////////////
+
+const uint32 HANDLE_MAX = 512;
+
+DescriptorHeap::DescriptorHeap(std::shared_ptr<TestGraphics> graphics)
+{
+	m_graphics = graphics;
+
+	m_handles.clear();
+	m_handles.reserve(HANDLE_MAX);
+
+	D3D12_DESCRIPTOR_HEAP_DESC desc{};
+	desc.NodeMask = 1;
+	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	desc.NumDescriptors = HANDLE_MAX;
+	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+	HRESULT hr = graphics->GetDevice()->CreateDescriptorHeap(
+		&desc,
+		IID_PPV_ARGS(m_heap.ReleaseAndGetAddressOf())
+	);
+
+	if (FAILED(hr))
+	{
+		m_isValid = false;
+		return;
+	}
+
+	m_incrementSize = graphics->GetDevice()->GetDescriptorHandleIncrementSize(desc.Type);
+	m_isValid = true;
+}
+
+ID3D12DescriptorHeap* DescriptorHeap::GetHeap()
+{
+	return m_heap.Get();
+}
+
+DescriptorHandle* DescriptorHeap::Register(Texture2D* texture)
+{
+	uint64 count = m_handles.size();
+	if (HANDLE_MAX <= count)
+	{
+		return nullptr;
+	}
+
+	DescriptorHandle* handle = new DescriptorHandle();
+
+	auto handleCPU = m_heap->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += m_incrementSize * count;
+
+	auto handleGPU = m_heap->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += m_incrementSize * count;
+
+	handle->HandleCPU = handleCPU;
+	handle->HandleGPU = handleGPU;
+
+	ID3D12Resource* resource = texture->Resource();
+	auto desc = texture->ViewDesc();
+	
+	m_graphics->GetDevice()->CreateShaderResourceView(resource, &desc, handle->HandleCPU);
+
+	m_handles.push_back(handle);
+	return handle;
+}
+
+//////////////////////////////////////////////
+
+Texture2D* Texture2D::Get(std::string path)
+{
+
+}
+
+Texture2D* Texture2D::GetWhite()
+{
+
+}
+
+bool Texture2D::IsValid()
+{
+
+}
+
+ID3D12Resource* Texture2D::Resource()
+{
+
+}
+
+D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::ViewDesc()
+{
+
+}
+
+Texture2D::Texture2D(std::string path)
+{
+	m_isValid = Load(path);
+}
+
+Texture2D::Texture2D(ID3D12Resource* buffer)
+{
+	m_resource = buffer;
+	m_isValid = m_resource != nullptr;
+}
+
+bool Texture2D::Load(std::string& path)
+{
+	using namespace DirectX;
+	TexMetadata meta = {};
+	ScratchImage scratch = {};
+	
+	HRESULT hr;
+
+	std::wstring wpath;
+	wpath.assign(path.begin(), path.end());
+	LoadFromWICFile(wpath.c_str(), WIC_FLAGS_NONE, &meta, scratch);
+
+	if (FAILED(hr))
+	{
+		return false;
+	}
+
+	auto img = scratch.GetImage(0, 0, 0);
+	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	auto desc = CD3DX12_RESOURCE_DESC::Tex2D(
+		meta.format,
+		meta.width,
+		meta.height,
+		static_cast<uint16>(meta.arraySize),
+		static_cast<uint16>(meta.mipLevels)
+	);
+
+	//hr = 
+}
+
+ID3D12Resource* Texture2D::GetDefaultResource(uint64 width, uint64 height)
+{
+
 }

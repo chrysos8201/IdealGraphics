@@ -1,5 +1,5 @@
 #include "RenderTest/ModelTest.h"
-
+#include "Misc/AssimpLoader.h"
 ModelTest::ModelTest(std::shared_ptr<TestGraphics> graphics)
 	: m_graphics(graphics)
 {
@@ -22,7 +22,7 @@ void ModelTest::LoadASEData(std::string path)
 	for (uint32 i = 0; i < meshNum; i++)
 	{
 		// 메쉬를 만들고
-		std::shared_ptr<MeshTest> mesh = std::make_shared<MeshTest>();
+		MeshTest mesh;
 		std::vector<Vertex> v;
 		
 		// 메쉬안에 있는 버텍스 정보를 복사하고
@@ -34,14 +34,35 @@ void ModelTest::LoadASEData(std::string path)
 		}
 
 		// 메쉬 정보를 다시 넣어준다.
-		mesh->SetVertices(v);
+		mesh.SetVertices(v);
 
 		// 이번에는 인덱스 정보
-		mesh->SetIndices(m_aseData->geomObjects[i]->indices);
+		mesh.SetIndices(m_aseData->geomObjects[i]->indices);
 
-		mesh->Create(m_graphics);
+		mesh.Create(m_graphics);
 
 		m_meshes.push_back(mesh);
+	}
+}
+
+void ModelTest::LoadFBXData(std::string path)
+{
+	ImportSettings2 importSetting =
+	{
+		path,
+		m_meshes,
+		false,
+		true
+	};
+	AssimpLoader loader;
+	if (!loader.Load(importSetting))
+	{
+		assert(false);
+		return;
+	}
+	for (uint32 i = 0; i < m_meshes.size(); i++)
+	{
+		m_meshes[i].Create(m_graphics);
 	}
 }
 
@@ -49,6 +70,6 @@ void ModelTest::Render()
 {
 	for (auto& mesh : m_meshes)
 	{
-		mesh->Render();
+		mesh.Render();
 	}
 }

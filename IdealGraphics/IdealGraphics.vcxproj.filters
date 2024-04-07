@@ -32,6 +32,9 @@
     <Filter Include="D3D12Util">
       <UniqueIdentifier>{b28d2b72-62c0-4b43-8373-59a6a7e3058b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Misc\Thirdparty">
+      <UniqueIdentifier>{0a4c80de-3891-4251-964b-186963a4f2c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Launch\IdealGraphics.h">
@@ -77,14 +80,20 @@
     <ClInclude Include="RenderTest\MeshTest.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTest\ASEParser.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
     <ClInclude Include="RenderTest\VertexInfo.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Engine2.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\ThirdParty\Thirdparty.h">
+      <Filter>Misc\Thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\AssimpLoader.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\ASEParser.h">
+      <Filter>Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -123,14 +132,17 @@
     <ClCompile Include="RenderTest\MeshTest.cpp">
       <Filter>RenderTest</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTest\ASEParser.cpp">
-      <Filter>RenderTest</Filter>
-    </ClCompile>
     <ClCompile Include="RenderTest\VertexInfo.cpp">
       <Filter>RenderTest</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Engine2.cpp">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\AssimpLoader.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\ASEParser.cpp">
+      <Filter>Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

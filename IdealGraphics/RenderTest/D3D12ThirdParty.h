@@ -13,7 +13,7 @@ using namespace Microsoft::WRL;
 #pragma comment(lib, "dxgi.lib")
 
 #include "ThirdParty/DXTK/SimpleMath.h"
-#pragma comment(lib, "ThirdParty/Lib/ForDebug/DirectXTK.lib")
+#pragma comment(lib, "ThirdParty/Libraries/ForDebug/DirectXTK.lib")
 
 using namespace DirectX::SimpleMath;
 
@@ -21,4 +21,4 @@ using namespace DirectX::SimpleMath;
 // DirectXTex
 //#include "ThirdParty/DirectXTex/d3dx12.h"
 #include "ThirdParty/Common/d3dx12.h"
-#pragma comment(lib, "ThirdParty/Lib/ForDebug/DirectXTex.lib")
+#pragma comment(lib, "ThirdParty/Libraries/ForDebug/DirectXTex.lib")

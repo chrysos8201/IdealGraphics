@@ -20,10 +20,11 @@ bool Engine2::Init()
 	m_graphics->Init();
 
 	std::shared_ptr<ModelTest> model = std::make_shared<ModelTest>(m_graphics);
+	model->LoadFBXData("Assets/JaneD/JaneD.fbx");
 	//model->LoadASEData("RenderTest/box.ASE");
-	model->LoadASEData("RenderTest/genji_max.ASE");
+	//model->LoadASEData("RenderTest/genji_max.ASE");
 	m_models.push_back(model);
-
+	
 	return true;
 }
 

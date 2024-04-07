@@ -7,6 +7,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/Engine2.h"
+#include "RenderTest/GraphicsEngine.h"
 
 #define MAX_LOADSTRING 100
 
@@ -44,7 +45,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg = {};
 
-    Engine2 engine(g_hWnd,1280,960);
+    //Engine2 engine(g_hWnd,1280,960);
+    GraphicsEngine engine(g_hWnd, 1280, 960);
     engine.Init();
 
 	while (msg.message != WM_QUIT)

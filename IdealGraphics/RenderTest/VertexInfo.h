@@ -9,6 +9,12 @@ struct alignas(256) Transform	// 사이즈를 맞추었다?
 	Matrix Proj;
 };
 
+struct VertexTest
+{
+	Vector3 Position;
+	Vector4 Color;
+};
+
 struct Vertex
 {
 	Vector3 Position;

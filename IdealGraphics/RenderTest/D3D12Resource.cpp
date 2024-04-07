@@ -1,5 +1,5 @@
 #include "RenderTest/D3D12Resource.h"
-#include "ThirdParty/DirectXTex/DirectXTex.h"
+//#include "ThirdParty/DirectXTex/DirectXTex.h"
 
 VertexBuffer::VertexBuffer(std::shared_ptr<TestGraphics> engine, uint64 size, uint64 stride, const void* initData)
 {
@@ -325,30 +325,30 @@ const uint32 HANDLE_MAX = 512;
 
 DescriptorHeap::DescriptorHeap(std::shared_ptr<TestGraphics> graphics)
 {
-	m_graphics = graphics;
-
-	m_handles.clear();
-	m_handles.reserve(HANDLE_MAX);
-
-	D3D12_DESCRIPTOR_HEAP_DESC desc{};
-	desc.NodeMask = 1;
-	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	desc.NumDescriptors = HANDLE_MAX;
-	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-
-	HRESULT hr = graphics->GetDevice()->CreateDescriptorHeap(
-		&desc,
-		IID_PPV_ARGS(m_heap.ReleaseAndGetAddressOf())
-	);
-
-	if (FAILED(hr))
-	{
-		m_isValid = false;
-		return;
-	}
-
-	m_incrementSize = graphics->GetDevice()->GetDescriptorHandleIncrementSize(desc.Type);
-	m_isValid = true;
+// 	m_graphics = graphics;
+// 
+// 	m_handles.clear();
+// 	m_handles.reserve(HANDLE_MAX);
+// 
+// 	D3D12_DESCRIPTOR_HEAP_DESC desc{};
+// 	desc.NodeMask = 1;
+// 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+// 	desc.NumDescriptors = HANDLE_MAX;
+// 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+// 
+// 	HRESULT hr = graphics->GetDevice()->CreateDescriptorHeap(
+// 		&desc,
+// 		IID_PPV_ARGS(m_heap.ReleaseAndGetAddressOf())
+// 	);
+// 
+// 	if (FAILED(hr))
+// 	{
+// 		m_isValid = false;
+// 		return;
+// 	}
+// 
+// 	m_incrementSize = graphics->GetDevice()->GetDescriptorHandleIncrementSize(desc.Type);
+// 	m_isValid = true;
 }
 
 ID3D12DescriptorHeap* DescriptorHeap::GetHeap()
@@ -358,73 +358,75 @@ ID3D12DescriptorHeap* DescriptorHeap::GetHeap()
 
 DescriptorHandle* DescriptorHeap::Register(Texture2D* texture)
 {
-	uint64 count = m_handles.size();
-	if (HANDLE_MAX <= count)
-	{
-		return nullptr;
-	}
+// 	uint64 count = m_handles.size();
+// 	if (HANDLE_MAX <= count)
+// 	{
+// 		return nullptr;
+// 	}
+// 
+// 	DescriptorHandle* handle = new DescriptorHandle();
+// 
+// 	auto handleCPU = m_heap->GetCPUDescriptorHandleForHeapStart();
+// 	handleCPU.ptr += m_incrementSize * count;
+// 
+// 	auto handleGPU = m_heap->GetGPUDescriptorHandleForHeapStart();
+// 	handleGPU.ptr += m_incrementSize * count;
+// 
+// 	handle->HandleCPU = handleCPU;
+// 	handle->HandleGPU = handleGPU;
+// 
+// 	ID3D12Resource* resource = texture->Resource();
+// 	auto desc = texture->ViewDesc();
+// 	
+// 	m_graphics->GetDevice()->CreateShaderResourceView(resource, &desc, handle->HandleCPU);
+// 
+// 	m_handles.push_back(handle);
+//	return handle;
 
-	DescriptorHandle* handle = new DescriptorHandle();
-
-	auto handleCPU = m_heap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += m_incrementSize * count;
-
-	auto handleGPU = m_heap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += m_incrementSize * count;
-
-	handle->HandleCPU = handleCPU;
-	handle->HandleGPU = handleGPU;
-
-	ID3D12Resource* resource = texture->Resource();
-	auto desc = texture->ViewDesc();
-	
-	m_graphics->GetDevice()->CreateShaderResourceView(resource, &desc, handle->HandleCPU);
-
-	m_handles.push_back(handle);
-	return handle;
+	return nullptr;
 }
 
 //////////////////////////////////////////////
 
 Texture2D* Texture2D::Get(std::string path)
 {
-
+	return nullptr;
 }
 
 Texture2D* Texture2D::GetWhite()
 {
-
+	return nullptr;
 }
 
 bool Texture2D::IsValid()
 {
-
+	return false;
 }
 
 ID3D12Resource* Texture2D::Resource()
 {
-
+	return nullptr;
 }
 
 D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::ViewDesc()
 {
-
+	return D3D12_SHADER_RESOURCE_VIEW_DESC();
 }
 
 Texture2D::Texture2D(std::string path)
 {
-	m_isValid = Load(path);
+/*	m_isValid = Load(path);*/
 }
 
 Texture2D::Texture2D(ID3D12Resource* buffer)
 {
-	m_resource = buffer;
-	m_isValid = m_resource != nullptr;
+// 	m_resource = buffer;
+// 	m_isValid = m_resource != nullptr;
 }
 
 bool Texture2D::Load(std::string& path)
 {
-	using namespace DirectX;
+	/*using namespace DirectX;
 	TexMetadata meta = {};
 	ScratchImage scratch = {};
 	
@@ -447,12 +449,14 @@ bool Texture2D::Load(std::string& path)
 		meta.height,
 		static_cast<uint16>(meta.arraySize),
 		static_cast<uint16>(meta.mipLevels)
-	);
+	);*/
 
 	//hr = 
+
+	return false;
 }
 
 ID3D12Resource* Texture2D::GetDefaultResource(uint64 width, uint64 height)
 {
-
+	return nullptr;
 }

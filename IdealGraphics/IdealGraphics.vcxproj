@@ -131,6 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Engine3.h" />
+    <ClInclude Include="RenderTest\GraphicsEngine.h" />
     <ClInclude Include="Misc\AssimpLoader.h" />
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Defines.h" />
@@ -156,6 +158,8 @@
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Engine3.cpp" />
+    <ClCompile Include="RenderTest\GraphicsEngine.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp" />
     <ClCompile Include="Engine\Engine2.cpp" />
     <ClCompile Include="Misc\ASEParser.cpp" />

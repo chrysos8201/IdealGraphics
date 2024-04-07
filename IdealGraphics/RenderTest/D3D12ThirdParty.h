@@ -22,3 +22,11 @@ using namespace DirectX::SimpleMath;
 //#include "ThirdParty/DirectXTex/d3dx12.h"
 #include "ThirdParty/Common/d3dx12.h"
 #pragma comment(lib, "ThirdParty/Libraries/ForDebug/DirectXTex.lib")
+
+inline void Check(HRESULT hr)
+{
+	if (FAILED(hr))
+	{
+		assert(false);
+	}
+}

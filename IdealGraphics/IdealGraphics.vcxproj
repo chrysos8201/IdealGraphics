@@ -131,7 +131,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
     <ClInclude Include="Engine\Engine3.h" />
+    <ClInclude Include="GraphicsEngine\IdealGraphics.h" />
+    <ClInclude Include="Misc\Utils\PIX.h" />
     <ClInclude Include="RenderTest\GraphicsEngine.h" />
     <ClInclude Include="Misc\AssimpLoader.h" />
     <ClInclude Include="Core\Core.h" />
@@ -141,7 +145,7 @@
     <ClInclude Include="Misc\ASEParser.h" />
     <ClInclude Include="RenderTest\MeshTest.h" />
     <ClInclude Include="RenderTest\ModelTest.h" />
-    <ClInclude Include="RenderTest\D3D12Resource.h" />
+    <ClInclude Include="RenderTest\D3D12ResourceTest.h" />
     <ClInclude Include="Engine\TestGraphics.h" />
     <ClInclude Include="Engine\IEngine.h" />
     <ClInclude Include="RenderTest\D3D12ThirdParty.h" />
@@ -150,7 +154,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Launch\IdealGraphics.h" />
+    <ClInclude Include="Launch\LaunchWindow.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="targetver.h" />
@@ -158,21 +162,24 @@
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
     <ClCompile Include="Engine\Engine3.cpp" />
+    <ClCompile Include="GraphicsEngine\IdealGraphics.cpp" />
     <ClCompile Include="RenderTest\GraphicsEngine.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp" />
     <ClCompile Include="Engine\Engine2.cpp" />
     <ClCompile Include="Misc\ASEParser.cpp" />
     <ClCompile Include="RenderTest\MeshTest.cpp" />
     <ClCompile Include="RenderTest\ModelTest.cpp" />
-    <ClCompile Include="RenderTest\D3D12Resource.cpp" />
+    <ClCompile Include="RenderTest\D3D12ResourceTest.cpp" />
     <ClCompile Include="Engine\TestGraphics.cpp" />
     <ClCompile Include="Engine\EngineTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
-    <ClCompile Include="Launch\IdealGraphics.cpp" />
+    <ClCompile Include="Launch\LaunchWindow.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="RenderTest\VertexInfo.cpp" />
   </ItemGroup>
@@ -203,6 +210,20 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\Triangle.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

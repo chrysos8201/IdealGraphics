@@ -3,7 +3,7 @@
 #include "RenderTest/D3D12ThirdParty.h"
 #include "RenderTest/VertexInfo.h"
 #include "Engine/TestGraphics.h"
-#include "RenderTest/D3D12Resource.h"
+#include "RenderTest/D3D12ResourceTest.h"
 
 class Engine : public IEngine
 {

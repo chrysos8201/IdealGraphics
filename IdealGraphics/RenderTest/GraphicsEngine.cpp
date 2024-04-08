@@ -1,6 +1,9 @@
 #include "RenderTest/GraphicsEngine.h"
 #include "Misc/AssimpLoader.h"
 #include <DirectXColors.h>
+
+#include "Misc/Utils/PIX.h"
+
 GraphicsEngine::GraphicsEngine(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd)
 {
@@ -41,6 +44,15 @@ GraphicsEngine::~GraphicsEngine()
 
 void GraphicsEngine::Init()
 {
+#ifdef _DEBUG
+	// Check to see if a copy of WinPixGpuCapturer.dll has already been injected into the application.
+// This may happen if the application is launched through the PIX UI. 
+	if (GetModuleHandle(L"WinPixGpuCapturer.dll") == 0)
+	{
+		LoadLibrary(GetLatestWinPixGpuCapturerPath().c_str());
+	}
+#endif
+
 	LoadPipeline();
 	LoadAsset();
 }
@@ -170,6 +182,7 @@ void GraphicsEngine::LoadPipeline()
 		for (uint32 i = 0; i < FRAME_BUFFER_COUNT; i++)
 		{
 			m_swapChain->GetBuffer(i, IID_PPV_ARGS(m_renderTargets[i].GetAddressOf()));
+			m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(1, m_rtvDescriptorSize);	// offset 기능은 d3dx12에 들어있고 포인터를 다음으로 넘겨주는 용도이다.
 			// 2024.04.07 위에서 사이즈를 왜 구하나 했었는데 handle의 포인터를 사이즈만큼 다음응로 이동시켜주는 역할인가 보다.
 			// 그래서 반복문에서 다음에 rtvHandle값은 GPU Descriptor Heap의 두 번째 rtv의 주소를 가져온다.
@@ -223,8 +236,12 @@ void GraphicsEngine::LoadAsset()
 			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;// |
+			//D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+
+		/*CD3DX12_STATIC_SAMPLER_DESC sampler = CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		D3D12_ROOT_SIGNATURE_DESC desc = {};
+		desc.NumParameters = std::size(rootParameter);*/
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init_1_1(_countof(rootParameter), rootParameter, 0, nullptr, rootSignatureFlags);
@@ -255,16 +272,21 @@ void GraphicsEngine::LoadAsset()
 		//Check(D3DCompileFromFile(L"Shaders/BoxVS.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", compileFlags, NULL, vertexShader.GetAddressOf(), errormessage.GetAddressOf()));
 		//Check(D3DCompileFromFile(L"Shaders/BoxPS.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", compileFlags, NULL, pixelShader.GetAddressOf(), nullptr));
 		
-		Check(D3DReadFileToBlob(L"../x64/Debug/BoxVS.cso", vertexShader.GetAddressOf()));
-		Check(D3DReadFileToBlob(L"../x64/Debug/BoxPS.cso", pixelShader.GetAddressOf()));
+		//Check(D3DReadFileToBlob(L"../x64/Debug/BoxVS.cso", vertexShader.GetAddressOf()));
+		//Check(D3DReadFileToBlob(L"../x64/Debug/BoxPS.cso", pixelShader.GetAddressOf()));
+		//Check(D3DReadFileToBlob(L"../x64/Debug/Triangle.cso", vertexShader.GetAddressOf()));
+		//Check(D3DReadFileToBlob(L"../x64/Debug/Triangle.cso", pixelShader.GetAddressOf()));
+
+		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", compileFlags, NULL, vertexShader.GetAddressOf(), nullptr));
+		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", compileFlags, NULL, pixelShader.GetAddressOf(), nullptr));
 
 		// vertex 정보
 		D3D12_INPUT_ELEMENT_DESC inputElementDesc[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			//{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			//{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			//{ "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
@@ -303,11 +325,18 @@ void GraphicsEngine::LoadAsset()
 	// VertexBuffer를 만든다.
 	{
 		// 일단 삼각형만
-		Vertex triangleVertices[] =
+		/*Vertex triangleVertices[] =
 		{
 			{Vector3(0.f, 0.25f * m_aspectRatio, 0.f), Vector3(1.f), Vector2(1.f), Vector3(1.f), Vector4(1.f)},
 			{Vector3(0.f, 0.25f * m_aspectRatio, 0.f), Vector3(1.f), Vector2(1.f), Vector3(1.f), Vector4(1.f)},
 			{Vector3(0.f, 0.25f * m_aspectRatio, 0.f), Vector3(1.f), Vector2(1.f), Vector3(1.f), Vector4(1.f)}
+		};*/
+
+		VertexTest triangleVertices[] =
+		{
+			 { { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+			{ { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+			{ { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
 		};
 
 		const uint32 vertexBufferSize = sizeof(triangleVertices);
@@ -332,7 +361,7 @@ void GraphicsEngine::LoadAsset()
 
 		uint8* vertexDataBegin;
 		CD3DX12_RANGE readRange(0, 0);
-		Check(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&vertexDataBegin)));
+		Check(m_vertexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataBegin)));
 		memcpy(vertexDataBegin, triangleVertices, sizeof(triangleVertices));
 		m_vertexBuffer->Unmap(0, nullptr);
 
@@ -340,7 +369,7 @@ void GraphicsEngine::LoadAsset()
 		// 2024.04.07 :
 		// Vertex_Buffer_view를 가지고 와서 뭐하지?
 		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-		m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+		m_vertexBufferView.StrideInBytes = sizeof(VertexTest);
 		m_vertexBufferView.SizeInBytes = vertexBufferSize;
 	}
 
@@ -430,12 +459,12 @@ void GraphicsEngine::PopulateCommandList()
 	m_commandList->DrawInstanced(3, 1, 0, 0);	// drawIndexInstanced가 아니라 인덱스 정보가 없다!
 
 	// backBuffer를 이제 Present를 해야하니 state 변경을 다시 해준다
-	backBufferResourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+	CD3DX12_RESOURCE_BARRIER presentBarrier= CD3DX12_RESOURCE_BARRIER::Transition(
 		m_renderTargets[m_frameIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
-	m_commandList->ResourceBarrier(1, &backBufferResourceBarrier);
+	m_commandList->ResourceBarrier(1, &presentBarrier);
 	Check(m_commandList->Close());
 }
 
@@ -445,20 +474,26 @@ void GraphicsEngine::WaitForPreviousFrame()
 	// 프레임이 완료될 때까지 대기하는 것은 최상의 방법이 아닙니다.
 	// 이 코드는 간결성을 위해 이렇게 구현되었습니다. D3D12HelloFrameBuffering 샘플에서는
 	// fence를 사용하여 효율적인 리소스 사용과 GPU 활용도를 최대화하는 방법을 보여줍니다.
-	
-	const uint64 fence = m_fenceValue;	
-	Check(m_commandQueue->Signal(m_fence.Get(), fence));
-	m_fenceValue++;
-
-	// 이전 프레임이 끝날때까지 기다린다.
-	if (m_fence->GetCompletedValue() < fence)
-	{
-		Check(m_fence->SetEventOnCompletion(fence, m_fenceEvent));
-		WaitForSingleObject(m_fenceEvent, INFINITE);
-	}
-
-	// 2024.04.07 :
-	// 여기서 프레임 인덱스 정보를 받아주는 이유가 뭘까?
 	//
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+	//const uint64 fence = m_fenceValue;	
+	//Check(m_commandQueue->Signal(m_fence.Get(), fence));
+	//m_fenceValue++;
+
+	//// 이전 프레임이 끝날때까지 기다린다.
+	//if (m_fence->GetCompletedValue() < fence)
+	//{
+	//	Check(m_fence->SetEventOnCompletion(fence, m_fenceEvent));
+	//	WaitForSingleObject(m_fenceEvent, INFINITE);
+	//}
+
+	//// 2024.04.07 :
+	//// 여기서 프레임 인덱스 정보를 받아주는 이유가 뭘까?
+	////
+	//m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+
+
+
+	//const uint64 currentFenceValue = m_fenceValue[m_frameIndex];
+	//Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue
 }

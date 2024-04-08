@@ -35,9 +35,15 @@
     <Filter Include="Misc\Thirdparty">
       <UniqueIdentifier>{0a4c80de-3891-4251-964b-186963a4f2c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GraphicsEngine">
+      <UniqueIdentifier>{77a23861-768d-4e51-b092-604c7392c8ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GraphicsEngine\Resources">
+      <UniqueIdentifier>{2a38037a-4dae-4186-9dee-e51d8069894d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Launch\IdealGraphics.h">
+    <ClInclude Include="Launch\LaunchWindow.h">
       <Filter>Launch</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
@@ -74,7 +80,7 @@
     <ClInclude Include="RenderTest\ModelTest.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTest\D3D12Resource.h">
+    <ClInclude Include="RenderTest\D3D12ResourceTest.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
     <ClInclude Include="RenderTest\MeshTest.h">
@@ -95,6 +101,18 @@
     <ClInclude Include="Misc\ASEParser.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Engine3.h" />
+    <ClInclude Include="Misc\Utils\PIX.h" />
+    <ClInclude Include="RenderTest\GraphicsEngine.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\IdealGraphics.h">
+      <Filter>GraphicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -110,7 +128,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Launch\IdealGraphics.cpp">
+    <ClCompile Include="Launch\LaunchWindow.cpp">
       <Filter>Launch</Filter>
     </ClCompile>
     <ClCompile Include="Engine\EngineTest.cpp">
@@ -126,7 +144,7 @@
     <ClCompile Include="RenderTest\ModelTest.cpp">
       <Filter>RenderTest</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTest\D3D12Resource.cpp">
+    <ClCompile Include="RenderTest\D3D12ResourceTest.cpp">
       <Filter>RenderTest</Filter>
     </ClCompile>
     <ClCompile Include="RenderTest\MeshTest.cpp">
@@ -144,12 +162,26 @@
     <ClCompile Include="Misc\ASEParser.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Engine3.cpp" />
+    <ClCompile Include="RenderTest\GraphicsEngine.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\IdealGraphics.cpp">
+      <Filter>GraphicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\BoxVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Triangle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

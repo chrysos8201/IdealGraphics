@@ -1,4 +1,4 @@
-#include "RenderTest/D3D12Resource.h"
+#include "RenderTest/D3D12ResourceTest.h"
 //#include "ThirdParty/DirectXTex/DirectXTex.h"
 
 VertexBuffer::VertexBuffer(std::shared_ptr<TestGraphics> engine, uint64 size, uint64 stride, const void* initData)

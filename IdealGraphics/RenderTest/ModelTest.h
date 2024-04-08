@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12Resource.h"
+#include "RenderTest/D3D12ResourceTest.h"
 #include "RenderTest/D3D12ThirdParty.h"
 #include "Misc/ASEParser.h"
 

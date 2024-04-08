@@ -8,7 +8,7 @@ IdealGraphics::IdealGraphics(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_width(width),
 	m_height(height),
-	m_viewport(hwnd,width,height)
+	m_viewport(hwnd, width, height)
 {
 	m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
@@ -129,7 +129,7 @@ void IdealGraphics::Init()
 		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "VS", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
 		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "PS", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 
-		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] = 
+		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -141,11 +141,13 @@ void IdealGraphics::Init()
 		psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 		psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		//psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		psoDesc.DepthStencilState.DepthEnable = FALSE;
 		psoDesc.DepthStencilState.StencilEnable = FALSE;
 		psoDesc.SampleMask = UINT_MAX;
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		//psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.SampleDesc.Count = 1;
@@ -153,9 +155,20 @@ void IdealGraphics::Init()
 	}
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
-	Check(m_commandList->Close());
+	//Check(m_commandList->Close());
 
 	{
+		// 2024.04.08
+		// ComPtr은 CPU 객체이다. 다만 이 리소스는 GPU에서 실행중인 명령 리스트가 완료될 때까지 사라지면 안된다.
+		// 우리가 명령을 넣고 실행하기 전까지는 이 리소스는 그대로 유지해야 하며,
+		// 명령을 실행했다 해도 우리는 이 명령을 GPU가 언제 시작하고 언제 끝낼지 모른다.
+		// 따라서 뭐 별로 좋은 방법 같지는 않지만 명령 실행이 끝날때까지 Wait를 걸어주어 이 리소스 내용을 
+		// 밀어넣겠다!!@!!!
+
+
+		// 아아ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ 왜 close가 안되는데
+		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
+
 		VertexTest triangleVertices[] =
 		{
 			{ { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
@@ -165,9 +178,75 @@ void IdealGraphics::Init()
 
 		const uint32 vertexBufferSize = sizeof(triangleVertices);
 
-		CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		{
+			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);	// vertexBufferSize만큼 확보해달라는 정보가 아닐까?
+			Check(m_device->CreateCommittedResource(
+				&heapProp,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_COPY_DEST,		// 업로드 전은 COPY_DEST 상태여야 한단다.
+				nullptr,
+				IID_PPV_ARGS(&m_vertexBuffer)
+			));
+		}
+
+		{
+			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+			Check(m_device->CreateCommittedResource(
+				&heapProp,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&vertexBufferUpload)
+			));
+		}
+		void* mappedUploadHeap = nullptr;
+		Check(vertexBufferUpload->Map(0, nullptr, &mappedUploadHeap));
+		//memcpy(mappedUploadHeap, triangleVertices, sizeof(triangleVertices));
+		memcpy(mappedUploadHeap, triangleVertices, sizeof(triangleVertices));
+		vertexBufferUpload->Unmap(0, nullptr);	// 사실 이건 시스템 메모리에 있는거라 굳이 UnMap안해도 된다?
+
+		m_commandList->CopyBufferRegion(m_vertexBuffer.Get(), 0, vertexBufferUpload.Get(), 0, vertexBufferSize);
+		// 일단 리소스 베리어를 쳐주고
+		CD3DX12_RESOURCE_BARRIER vertexBufferBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_vertexBuffer.Get(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		);
+		m_commandList->ResourceBarrier(1, &vertexBufferBarrier);
+
+		// vertex buffer view를 만든다!
+		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+		m_vertexBufferView.SizeInBytes = vertexBufferSize;
+		m_vertexBufferView.StrideInBytes = sizeof(VertexTest);
+
+		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
+		// command List를 일단 닫아주고 실행시킨다.
+		Check(m_commandList->Close());
+		ID3D12CommandList* commandLists[] = { m_commandList.Get() };	// 하나밖에 없다
+		m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+
+		// 동기화 오브젝트를 만들고 에셋 정보가 GPU에 업로드되기까지 기다린다.
+		{
+			Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+			m_fenceValues[m_frameIndex]++;
+
+			m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			if (m_fenceEvent == nullptr)
+			{
+				Check(HRESULT_FROM_WIN32(GetLastError()));
+			}
+
+			WaitForGPU();
+		}
+
+
+		/*CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-		
+
 		Check(m_device->CreateCommittedResource(
 			&heapProp,
 			D3D12_HEAP_FLAG_NONE,
@@ -185,7 +264,7 @@ void IdealGraphics::Init()
 
 		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
 		m_vertexBufferView.StrideInBytes = sizeof(VertexTest);
-		m_vertexBufferView.SizeInBytes = vertexBufferSize;
+		m_vertexBufferView.SizeInBytes = vertexBufferSize;*/
 	}
 
 	{

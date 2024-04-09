@@ -245,6 +245,9 @@ void IdealRenderer::Init()
 			}
 		}
 
+		m_commandAllocators[m_frameIndex]->Reset();
+		m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+
 		// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
 
 		uint32 indices[] = { 0,1,2 };
@@ -344,7 +347,7 @@ void IdealRenderer::Init()
 		m_vertexBufferView.SizeInBytes = vertexBufferSize;*/
 	}
 
-	{
+	/*{
 		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 		m_fenceValues[m_frameIndex]++;
 
@@ -355,7 +358,7 @@ void IdealRenderer::Init()
 		}
 
 		WaitForGPU();
-	}
+	}*/
 }
 
 void IdealRenderer::Tick()
@@ -396,7 +399,9 @@ void IdealRenderer::PopulateCommandList()
 	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	m_commandList->DrawInstanced(3, 1, 0, 0);
+	m_commandList->IASetIndexBuffer(&m_indexBufferView);
+	m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
+	//m_commandList->DrawInstanced(3, 1, 0, 0);
 
 	CD3DX12_RESOURCE_BARRIER backBufferPresent = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_renderTargets[m_frameIndex].Get(),

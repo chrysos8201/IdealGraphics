@@ -6,7 +6,15 @@
 
 class IdealRenderer
 {
-	enum { FRAME_BUFFER_COUNT  = 2};
+	enum { FRAME_BUFFER_COUNT = 2 };
+
+	struct TestOffset
+	{
+		Vector4 offset;
+		float padding[60];
+	};
+	static_assert(sizeof(TestOffset) % 256 == 0);
+
 public:
 	IdealRenderer(HWND hwnd, uint32 width, uint32 height);
 	virtual ~IdealRenderer();

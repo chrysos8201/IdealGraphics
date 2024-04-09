@@ -4,12 +4,12 @@
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 
-class IdealGraphics
+class IdealRenderer
 {
 	enum { FRAME_BUFFER_COUNT  = 2};
 public:
-	IdealGraphics(HWND hwnd, uint32 width, uint32 height);
-	virtual ~IdealGraphics();
+	IdealRenderer(HWND hwnd, uint32 width, uint32 height);
+	virtual ~IdealRenderer();
 
 public:
 	void Init();
@@ -41,6 +41,9 @@ private:
 	float m_aspectRatio = 0.f;
 	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+	ComPtr<ID3D12Resource> m_indexBuffer;
+	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
 private:
 	ComPtr<ID3D12Fence> m_fence;

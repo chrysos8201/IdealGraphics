@@ -1,10 +1,10 @@
-#include "IdealGraphics.h"
+#include "IdealRenderer.h"
 #include "RenderTest/VertexInfo.h"
 #include <DirectXColors.h>
 #include "Misc/Utils/PIX.h"
 
 
-IdealGraphics::IdealGraphics(HWND hwnd, uint32 width, uint32 height)
+IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_width(width),
 	m_height(height),
@@ -13,16 +13,16 @@ IdealGraphics::IdealGraphics(HWND hwnd, uint32 width, uint32 height)
 	m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
 
-IdealGraphics::~IdealGraphics()
+IdealRenderer::~IdealRenderer()
 {
-
+	//uint32 ref_count = m_device->Release();
 }
 
-void IdealGraphics::Init()
+void IdealRenderer::Init()
 {
 #ifdef _DEBUG
 	// Check to see if a copy of WinPixGpuCapturer.dll has already been injected into the application.
-// This may happen if the application is launched through the PIX UI. 
+	// This may happen if the application is launched through the PIX UI. 
 	if (GetModuleHandle(L"WinPixGpuCapturer.dll") == 0)
 	{
 		LoadLibrary(GetLatestWinPixGpuCapturerPath().c_str());
@@ -225,24 +225,101 @@ void IdealGraphics::Init()
 
 		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
 		// command List를 일단 닫아주고 실행시킨다.
-		Check(m_commandList->Close());
-		ID3D12CommandList* commandLists[] = { m_commandList.Get() };	// 하나밖에 없다
-		m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-		// 동기화 오브젝트를 만들고 에셋 정보가 GPU에 업로드되기까지 기다린다.
 		{
-			Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-			m_fenceValues[m_frameIndex]++;
+			Check(m_commandList->Close());
+			ID3D12CommandList* commandLists[] = { m_commandList.Get() };	// 하나밖에 없다
+			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
-			m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-			if (m_fenceEvent == nullptr)
+			// 동기화 오브젝트를 만들고 에셋 정보가 GPU에 업로드되기까지 기다린다.
 			{
-				Check(HRESULT_FROM_WIN32(GetLastError()));
-			}
+				Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+				m_fenceValues[m_frameIndex]++;
 
-			WaitForGPU();
+				m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+				if (m_fenceEvent == nullptr)
+				{
+					Check(HRESULT_FROM_WIN32(GetLastError()));
+				}
+
+				WaitForGPU();
+			}
 		}
 
+		// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
+
+		uint32 indices[] = { 0,1,2 };
+		const uint32 indexBufferSize = sizeof(indices);
+
+		// GPU버퍼와 업로드 버퍼를 만들겠다.
+		ComPtr<ID3D12Resource> indexBufferUpload = nullptr;
+		{
+			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
+
+			// 복사 목적지로 만들고
+			Check(m_device->CreateCommittedResource(
+				&heapProp,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_COPY_DEST,
+				nullptr,
+				IID_PPV_ARGS(m_indexBuffer.GetAddressOf())
+			));
+		}
+		// 업로드 버퍼도 만든다.
+		{
+			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
+
+			Check(m_device->CreateCommittedResource(
+				&heapProp,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(indexBufferUpload.GetAddressOf())
+			));
+		}
+
+		// 업로드버퍼에 먼저 복사
+		void* mappedUploadBuffer = nullptr;
+		Check(indexBufferUpload->Map(0, nullptr, &mappedUploadBuffer));
+		memcpy(mappedUploadBuffer, indices, indexBufferSize);
+		indexBufferUpload->Unmap(0, nullptr);
+
+		// 업로드 버퍼에서 GPU버퍼로 복사하고 리소스 베리어를 건다.
+		m_commandList->CopyBufferRegion(m_indexBuffer.Get(), 0, indexBufferUpload.Get(), 0, indexBufferSize);
+		CD3DX12_RESOURCE_BARRIER indexBufferBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_indexBuffer.Get(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_INDEX_BUFFER
+		);
+		m_commandList->ResourceBarrier(1, &indexBufferBarrier);
+
+		// 이제 이 버퍼에 대한 view를 만든다.
+		m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+		m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+		m_indexBufferView.SizeInBytes = indexBufferSize;
+
+		// 일단 커맨드 리스트를 닫는다
+		{
+			Check(m_commandList->Close());
+			ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+			// 여기서도 Wait를 걸면 될까?
+			{
+				Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+				m_fenceValues[m_frameIndex]++;
+
+				m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+				if (m_fenceEvent == nullptr)
+				{
+					Check(HRESULT_FROM_WIN32(GetLastError()));
+				}
+
+				WaitForGPU();
+			}
+		}
 
 		/*CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
@@ -281,12 +358,12 @@ void IdealGraphics::Init()
 	}
 }
 
-void IdealGraphics::Tick()
+void IdealRenderer::Tick()
 {
 
 }
 
-void IdealGraphics::Render()
+void IdealRenderer::Render()
 {
 	PopulateCommandList();
 
@@ -297,7 +374,7 @@ void IdealGraphics::Render()
 	MoveToNextFrame();
 }
 
-void IdealGraphics::PopulateCommandList()
+void IdealRenderer::PopulateCommandList()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
@@ -331,7 +408,7 @@ void IdealGraphics::PopulateCommandList()
 	Check(m_commandList->Close());
 }
 
-void IdealGraphics::MoveToNextFrame()
+void IdealRenderer::MoveToNextFrame()
 {
 	const uint64 currentFenceValue = m_fenceValues[m_frameIndex];
 	Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
@@ -347,7 +424,7 @@ void IdealGraphics::MoveToNextFrame()
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
-void IdealGraphics::WaitForGPU()
+void IdealRenderer::WaitForGPU()
 {
 	Check(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 

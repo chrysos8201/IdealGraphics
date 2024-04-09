@@ -131,10 +131,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Core\ForDebug.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
     <ClInclude Include="Engine\Engine3.h" />
-    <ClInclude Include="GraphicsEngine\IdealGraphics.h" />
+    <ClInclude Include="GraphicsEngine\IdealRenderer.h" />
     <ClInclude Include="Misc\Utils\PIX.h" />
     <ClInclude Include="RenderTest\GraphicsEngine.h" />
     <ClInclude Include="Misc\AssimpLoader.h" />
@@ -165,7 +166,7 @@
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
     <ClCompile Include="Engine\Engine3.cpp" />
-    <ClCompile Include="GraphicsEngine\IdealGraphics.cpp" />
+    <ClCompile Include="GraphicsEngine\IdealRenderer.cpp" />
     <ClCompile Include="RenderTest\GraphicsEngine.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp" />
     <ClCompile Include="Engine\Engine2.cpp" />

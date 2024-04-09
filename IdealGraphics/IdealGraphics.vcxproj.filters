@@ -106,13 +106,14 @@
     <ClInclude Include="RenderTest\GraphicsEngine.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\IdealGraphics.h">
+    <ClInclude Include="GraphicsEngine\IdealRenderer.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h">
       <Filter>GraphicsEngine\Resources</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
+    <ClInclude Include="Core\ForDebug.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -166,7 +167,7 @@
     <ClCompile Include="RenderTest\GraphicsEngine.cpp">
       <Filter>RenderTest</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\IdealGraphics.cpp">
+    <ClCompile Include="GraphicsEngine\IdealRenderer.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp">

@@ -3,6 +3,7 @@
 #include "RenderTest/D3D12ThirdParty.h"
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
+#include "GraphicsEngine/Resources/D3D12Resource.h"
 
 class IdealRenderer
 {
@@ -25,6 +26,11 @@ public:
 	void Render();
 	void PopulateCommandList();
 	void MoveToNextFrame();
+
+	void LoadAsset();
+	// 다시 수정 버전
+	void PopulateCommandList2();
+	void LoadAsset2();
 
 private:
 	uint32 m_width;
@@ -73,5 +79,10 @@ private:
 private:
 	//
 	Ideal::D3D12Viewport m_viewport;
+
+	// 2024.04.11 :
+	// VertexBuffer와 IndexBuffer를 묶어줘보겠다.
+	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
+	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
 };
 

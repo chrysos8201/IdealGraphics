@@ -164,6 +164,7 @@
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />

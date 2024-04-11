@@ -180,6 +180,7 @@
     <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp">
       <Filter>GraphicsEngine\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

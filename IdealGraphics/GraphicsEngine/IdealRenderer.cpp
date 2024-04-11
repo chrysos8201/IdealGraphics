@@ -103,12 +103,16 @@ void IdealRenderer::Init()
 
 		}
 	}
-
-
-
+	
+	// 2024.04.11 cbv Heap을 만든다.
+	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
+	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	Check(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(m_cbvHeap.GetAddressOf())));
 
 	////////////////////////////////////// Load ASSET
-	{
+	/*{
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -116,7 +120,29 @@ void IdealRenderer::Init()
 		ComPtr<ID3DBlob> error;
 		Check(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 		Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+	}*/
+
+	{
+		// CBV를 다시 만들었으니 Root Signature을 다시 만든다.
+		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+
+		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
+
+		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		
+		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
+
+		ComPtr<ID3DBlob> signature;
+		ComPtr<ID3DBlob> error;
+		Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+		Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_rootSignature.GetAddressOf())));
 	}
+
+
+
 
 	{
 		ComPtr<ID3DBlob> vertexShader;
@@ -324,6 +350,37 @@ void IdealRenderer::Init()
 			}
 		}
 
+		// 2024.04.11 : ConstantBufferView 만든다
+		// D3D12_HEAP_TYPE_UPLOAD를 사용하여 힙 속성을 지정하면 업로드 힙이 생성됩니다. 업로드 힙은 CPU에서 GPU로 데이터를 전송할 때 사용됩니다. 이는 일반적으로 CPU가 데이터를 준비하고 GPU에 전송하는 데 사용되는 임시적인 메모리입니다.
+		{
+			const uint32 testConstantBufferSize = sizeof(TestOffset);
+
+			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(testConstantBufferSize);
+
+			Check(m_device->CreateCommittedResource(
+				&heapProp,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(m_constantBuffer.GetAddressOf())
+			));
+
+			// descibe하고 cbv를 만든다.
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+			cbvDesc.BufferLocation = m_constantBuffer->GetGPUVirtualAddress();
+			cbvDesc.SizeInBytes = testConstantBufferSize;
+			m_device->CreateConstantBufferView(&cbvDesc, m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
+
+			/// Map으로 열고 UnMap을 해주지 않을건데 시스템 메모리에 데이터를 잡을거라 주소가 변경될?일은 없을테니 계속 잡아준다..
+			// m_cbvDataBegin으로 상수 버퍼를 열고 주소를 가져온다.
+			CD3DX12_RANGE readRange(0, 0);
+			Check(m_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_cbvDataBegin)));
+			// 가져온 주소부터 데이터를 넣어준다.
+			memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+		}
+
 		/*CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
 
@@ -363,7 +420,12 @@ void IdealRenderer::Init()
 
 void IdealRenderer::Tick()
 {
-
+	m_constantBufferData.offset.x += m_offsetSpeed;
+	if (m_constantBufferData.offset.x > 1.25f)
+	{
+		m_constantBufferData.offset.x = -1.25f;
+	}
+	memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 }
 
 void IdealRenderer::Render()
@@ -383,6 +445,13 @@ void IdealRenderer::PopulateCommandList()
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
 
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
+	// 2024.04.11 cb bind
+	ID3D12DescriptorHeap* heaps[] = { m_cbvHeap.Get() };
+	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	m_commandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+	// 여기까지
+
 	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
 	m_commandList->RSSetScissorRects(1, &m_viewport.GetScissorRect());
 

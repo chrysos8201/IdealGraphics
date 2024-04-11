@@ -10,9 +10,9 @@ class IdealRenderer
 
 	struct TestOffset
 	{
-		Vector4 offset;
+		Vector4 offset = Vector4();
 		float padding[60];
-	};
+	};	// 256 byte
 	static_assert(sizeof(TestOffset) % 256 == 0);
 
 public:
@@ -38,6 +38,10 @@ private:
 	ComPtr<IDXGISwapChain3> m_swapChain;
 	uint32 m_frameIndex;
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+
+	// 2024.04.11 cbv
+	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
+
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];
 	ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
@@ -53,6 +57,11 @@ private:
 	ComPtr<ID3D12Resource> m_indexBuffer;
 	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
+	ComPtr<ID3D12Resource> m_constantBuffer;
+	uint8* m_cbvDataBegin;				// 상수 버퍼 데이터 시작 주소
+	TestOffset m_constantBufferData;	// 테스트용으로 오프셋을 더하는 상수 버퍼용 변수
+	//D3D12_CONSTANT_BUFFER_VIEW_DESC m_constantBufferViewDesc;
+	const float m_offsetSpeed = 0.02f;
 private:
 	ComPtr<ID3D12Fence> m_fence;
 	uint64 m_fenceValues[FRAME_BUFFER_COUNT];

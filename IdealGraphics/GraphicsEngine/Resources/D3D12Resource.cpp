@@ -149,6 +149,8 @@ void D3D12VertexBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* 
 	m_vertexBufferView.StrideInBytes = m_elementSize;
 }
 
+///////////////////<IndexBuffer>//////////////////////
+
 D3D12IndexBuffer::D3D12IndexBuffer()
 {
 

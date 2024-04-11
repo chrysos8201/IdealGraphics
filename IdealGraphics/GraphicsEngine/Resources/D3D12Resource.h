@@ -19,13 +19,14 @@ namespace Ideal
 	};
 
 
-	// 업로드용 버퍼. 시스템 메모리에 존재한다.
+	// 업로드용 임시 버퍼. 시스템 메모리에 존재한다. 
 	class D3D12UploadBuffer : public D3D12Resource
 	{
 	public:
 		D3D12UploadBuffer();
 		virtual ~D3D12UploadBuffer();
 
+		// 업로드 버퍼를 만든다. 
 		void Create(ID3D12Device* Device, uint32 BufferSize);
 		void* Map();
 		void UnMap();
@@ -42,6 +43,8 @@ namespace Ideal
 		virtual ~D3D12GPUBuffer();
 
 	protected:
+		// GPU에서 사용할 버퍼를 만든다.
+		// 만들 때 리소스 스테이트를 COPY_DEST로 초기화 해준다.
 		void CreateBuffer(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount);
 
 		// GPU에서 버퍼를 만든다.
@@ -65,6 +68,7 @@ namespace Ideal
 
 	public:
 		// Upload Buffer에 있는 데이터를 GPU Buffer에 복사한다.
+		// 내부에서 리소스 베리어를 걸어주고 Buffer View를 만든다.
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
 		
 		D3D12_VERTEX_BUFFER_VIEW GetView() const;
@@ -82,6 +86,7 @@ namespace Ideal
 
 	public:
 		// Upload Buffer에 있는 데이터를 GPU Buffer에 복사한다.
+		// 내부에서 리소스 베리어를 걸어주고 Buffer View를 만든다.
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
 		D3D12_INDEX_BUFFER_VIEW GetView() const;
 

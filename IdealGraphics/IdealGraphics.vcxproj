@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\ForDebug.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
     <ClInclude Include="Engine\Engine3.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
     <ClCompile Include="Engine\Engine3.cpp" />

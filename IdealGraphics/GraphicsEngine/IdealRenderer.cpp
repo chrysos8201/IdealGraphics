@@ -380,42 +380,7 @@ void IdealRenderer::Init()
 			// 가져온 주소부터 데이터를 넣어준다.
 			memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 		}
-
-		/*CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-
-		Check(m_device->CreateCommittedResource(
-			&heapProp,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&m_vertexBuffer)
-		));
-
-		uint8* pVertexDataBegin;
-		CD3DX12_RANGE readRange(0, 0);
-		Check(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-		memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));
-		m_vertexBuffer->Unmap(0, nullptr);
-
-		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-		m_vertexBufferView.StrideInBytes = sizeof(VertexTest);
-		m_vertexBufferView.SizeInBytes = vertexBufferSize;*/
 	}
-
-	/*{
-		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-		m_fenceValues[m_frameIndex]++;
-
-		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-		if (m_fenceEvent == nullptr)
-		{
-			Check(HRESULT_FROM_WIN32(GetLastError()));
-		}
-
-		WaitForGPU();
-	}*/
 }
 
 void IdealRenderer::Tick()

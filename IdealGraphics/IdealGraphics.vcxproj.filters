@@ -114,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
     <ClInclude Include="Core\ForDebug.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -174,6 +177,9 @@
       <Filter>GraphicsEngine\Resources</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
+    <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

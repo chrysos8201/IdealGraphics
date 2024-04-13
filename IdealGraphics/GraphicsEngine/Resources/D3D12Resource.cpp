@@ -2,7 +2,8 @@
 
 using namespace Ideal;
 
-///////////////////<D3D12Resource>//////////////////////
+//------------------------Resource------------------------//
+
 D3D12Resource::D3D12Resource()
 {
 
@@ -18,7 +19,7 @@ ID3D12Resource* D3D12Resource::GetResource() const
 	return m_resource.Get();
 }
 
-///////////////////<UploadBuffer>//////////////////////
+//------------------------UploadBuffer------------------------//
 
 D3D12UploadBuffer::D3D12UploadBuffer()
 	: m_bufferSize(0)
@@ -36,7 +37,7 @@ void Ideal::D3D12UploadBuffer::Create(ID3D12Device* Device, uint32 BufferSize)
 	// 버퍼 사이즈
 	m_bufferSize = BufferSize;
 
-	// 업로드 용으로 버퍼를 만든다
+	// 업로드 용으로 GPU Upload heap에 버퍼를 만든다
 	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(BufferSize);
 
@@ -63,7 +64,7 @@ void D3D12UploadBuffer::UnMap()
 	m_resource->Unmap(0, nullptr);
 }
 
-///////////////////<GPUBuffer>//////////////////////
+//------------------------GPUBuffer------------------------//
 
 D3D12GPUBuffer::D3D12GPUBuffer()
 	: m_bufferSize(0),
@@ -111,7 +112,7 @@ uint32 D3D12GPUBuffer::GetElemnetSize() const
 	return m_elementSize;
 }
 
-///////////////////<VertexBuffer>//////////////////////
+//------------------------VertexBuffer------------------------//
 
 D3D12VertexBuffer::D3D12VertexBuffer()
 {
@@ -149,7 +150,7 @@ void D3D12VertexBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* 
 	m_vertexBufferView.StrideInBytes = m_elementSize;
 }
 
-///////////////////<IndexBuffer>//////////////////////
+//------------------------IndexBuffer------------------------//
 
 D3D12IndexBuffer::D3D12IndexBuffer()
 {
@@ -183,4 +184,62 @@ void D3D12IndexBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* C
 D3D12_INDEX_BUFFER_VIEW D3D12IndexBuffer::GetView() const
 {
 	return m_indexBufferView;
+}
+
+//------------------------ConstantBuffer------------------------//
+
+D3D12ConstantBuffer::D3D12ConstantBuffer()
+	: m_bufferSize(0),
+	m_perFrameBufferSize(0),
+	m_mappedConstantBuffer(nullptr)
+{
+
+}
+
+D3D12ConstantBuffer::~D3D12ConstantBuffer()
+{
+	m_resource->Unmap(0, nullptr);
+}
+
+void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize, uint32 FrameCount)
+{
+	// constant buffer 사이즈는 256 바이트 배수여야 한다
+
+	m_perFrameBufferSize = Align(BufferSize);
+	m_bufferSize = m_perFrameBufferSize * FrameCount;
+
+	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
+
+	Check(Device->CreateCommittedResource(
+		&heapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(m_resource.GetAddressOf())
+	));
+
+	CD3DX12_RANGE readRange(0, 0);
+	Check(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedConstantBuffer)));
+}
+
+D3D12_GPU_VIRTUAL_ADDRESS D3D12ConstantBuffer::GetGPUVirtualAddress(uint32 FrameIndex)
+{
+	uint32 beginDataOffset = m_perFrameBufferSize * FrameIndex;
+	return m_resource->GetGPUVirtualAddress() + beginDataOffset;
+}
+
+void* D3D12ConstantBuffer::GetMappedMemory(uint32 FrameIndex)
+{
+	// 현재 프레임에 할당된 메모리의 주소를 가져온다.
+	uint32 beginDataOffset = m_perFrameBufferSize * FrameIndex;
+	uint8* beginData = (uint8*)m_mappedConstantBuffer + beginDataOffset;
+
+	return beginData;
+}
+
+uint32 D3D12ConstantBuffer::Align(uint32 location, uint32 align /*= D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT*/)
+{
+	return (location + (align - 1)) & ~(align - 1);
 }

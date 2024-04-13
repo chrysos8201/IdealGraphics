@@ -19,7 +19,7 @@ namespace Ideal
 	};
 
 
-	// 업로드용 임시 버퍼. 시스템 메모리에 존재한다. 
+	// 업로드용 임시 버퍼; 업로드 힙에 잡힌다. cpu write gpu read
 	class D3D12UploadBuffer : public D3D12Resource
 	{
 	public:
@@ -42,7 +42,7 @@ namespace Ideal
 		D3D12GPUBuffer();
 		virtual ~D3D12GPUBuffer();
 
-	protected:
+	public:
 		// GPU에서 사용할 버퍼를 만든다.
 		// 만들 때 리소스 스테이트를 COPY_DEST로 초기화 해준다.
 		void CreateBuffer(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount);
@@ -60,7 +60,7 @@ namespace Ideal
 	};
 
 	// VertexBuffer
-	class D3D12VertexBuffer : D3D12GPUBuffer
+	class D3D12VertexBuffer : public D3D12GPUBuffer
 	{
 	public:
 		D3D12VertexBuffer();
@@ -78,7 +78,7 @@ namespace Ideal
 	};
 
 	// IndexBuffer
-	class D3D12IndexBuffer : D3D12GPUBuffer
+	class D3D12IndexBuffer : public D3D12GPUBuffer
 	{
 	public:
 		D3D12IndexBuffer();
@@ -92,5 +92,34 @@ namespace Ideal
 
 	private:
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView = {};
+	};
+
+	// ConstantBuffer
+	// 업로드 힙에 잡는다. cpu write / gpu read
+	// 매 프레임 수정할 메모리이기 땜문에 일일히 GPU에 넣어서 fence/wait을 걸어주지 않는다.
+	class D3D12ConstantBuffer : public D3D12Resource
+	{
+	public:
+		D3D12ConstantBuffer();
+		virtual ~D3D12ConstantBuffer();
+
+	public:
+		void Create(ID3D12Device* Device, uint32 BufferSize, uint32 FrameCount);
+		// 현재 프레임 인덱스에 해당하는 메모리의 주소를 가져온다.
+		void* GetMappedMemory(uint32 FrameIndex);
+
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32 FrameIndex);
+	private:
+		uint32 Align(uint32 location, uint32 align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+
+	private:
+		// 총 버퍼의 사이즈 : 버퍼 * 프레임 개수
+		uint32 m_bufferSize;
+
+		// 한 프레임의 버퍼 사이즈
+		uint32 m_perFrameBufferSize;
+
+		// 버퍼를 할당받은 영역의 첫 주소를 가리킨다.
+		void* m_mappedConstantBuffer;
 	};
 }

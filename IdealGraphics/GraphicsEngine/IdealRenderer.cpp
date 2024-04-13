@@ -123,7 +123,11 @@ void IdealRenderer::Tick()
 	{
 		m_constantBufferData.offset.x = -1.25f;
 	}
-	memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+	//memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+
+	// 2024.04.13 constantBuffer 수정
+	m_testOffsetConstantBufferDataBegin = (TestOffset*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+	m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
 }
 
 void IdealRenderer::Render()
@@ -136,65 +140,6 @@ void IdealRenderer::Render()
 
 	Check(m_swapChain->Present(1, 0));
 	MoveToNextFrame();
-}
-
-void IdealRenderer::PopulateCommandList()
-{
-	Check(m_commandAllocators[m_frameIndex]->Reset());
-	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
-
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
-
-	// 2024.04.11 cb bind
-	ID3D12DescriptorHeap* heaps[] = { m_cbvHeap.Get() };
-	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	m_commandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
-	// 여기까지
-
-	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
-	m_commandList->RSSetScissorRects(1, &m_viewport.GetScissorRect());
-
-	CD3DX12_RESOURCE_BARRIER backBufferRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_renderTargets[m_frameIndex].Get(),
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	m_commandList->ResourceBarrier(1, &backBufferRenderTarget);
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
-	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
-	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	m_commandList->IASetIndexBuffer(&m_indexBufferView);
-	m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
-	//m_commandList->DrawInstanced(3, 1, 0, 0);
-
-	CD3DX12_RESOURCE_BARRIER backBufferPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_renderTargets[m_frameIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
-
-	m_commandList->ResourceBarrier(1, &backBufferPresent);
-	Check(m_commandList->Close());
-}
-
-void IdealRenderer::MoveToNextFrame()
-{
-	const uint64 currentFenceValue = m_fenceValues[m_frameIndex];
-	Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
-
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
-	{
-		Check(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-	}
-
-	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
 void IdealRenderer::LoadAsset()
@@ -217,6 +162,7 @@ void IdealRenderer::LoadAsset()
 		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
 
+		
 		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -467,7 +413,7 @@ void IdealRenderer::LoadAsset()
 	}
 }
 
-void IdealRenderer::PopulateCommandList2()
+void IdealRenderer::PopulateCommandList()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
@@ -495,10 +441,8 @@ void IdealRenderer::PopulateCommandList2()
 
 	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	auto vbView = m_idealVertexBuffer.GetView();
-	m_commandList->IASetVertexBuffers(0, 1, &vbView);
-	auto ibView = m_idealIndexBuffer.GetView();
-	m_commandList->IASetIndexBuffer(&ibView);
+	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	m_commandList->IASetIndexBuffer(&m_indexBufferView);
 	m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
 	//m_commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -512,20 +456,44 @@ void IdealRenderer::PopulateCommandList2()
 	Check(m_commandList->Close());
 }
 
+void IdealRenderer::MoveToNextFrame()
+{
+	const uint64 currentFenceValue = m_fenceValues[m_frameIndex];
+	Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
+
+	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
+	{
+		Check(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+	}
+
+	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+}
+
 void IdealRenderer::LoadAsset2()
 {
 	{
 		// CBV를 다시 만들었으니 Root Signature을 다시 만든다.
-		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+		//CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
 		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
 
-		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
+		//ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+		//rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
+		//rootParameters[0].InitAsConstantBufferView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
+		
+		// 2024.04.13 : 루트 시그니쳐 뭔가 바꿔보겠다
+		// 1개 있고, b0에 들어갈 것이고, data_static은 일반적으로 상수 버퍼 설정에 넣는 것이라고 한다(?), 그리고 이 데이터는 vertex 쉐이더에서 사용할 것이다
+		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
+
 
 		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
+
+		//CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(1,rootParameters,0,nullptr, rootSignatureFlags);
 
 		ComPtr<ID3DBlob> signature;
 		ComPtr<ID3DBlob> error;
@@ -682,7 +650,6 @@ void IdealRenderer::LoadAsset2()
 			cbvDesc.BufferLocation = m_constantBuffer->GetGPUVirtualAddress();
 			cbvDesc.SizeInBytes = testConstantBufferSize;
 			m_device->CreateConstantBufferView(&cbvDesc, m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
-
 			/// Map으로 열고 UnMap을 해주지 않을건데 시스템 메모리에 데이터를 잡을거라 주소가 변경될?일은 없을테니 계속 잡아준다..
 			// m_cbvDataBegin으로 상수 버퍼를 열고 주소를 가져온다.
 			CD3DX12_RANGE readRange(0, 0);
@@ -690,7 +657,70 @@ void IdealRenderer::LoadAsset2()
 			// 가져온 주소부터 데이터를 넣어준다.
 			memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 		}
+
+		// 2024.04.13 : ConstantBuffer 다시 만든다.
+		// 프레임 개수 만큼 메모리를 할당 할 것이다.
+		{
+			const uint32 testConstantBufferSize = sizeof(TestOffset);
+
+			m_idealConstantBuffer.Create(m_device.Get(), testConstantBufferSize, FRAME_BUFFER_COUNT);
+
+			//void* beginData = m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+			//memcpy(beginData, &m_constantBufferData, sizeof(m_constantBufferData));
+			m_testOffsetConstantBufferDataBegin = (TestOffset*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+			m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
+		}
 	}
+}
+
+void IdealRenderer::PopulateCommandList2()
+{
+	Check(m_commandAllocators[m_frameIndex]->Reset());
+	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
+
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
+	// 2024.04.11 cb bind
+	//ID3D12DescriptorHeap* heaps[] = { m_cbvHeap.Get() };
+	//m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	//m_commandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+	// 여기까지
+
+	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
+	m_commandList->RSSetScissorRects(1, &m_viewport.GetScissorRect());
+
+	CD3DX12_RESOURCE_BARRIER backBufferRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_renderTargets[m_frameIndex].Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	m_commandList->ResourceBarrier(1, &backBufferRenderTarget);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
+	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
+	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	auto vbView = m_idealVertexBuffer.GetView();
+	m_commandList->IASetVertexBuffers(0, 1, &vbView);
+	auto ibView = m_idealIndexBuffer.GetView();
+	m_commandList->IASetIndexBuffer(&ibView);
+	//m_commandList->SetGraphicsRootConstantBufferView(0, m_constantBuffer->GetGPUVirtualAddress());
+
+	// 2024.04.13 : 현재 frameIndex에 맞는 CB의 주소를 가져와서 바인딩한다.
+	m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
+
+	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
+	//m_commandList->DrawInstanced(3, 1, 0, 0);
+
+	CD3DX12_RESOURCE_BARRIER backBufferPresent = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_renderTargets[m_frameIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	m_commandList->ResourceBarrier(1, &backBufferPresent);
+	Check(m_commandList->Close());
 }
 
 void IdealRenderer::WaitForGPU()

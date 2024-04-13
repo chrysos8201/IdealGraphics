@@ -84,5 +84,7 @@ private:
 	// VertexBuffer¿Í IndexBuffer¸¦ ¹­¾îÁàº¸°Ú´Ù.
 	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
 	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
+	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
+	TestOffset* m_testOffsetConstantBufferDataBegin;
 };
 

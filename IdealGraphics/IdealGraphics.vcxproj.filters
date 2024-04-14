@@ -67,7 +67,7 @@
     <ClInclude Include="Engine\EngineTest.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTest\D3D12ThirdParty.h">
+    <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
     <ClInclude Include="Engine\TestGraphics.h">
@@ -117,6 +117,8 @@
     <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h">
       <Filter>GraphicsEngine\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsEngine\Model.h" />
+    <ClInclude Include="GraphicsEngine\Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -181,6 +183,8 @@
       <Filter>GraphicsEngine\Resources</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
+    <ClCompile Include="GraphicsEngine\Model.cpp" />
+    <ClCompile Include="GraphicsEngine\Mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
@@ -192,6 +196,8 @@
     <FxCompile Include="Shaders\Triangle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\SimplePixelShader.hlsl" />
+    <FxCompile Include="Shaders\SimpleVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli">

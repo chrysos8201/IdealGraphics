@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 #include "GraphicsEngine/Resources/D3D12Resource.h"
@@ -32,6 +32,12 @@ public:
 	void PopulateCommandList2();
 	void LoadAsset2();
 
+	void ExecuteCommandList();
+public:
+	ComPtr<ID3D12Device> GetDevice();
+	// 일단 cmd list는 하나만 쓴다.
+	ComPtr<ID3D12GraphicsCommandList> GetCommandList();
+
 private:
 	uint32 m_width;
 	uint32 m_height;
@@ -44,6 +50,9 @@ private:
 	ComPtr<IDXGISwapChain3> m_swapChain;
 	uint32 m_frameIndex;
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+	// 2024.04.14 : dsv
+	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+	ComPtr<ID3D12Resource> m_depthStencil;
 
 	// 2024.04.11 cbv
 	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;

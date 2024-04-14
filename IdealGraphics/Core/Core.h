@@ -7,7 +7,6 @@
 
 
 #include <memory>
-
 #include <string>
 #include <array>
 #include <vector>
@@ -16,6 +15,7 @@
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
+#include <algorithm>
 
 #include "Misc/ThirdParty/Thirdparty.h"
 //#include <wrl.h>

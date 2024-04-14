@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 #include "RenderTest/D3D12ResourceTest.h"
 #include "Misc/ASEParser.h"
 #include "RenderTest/VertexInfo.h"

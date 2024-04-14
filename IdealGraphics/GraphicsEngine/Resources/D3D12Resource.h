@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 #include "GraphicsEngine/Resources/D3D12Definitions.h"
 
 namespace Ideal
@@ -97,6 +97,7 @@ namespace Ideal
 	// ConstantBuffer
 	// 업로드 힙에 잡는다. cpu write / gpu read
 	// 매 프레임 수정할 메모리이기 땜문에 일일히 GPU에 넣어서 fence/wait을 걸어주지 않는다.
+	// 두 프레임의 메모리를 잡아주지만 매 프레임마다 wait를 걸기 때문에 의미가 없어보임.
 	class D3D12ConstantBuffer : public D3D12Resource
 	{
 	public:

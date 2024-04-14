@@ -137,7 +137,9 @@
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
     <ClInclude Include="Engine\Engine3.h" />
     <ClInclude Include="GraphicsEngine\IdealRenderer.h" />
+    <ClInclude Include="GraphicsEngine\Mesh.h" />
     <ClInclude Include="Misc\Utils\PIX.h" />
+    <ClInclude Include="GraphicsEngine\Model.h" />
     <ClInclude Include="RenderTest\GraphicsEngine.h" />
     <ClInclude Include="Misc\AssimpLoader.h" />
     <ClInclude Include="Core\Core.h" />
@@ -150,7 +152,7 @@
     <ClInclude Include="RenderTest\D3D12ResourceTest.h" />
     <ClInclude Include="Engine\TestGraphics.h" />
     <ClInclude Include="Engine\IEngine.h" />
-    <ClInclude Include="RenderTest\D3D12ThirdParty.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h" />
     <ClInclude Include="Engine\EngineTest.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -170,6 +172,8 @@
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
     <ClCompile Include="Engine\Engine3.cpp" />
     <ClCompile Include="GraphicsEngine\IdealRenderer.cpp" />
+    <ClCompile Include="GraphicsEngine\Model.cpp" />
+    <ClCompile Include="GraphicsEngine\Mesh.cpp" />
     <ClCompile Include="RenderTest\GraphicsEngine.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp" />
     <ClCompile Include="Engine\Engine2.cpp" />
@@ -214,6 +218,14 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimplePixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Triangle.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

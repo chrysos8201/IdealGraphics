@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 
 struct alignas(256) Transform	// 사이즈를 맞추었다?
 {
@@ -28,6 +28,11 @@ struct Vertex
 private:
 	static const int32 InputElementCount = 5;
 	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
+};
+
+struct SimpleBoxConstantBuffer
+{
+	Matrix worldViewProjection;
 };
 
 struct Mesh

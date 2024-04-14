@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 struct RotationAxisAndAngle
 {
 	RotationAxisAndAngle() : frame(0), axis(Vector3()), angle(0), quat(Quaternion()) { }

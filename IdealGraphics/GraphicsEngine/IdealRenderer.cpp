@@ -82,14 +82,15 @@ void IdealRenderer::Init()
 	Check(swapChain.As(&m_swapChain));
 	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
+	// rtv descriptor heap
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 	rtvHeapDesc.NumDescriptors = FRAME_BUFFER_COUNT;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	Check(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 
+	// descriptor heap 에서 rtv Descriptor의 크기
 	m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -102,6 +103,49 @@ void IdealRenderer::Init()
 			Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
 
 		}
+	}
+
+	// 2024.04.14 : dsv를 만들겠다. 먼저 descriptor heap을 만든다.
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	Check(m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+
+	{
+		D3D12_CLEAR_VALUE depthClearValue = {};
+		depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthClearValue.DepthStencil.Depth = 1.0f;
+		depthClearValue.DepthStencil.Stencil = 0;
+
+		CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+			DXGI_FORMAT_D24_UNORM_S8_UINT,
+			m_width,
+			m_height,
+			1,
+			0,
+			1,
+			0,
+			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+		);
+
+		m_device->CreateCommittedResource(
+			&heapProp,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&depthClearValue,
+			IID_PPV_ARGS(m_depthStencil.GetAddressOf())
+		);
+
+		// create dsv
+		D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilDesc = {};
+		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		depthStencilDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		m_device->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
 	// 2024.04.11 cbv Heap을 만든다.
@@ -526,8 +570,12 @@ void IdealRenderer::LoadAsset2()
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		//psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+		psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		psoDesc.DepthStencilState.DepthEnable = FALSE;
 		psoDesc.DepthStencilState.StencilEnable = FALSE;
+
+
 		psoDesc.SampleMask = UINT_MAX;
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		//psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
@@ -628,36 +676,6 @@ void IdealRenderer::LoadAsset2()
 			}
 		}
 
-		// 2024.04.11 : ConstantBufferView 만든다
-		// D3D12_HEAP_TYPE_UPLOAD를 사용하여 힙 속성을 지정하면 업로드 힙이 생성됩니다. 업로드 힙은 CPU에서 GPU로 데이터를 전송할 때 사용됩니다. 이는 일반적으로 CPU가 데이터를 준비하고 GPU에 전송하는 데 사용되는 임시적인 메모리입니다.
-		{
-			const uint32 testConstantBufferSize = sizeof(TestOffset);
-
-			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(testConstantBufferSize);
-
-			Check(m_device->CreateCommittedResource(
-				&heapProp,
-				D3D12_HEAP_FLAG_NONE,
-				&resourceDesc,
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr,
-				IID_PPV_ARGS(m_constantBuffer.GetAddressOf())
-			));
-
-			// descibe하고 cbv를 만든다.
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-			cbvDesc.BufferLocation = m_constantBuffer->GetGPUVirtualAddress();
-			cbvDesc.SizeInBytes = testConstantBufferSize;
-			m_device->CreateConstantBufferView(&cbvDesc, m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
-			/// Map으로 열고 UnMap을 해주지 않을건데 시스템 메모리에 데이터를 잡을거라 주소가 변경될?일은 없을테니 계속 잡아준다..
-			// m_cbvDataBegin으로 상수 버퍼를 열고 주소를 가져온다.
-			CD3DX12_RANGE readRange(0, 0);
-			Check(m_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_cbvDataBegin)));
-			// 가져온 주소부터 데이터를 넣어준다.
-			memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-		}
-
 		// 2024.04.13 : ConstantBuffer 다시 만든다.
 		// 프레임 개수 만큼 메모리를 할당 할 것이다.
 		{
@@ -673,12 +691,44 @@ void IdealRenderer::LoadAsset2()
 	}
 }
 
+void IdealRenderer::ExecuteCommandList()
+{
+	Check(m_commandList->Close());
+	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+	// 여기서도 Wait를 걸면 될까?
+	{
+		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+		m_fenceValues[m_frameIndex]++;
+
+		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		if (m_fenceEvent == nullptr)
+		{
+			Check(HRESULT_FROM_WIN32(GetLastError()));
+		}
+
+		WaitForGPU();
+	}
+	m_commandAllocators[m_frameIndex]->Reset();
+	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+}
+
+Microsoft::WRL::ComPtr<ID3D12Device> IdealRenderer::GetDevice()
+{
+	return m_device;
+}
+
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> IdealRenderer::GetCommandList()
+{
+	return m_commandList;
+}
+
 void IdealRenderer::PopulateCommandList2()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
 
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+	//m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
 	// 2024.04.11 cb bind
 	//ID3D12DescriptorHeap* heaps[] = { m_cbvHeap.Get() };
@@ -697,9 +747,14 @@ void IdealRenderer::PopulateCommandList2()
 	m_commandList->ResourceBarrier(1, &backBufferRenderTarget);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+	// 2024.04.14 dsv세팅
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
 	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
+	// 2024.04.14 Clear DSV
+	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	auto vbView = m_idealVertexBuffer.GetView();
 	m_commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -707,6 +762,7 @@ void IdealRenderer::PopulateCommandList2()
 	m_commandList->IASetIndexBuffer(&ibView);
 	//m_commandList->SetGraphicsRootConstantBufferView(0, m_constantBuffer->GetGPUVirtualAddress());
 
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	// 2024.04.13 : 현재 frameIndex에 맞는 CB의 주소를 가져와서 바인딩한다.
 	m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
 

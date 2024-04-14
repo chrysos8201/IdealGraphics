@@ -4,7 +4,7 @@
 #include "assimp/postprocess.h"
 #include "assimp/types.h"
 #include "assimp/mesh.h"
-#include "RenderTest/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 #include "RenderTest/VertexInfo.h"
 #include "RenderTest/MeshTest.h"
 #include "RenderTest/ModelTest.h"

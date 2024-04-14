@@ -54,6 +54,8 @@ namespace Ideal
 		uint32 GetElemnetSize() const;
 
 	protected:
+		void SetName(const LPCTSTR& name);
+
 		uint32 m_bufferSize;
 		uint32 m_elementSize;
 		uint32 m_elementCount;

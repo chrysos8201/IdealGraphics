@@ -42,6 +42,22 @@ void IdealRenderer::Init()
 		}
 	}
 #endif
+
+	// 2024.04.14 // 임시용 wvp만들기
+	{
+		Vector3 eyePos(0.f, 0.f, 5.f);
+		Vector3 targetPos = Vector3::Zero;
+		Vector3 upward(0.f, 1.f, 0.f);
+
+		auto fov = DirectX::XMConvertToRadians(37.5f);
+		auto aspect = static_cast<float>(m_width) / static_cast<float>(m_height);
+
+		Matrix world = Matrix::Identity;
+		Matrix view = Matrix::CreateLookAt(eyePos, targetPos, upward);
+		Matrix proj = Matrix::CreatePerspectiveFieldOfView(fov, aspect, 0.3f, 1000.f);
+		m_viewProj = view * proj;
+	}
+
 	// Ideal Viewport Init
 	m_viewport.Init();
 
@@ -162,16 +178,25 @@ void IdealRenderer::Init()
 
 void IdealRenderer::Tick()
 {
-	m_constantBufferData.offset.x += m_offsetSpeed;
-	if (m_constantBufferData.offset.x > 1.25f)
-	{
-		m_constantBufferData.offset.x = -1.25f;
-	}
-	//memcpy(m_cbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+	//m_constantBufferData.offset.x += m_offsetSpeed;
+	//if (m_constantBufferData.offset.x > 1.25f)
+	//{
+	//	m_constantBufferData.offset.x = -1.25f;
+	//}
+	//// 2024.04.13 constantBuffer 수정
+	//m_testOffsetConstantBufferDataBegin = (TestOffset*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+	//m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
 
-	// 2024.04.13 constantBuffer 수정
-	m_testOffsetConstantBufferDataBegin = (TestOffset*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
-	m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
+
+
+	// 2024.04.14 constantBuffer 수정
+	//m_constantBufferDataSimpleBox
+	static float rot = 0.0f;
+	m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+	Matrix mat = Matrix::CreateRotationY(rot) * Matrix::CreateRotationX(-rot) * m_viewProj;
+	Matrix tMat = mat.Transpose();
+	rot += 0.01f;
+	m_simpleBoxConstantBufferDataBegin->worldViewProjection = tMat;
 }
 
 void IdealRenderer::Render()
@@ -206,7 +231,7 @@ void IdealRenderer::LoadAsset()
 		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
 
-		
+
 		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -226,8 +251,8 @@ void IdealRenderer::LoadAsset()
 #if defined(_DEBUG)
 		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "VS", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "PS", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+		Check(D3DCompileFromFile(L"Shaders/SimpleVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
+		Check(D3DCompileFromFile(L"Shaders/SimplePixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 
 		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 		{
@@ -269,14 +294,27 @@ void IdealRenderer::LoadAsset()
 		// 아아ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ 왜 close가 안되는데
 		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
 
-		VertexTest triangleVertices[] =
+		/*VertexTest triangleVertices[] =
 		{
 			{ { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
 			{ { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
 			{ { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+		};*/
+
+		const VertexTest cubeVertices[] = {
+			{ { -1.0f, 1.0f, -1.0f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
+			{ { 1.0f, 1.0f, -1.0f},		{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Right
+			{ { 1.0f, 1.0f, 1.0f},		{1.0f, 0.0f,0.0f,1.0f } },    // Front Top Right
+			{ { -1.0f, 1.0f, 1.0f},		{1.0f, 0.0f,0.0f,1.0f } },    // Front Top Left
+
+			{ { -1.0f, -1.0f, -1.0f},	{1.0f, 0.0f,0.0f,1.0f } },    // Back Bottom Left
+			{ { 1.0f, -1.0f, -1.0f},	{1.0f, 0.0f,0.0f,1.0f } },    // Back Bottom Right
+			{ { 1.0f, -1.0f, 1.0f},		{1.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Right
+			{ { -1.0f, -1.0f, 1.0f},	{1.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
 		};
 
-		const uint32 vertexBufferSize = sizeof(triangleVertices);
+
+		const uint32 vertexBufferSize = sizeof(cubeVertices);
 
 		{
 			CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -306,7 +344,7 @@ void IdealRenderer::LoadAsset()
 		void* mappedUploadHeap = nullptr;
 		Check(vertexBufferUpload->Map(0, nullptr, &mappedUploadHeap));
 		//memcpy(mappedUploadHeap, triangleVertices, sizeof(triangleVertices));
-		memcpy(mappedUploadHeap, triangleVertices, sizeof(triangleVertices));
+		memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
 		vertexBufferUpload->Unmap(0, nullptr);	// 사실 이건 시스템 메모리에 있는거라 굳이 UnMap안해도 된다?
 
 		m_commandList->CopyBufferRegion(m_vertexBuffer.Get(), 0, vertexBufferUpload.Get(), 0, vertexBufferSize);
@@ -350,7 +388,24 @@ void IdealRenderer::LoadAsset()
 
 		// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
 
-		uint32 indices[] = { 0,1,2 };
+		uint32 indices[] = {
+			0, 1, 3,
+			1, 2, 3,
+
+			3, 2, 7,
+			6, 7, 2,
+
+			2, 1, 6,
+			5, 6, 1,
+
+			1, 0, 5,
+			4, 5, 0,
+
+			0, 3, 4,
+			7, 4, 3,
+
+			7, 6, 4,
+			5, 4, 6, };
 		const uint32 indexBufferSize = sizeof(indices);
 
 		// GPU버퍼와 업로드 버퍼를 만들겠다.
@@ -526,7 +581,7 @@ void IdealRenderer::LoadAsset2()
 		//ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 		//rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);	// vertex shader에서만 접근에 가능하도록은 되어있긴 한데 hlsli과 관계가 있을련지 모르겠다. 사실 헤더파일이라 상관은 없을지도
 		//rootParameters[0].InitAsConstantBufferView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
-		
+
 		// 2024.04.13 : 루트 시그니쳐 뭔가 바꿔보겠다
 		// 1개 있고, b0에 들어갈 것이고, data_static은 일반적으로 상수 버퍼 설정에 넣는 것이라고 한다(?), 그리고 이 데이터는 vertex 쉐이더에서 사용할 것이다
 		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
@@ -549,13 +604,16 @@ void IdealRenderer::LoadAsset2()
 		ComPtr<ID3DBlob> vertexShader;
 		ComPtr<ID3DBlob> pixelShader;
 
+		ComPtr<ID3DBlob> errorBlob;
+
 		uint32 compileFlags = 0;
 #if defined(_DEBUG)
 		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "VS", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-		Check(D3DCompileFromFile(L"Shaders/Triangle.hlsl", nullptr, nullptr, "PS", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
-
+		Check(D3DCompileFromFile(L"Shaders/SimpleVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
+		Check(D3DCompileFromFile(L"Shaders/SimplePixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
+		//const char* errorPtr = (char*)errorBlob->GetBufferPointer();
+		//Check(D3DCompileFromFile(L"Shaders/SimplePixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -591,25 +649,29 @@ void IdealRenderer::LoadAsset2()
 	{
 		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
 
-		VertexTest triangleVertices[] =
-		{
-			{ { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-			{ { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-			{ { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
-		};
+		const VertexTest cubeVertices[] = {
+			{ { -1.0f, 1.0f, -1.0f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
+			{ { 1.0f, 1.0f, -1.0f},		{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
+			{ { 1.0f, 1.0f, 1.0f},		{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
+			{ { -1.0f, 1.0f, 1.0f},		{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
 
-		const uint32 vertexBufferSize = sizeof(triangleVertices);
+			{ { -1.0f, -1.0f, -1.0f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
+			{ { 1.0f, -1.0f, -1.0f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
+			{ { 1.0f, -1.0f, 1.0f},		{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
+			{ { -1.0f, -1.0f, 1.0f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
+		};
+		const uint32 vertexBufferSize = sizeof(cubeVertices);
 
 		// UploadBuffer를 만든다.
 		Ideal::D3D12UploadBuffer uploadBuffer;
 		uploadBuffer.Create(m_device.Get(), vertexBufferSize);
 
 		void* mappedUploadHeap = uploadBuffer.Map();
-		memcpy(mappedUploadHeap, triangleVertices, sizeof(triangleVertices));
+		memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
 		uploadBuffer.UnMap();
 
 		uint32 vertexTypeSize = sizeof(VertexTest);
-		uint32 vertexCount = _countof(triangleVertices);
+		uint32 vertexCount = _countof(cubeVertices);
 		m_idealVertexBuffer.Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
 
 		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
@@ -639,13 +701,30 @@ void IdealRenderer::LoadAsset2()
 
 	// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
 	{
-		uint32 indices[] = { 0,1,2 };
+		uint32 indices[] = {
+			0, 1, 3,
+			1, 2, 3,
+
+			3, 2, 7,
+			6, 7, 2,
+
+			2, 1, 6,
+			5, 6, 1,
+
+			1, 0, 5,
+			4, 5, 0,
+
+			0, 3, 4,
+			7, 4, 3,
+
+			7, 6, 4,
+			5, 4, 6, };
 		const uint32 indexBufferSize = sizeof(indices);
 
 		Ideal::D3D12UploadBuffer uploadBuffer;
 		uploadBuffer.Create(m_device.Get(), indexBufferSize);
-		
-	
+
+
 		// 업로드버퍼에 먼저 복사
 		void* mappedUploadBuffer = uploadBuffer.Map();
 		memcpy(mappedUploadBuffer, indices, indexBufferSize);
@@ -679,14 +758,14 @@ void IdealRenderer::LoadAsset2()
 		// 2024.04.13 : ConstantBuffer 다시 만든다.
 		// 프레임 개수 만큼 메모리를 할당 할 것이다.
 		{
-			const uint32 testConstantBufferSize = sizeof(TestOffset);
+			const uint32 testConstantBufferSize = sizeof(SimpleBoxConstantBuffer);
 
 			m_idealConstantBuffer.Create(m_device.Get(), testConstantBufferSize, FRAME_BUFFER_COUNT);
 
 			//void* beginData = m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
 			//memcpy(beginData, &m_constantBufferData, sizeof(m_constantBufferData));
-			m_testOffsetConstantBufferDataBegin = (TestOffset*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
-			m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
+			m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+			//m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
 		}
 	}
 }

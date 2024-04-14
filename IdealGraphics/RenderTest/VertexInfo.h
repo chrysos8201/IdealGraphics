@@ -30,7 +30,7 @@ private:
 	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 };
 
-struct SimpleBoxConstantBuffer
+struct alignas(256) SimpleBoxConstantBuffer
 {
 	Matrix worldViewProjection;
 };

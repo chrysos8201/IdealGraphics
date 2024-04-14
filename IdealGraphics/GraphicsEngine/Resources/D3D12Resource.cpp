@@ -112,6 +112,11 @@ uint32 D3D12GPUBuffer::GetElemnetSize() const
 	return m_elementSize;
 }
 
+void D3D12GPUBuffer::SetName(const LPCTSTR& name)
+{
+	m_resource->SetName(name);
+}
+
 //------------------------VertexBuffer------------------------//
 
 D3D12VertexBuffer::D3D12VertexBuffer()
@@ -132,7 +137,7 @@ D3D12_VERTEX_BUFFER_VIEW D3D12VertexBuffer::GetView() const
 void D3D12VertexBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer)
 {
 	D3D12GPUBuffer::CreateBuffer(Device, ElementSize, ElementCount);
-
+	D3D12GPUBuffer::SetName(L"VertexBuffer");
 	// 데이터를 복사한다
 	CmdList->CopyBufferRegion(m_resource.Get(), 0, UploadBuffer.GetResource(), 0, m_bufferSize);
 
@@ -165,6 +170,7 @@ D3D12IndexBuffer::~D3D12IndexBuffer()
 void D3D12IndexBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer)
 {
 	D3D12GPUBuffer::CreateBuffer(Device, ElementSize, ElementCount);
+	D3D12GPUBuffer::SetName(L"IndexBuffer");
 
 	CmdList->CopyBufferRegion(m_resource.Get(), 0, UploadBuffer.GetResource(), 0, m_bufferSize);
 
@@ -219,6 +225,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 		nullptr,
 		IID_PPV_ARGS(m_resource.GetAddressOf())
 	));
+	m_resource->SetName(L"ConstantBuffer");
 
 	CD3DX12_RANGE readRange(0, 0);
 	Check(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedConstantBuffer)));

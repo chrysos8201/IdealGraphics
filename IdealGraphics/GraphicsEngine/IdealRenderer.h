@@ -4,6 +4,7 @@
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 #include "GraphicsEngine/Resources/D3D12Resource.h"
+#include "RenderTest/VertexInfo.h"
 
 class IdealRenderer
 {
@@ -75,6 +76,7 @@ private:
 	ComPtr<ID3D12Resource> m_constantBuffer;
 	uint8* m_cbvDataBegin;				// 상수 버퍼 데이터 시작 주소
 	TestOffset m_constantBufferData;	// 테스트용으로 오프셋을 더하는 상수 버퍼용 변수
+	SimpleBoxConstantBuffer m_constantBufferDataSimpleBox;
 	//D3D12_CONSTANT_BUFFER_VIEW_DESC m_constantBufferViewDesc;
 	const float m_offsetSpeed = 0.02f;
 private:
@@ -84,6 +86,11 @@ private:
 
 	void WaitForGPU();
 
+private:
+	// 2024.04.14
+	// 임시용 wvp
+	Matrix m_world;
+	Matrix m_viewProj;
 
 private:
 	//
@@ -95,5 +102,6 @@ private:
 	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
 	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
 	TestOffset* m_testOffsetConstantBufferDataBegin;
+	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
 };
 

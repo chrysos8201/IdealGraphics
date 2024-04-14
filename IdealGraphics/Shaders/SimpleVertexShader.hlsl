@@ -21,7 +21,7 @@ struct PSInput
     float3 color : COLOR;
 };
 
-cbuffer PerDraw : register(b1)
+cbuffer PerDraw : register(b0)
 {
     float4x4 worldViewProjection;
 };

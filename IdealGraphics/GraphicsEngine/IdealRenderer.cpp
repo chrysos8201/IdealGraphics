@@ -600,6 +600,12 @@ void IdealRenderer::LoadAsset2()
 		Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_rootSignature.GetAddressOf())));
 	}
 
+	// 2024.04.15 : pso를 미리 만들어두고 사용하겠다!
+	{
+
+		m_pipelineStateCache.Create(m_device.Get(), m_rootSignature.Get());
+	}
+
 	{
 		ComPtr<ID3DBlob> vertexShader;
 		ComPtr<ID3DBlob> pixelShader;
@@ -805,7 +811,15 @@ Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> IdealRenderer::GetCommandList(
 void IdealRenderer::PopulateCommandList2()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
-	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
+	//Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
+
+	// 2024.04.15
+	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
+	m_commandList->SetPipelineState(m_pipelineStateCache.GetPipelineState(
+		Ideal::EPipelineStateInputLayout::ESimpleInputElement,
+		Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
+		Ideal::EPipelineStatePS::ESimplePixelShaderPS
+	).Get());
 
 	//m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 

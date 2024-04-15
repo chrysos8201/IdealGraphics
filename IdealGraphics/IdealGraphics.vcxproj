@@ -132,6 +132,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\ForDebug.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineStateCache.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
@@ -167,6 +171,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
+    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineStateCache.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
@@ -222,6 +230,12 @@
     <FxCompile Include="Shaders\SimplePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimplePixelShader2.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

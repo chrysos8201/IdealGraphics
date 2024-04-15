@@ -4,6 +4,7 @@
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 #include "GraphicsEngine/Resources/D3D12Resource.h"
+#include "GraphicsEngine/Resources/D3D12PipelineStateCache.h"
 #include "RenderTest/VertexInfo.h"
 
 class IdealRenderer
@@ -55,7 +56,7 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	ComPtr<ID3D12Resource> m_depthStencil;
 
-	// 2024.04.11 cbv
+	// 2024.04.11 : cbv
 	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
 
 	uint32 m_rtvDescriptorSize;
@@ -103,5 +104,9 @@ private:
 	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
 	TestOffset* m_testOffsetConstantBufferDataBegin;
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
+
+	// 2024.04.15 : pso
+	Ideal::D3D12PipelineStateCache m_pipelineStateCache;
+
 };
 

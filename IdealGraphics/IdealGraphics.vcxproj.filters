@@ -119,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Model.h" />
     <ClInclude Include="GraphicsEngine\Mesh.h" />
+    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineStateCache.h">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -185,6 +188,9 @@
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
     <ClCompile Include="GraphicsEngine\Model.cpp" />
     <ClCompile Include="GraphicsEngine\Mesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineStateCache.cpp">
+      <Filter>GraphicsEngine\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
@@ -196,8 +202,15 @@
     <FxCompile Include="Shaders\Triangle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SimplePixelShader.hlsl" />
-    <FxCompile Include="Shaders\SimpleVertexShader.hlsl" />
+    <FxCompile Include="Shaders\SimplePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimplePixelShader2.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli">

@@ -1,31 +1,50 @@
 #include "GraphicsEngine/Resources/D3D12PipelineStateCache.h"
 
 using namespace Ideal;
-//std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>> PipelineStateInputLayouts;
 
-std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>> PipelineStateInputLayouts = // = std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>>(2, std::vector<D3D12_INPUT_ELEMENT_DESC>());
+const D3D12_INPUT_ELEMENT_DESC D3D12PipelineStateCache::PipelineStateInputLayouts[][5] =
 {
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	},
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
+		{ "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	}
 };
 
-LPCTSTR PipelineStateVSPath[] =
+// InputLayouts가 가지고 있는 Element집합 개별이 가지고 있는 Element의 개수.......
+const uint32 D3D12PipelineStateCache::PipelineStateInputLayoutCount[EPipelineStateInputLayoutCount] =
 {
-	L"Shaders/SimpleVertexShader.hlsl"
+	2,
+	5
 };
 
-//std::wstring PipelineStatePSPath[] =
-//{
-//	L"Shaders/SimplePixelShader.hlsl",
-//	L"Shaders/SimplePixelShader2.hlsl"
-//};
-
-std::vector<std::wstring> PipelineStatePSPath = 
+const ShaderData D3D12PipelineStateCache::PipelineStateVSData[EPipelineStateVSCount] =
 {
-	L"Shaders/SimplePixelShader.hlsl",
-	L"Shaders/SimplePixelShader2.hlsl"
+	{
+		L"Shaders/SimpleVertexShader.hlsl",
+		"main",
+		"vs_5_0"
+	},
+};
+
+const ShaderData D3D12PipelineStateCache::PipelineStatePSData[EPipelineStatePSCount] =
+{
+	{
+		L"Shaders/SimplePixelShader.hlsl",
+		"main",
+		"ps_5_0"
+	},
+	{
+		L"Shaders/SimplePixelShader2.hlsl",
+		"main",
+		"ps_5_0"
+	}
 };
 
 D3D12PipelineStateCache::D3D12PipelineStateCache()
@@ -40,7 +59,7 @@ D3D12PipelineStateCache::~D3D12PipelineStateCache()
 
 void D3D12PipelineStateCache::Create(ID3D12Device* Device, ID3D12RootSignature* RootSignature)
 {
-	
+
 
 	for (uint32 inputNum = 0; inputNum < EPipelineStateInputLayoutCount; ++inputNum)
 	{
@@ -55,15 +74,27 @@ void D3D12PipelineStateCache::Create(ID3D12Device* Device, ID3D12RootSignature* 
 #endif
 				// VS
 				ComPtr<ID3DBlob> vertexShader;
-				Check(D3DCompileFromFile(PipelineStateVSPath[vsNum], nullptr, nullptr, "main", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
+				Check(D3DCompileFromFile(PipelineStateVSData[vsNum].path,
+					nullptr, 
+					nullptr,
+					PipelineStateVSData[vsNum].entryPoint,
+					PipelineStateVSData[vsNum].shaderVersion,
+					compileFlags, 0, &vertexShader, nullptr));
 
 				// PS
 				ComPtr<ID3DBlob> pixelShader;
-				Check(D3DCompileFromFile(PipelineStatePSPath[psNum].c_str(), nullptr, nullptr, "main", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+				Check(D3DCompileFromFile(PipelineStatePSData[psNum].path,
+					nullptr, 
+					nullptr, 
+					PipelineStatePSData[psNum].entryPoint,
+					PipelineStatePSData[psNum].shaderVersion,
+					compileFlags, 0, &pixelShader, nullptr));
 
 				D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-				psoDesc.InputLayout = { PipelineStateInputLayouts[inputNum].data(), static_cast<uint32>(PipelineStateInputLayouts[inputNum].size()) };
+				psoDesc.InputLayout = { PipelineStateInputLayouts[inputNum], PipelineStateInputLayoutCount[inputNum]};
+
 				psoDesc.pRootSignature = RootSignature;
+
 				psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 				psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
 				psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
@@ -86,6 +117,13 @@ void D3D12PipelineStateCache::Create(ID3D12Device* Device, ID3D12RootSignature* 
 					&psoDesc,
 					IID_PPV_ARGS(m_pipelineStatesCache[inputNum][vsNum][psNum].GetAddressOf())
 				));
+
+				WCHAR name[50];
+				if (swprintf_s(name, L"m_pipelineStates[%d][%d][%d]", inputNum, vsNum, psNum) > 0)
+				{
+					//SetName(pLibrary->m_pipelineStates[type].Get(), name);
+					m_pipelineStatesCache[inputNum][vsNum][psNum]->SetName(name);
+				}
 			}
 		}
 	}

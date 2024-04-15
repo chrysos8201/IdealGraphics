@@ -1,22 +1,22 @@
 #pragma once
 #include "Core/Core.h"
 #include "GraphicsEngine/Resources/D3D12ThirdParty.h"
+#include "GraphicsEngine/Resources/D3D12Definitions.h"
 
 namespace Ideal
 {
 	enum EPipelineStateInputLayout
 	{
 		ESimpleInputElement,
+		EVertexElement,
 		EPipelineStateInputLayoutCount
 	};
-	//extern std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>> PipelineStateInputLayouts;
-	
+
 	enum EPipelineStateVS
 	{
 		ESimpleVertexShaderVS,
 		EPipelineStateVSCount
 	};
-	//extern LPCTSTR PipelineStateVSPath[EPipelineStateVSCount];
 
 	enum EPipelineStatePS
 	{
@@ -24,7 +24,13 @@ namespace Ideal
 		ESimplePixelShaderPS2,
 		EPipelineStatePSCount
 	};
-	//extern LPCTSTR PipelineStatePSPath[];
+
+	struct ShaderData
+	{
+		LPCTSTR path;
+		const char* entryPoint;
+		const char* shaderVersion;
+	};
 
 	class D3D12PipelineStateCache
 	{
@@ -37,6 +43,12 @@ namespace Ideal
 		ComPtr<ID3D12PipelineState> GetPipelineState(EPipelineStateInputLayout input, EPipelineStateVS vs, EPipelineStatePS ps);
 	private:
 		ComPtr<ID3D12PipelineState> m_pipelineStatesCache[EPipelineStateInputLayoutCount][EPipelineStateVSCount][EPipelineStatePSCount];
+
+	private:
+		static const D3D12_INPUT_ELEMENT_DESC PipelineStateInputLayouts[EPipelineStateInputLayoutCount][5];
+		static const uint32 PipelineStateInputLayoutCount[EPipelineStateInputLayoutCount];
+		static const ShaderData PipelineStateVSData[EPipelineStateVSCount];
+		static const ShaderData PipelineStatePSData[EPipelineStatePSCount];
 	};
 }
 

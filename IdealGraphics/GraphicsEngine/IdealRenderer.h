@@ -11,13 +11,6 @@ class IdealRenderer
 {
 	enum { FRAME_BUFFER_COUNT = 2 };
 
-	struct TestOffset
-	{
-		Vector4 offset = Vector4();
-		float padding[60];
-	};	// 256 byte
-	static_assert(sizeof(TestOffset) % 256 == 0);
-
 public:
 	IdealRenderer(HWND hwnd, uint32 width, uint32 height);
 	virtual ~IdealRenderer();
@@ -26,10 +19,8 @@ public:
 	void Init();
 	void Tick();
 	void Render();
-	void PopulateCommandList();
 	void MoveToNextFrame();
 
-	void LoadAsset();
 	// 다시 수정 버전
 	void PopulateCommandList2();
 	void LoadAsset2();
@@ -68,17 +59,7 @@ private:
 
 private:
 	float m_aspectRatio = 0.f;
-	ComPtr<ID3D12Resource> m_vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-
-	ComPtr<ID3D12Resource> m_indexBuffer;
-	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-
-	ComPtr<ID3D12Resource> m_constantBuffer;
-	uint8* m_cbvDataBegin;				// 상수 버퍼 데이터 시작 주소
-	TestOffset m_constantBufferData;	// 테스트용으로 오프셋을 더하는 상수 버퍼용 변수
 	SimpleBoxConstantBuffer m_constantBufferDataSimpleBox;
-	//D3D12_CONSTANT_BUFFER_VIEW_DESC m_constantBufferViewDesc;
 	const float m_offsetSpeed = 0.02f;
 private:
 	ComPtr<ID3D12Fence> m_fence;
@@ -102,11 +83,10 @@ private:
 	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
 	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
 	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
-	TestOffset* m_testOffsetConstantBufferDataBegin;
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
 
 	// 2024.04.15 : pso
 	Ideal::D3D12PipelineStateCache m_pipelineStateCache;
-
+	ComPtr<ID3D12PipelineState> m_currentPipelineState;
 };
 

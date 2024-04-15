@@ -6,8 +6,8 @@
 #include "assimp/mesh.h"
 #include "GraphicsEngine/Resources/D3D12ThirdParty.h"
 #include "RenderTest/VertexInfo.h"
-#include "RenderTest/MeshTest.h"
-#include "RenderTest/ModelTest.h"
+//#include "RenderTest/MeshTest.h"
+//#include "RenderTest/ModelTest.h"
 
 #include <filesystem>
 

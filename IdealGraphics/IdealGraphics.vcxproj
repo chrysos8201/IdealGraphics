@@ -139,32 +139,24 @@
     <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
-    <ClInclude Include="Engine\Engine3.h" />
     <ClInclude Include="GraphicsEngine\IdealRenderer.h" />
     <ClInclude Include="GraphicsEngine\Mesh.h" />
     <ClInclude Include="Misc\Utils\PIX.h" />
     <ClInclude Include="GraphicsEngine\Model.h" />
-    <ClInclude Include="RenderTest\GraphicsEngine.h" />
-    <ClInclude Include="Misc\AssimpLoader.h" />
+    <ClInclude Include="Misc\AssimpLoader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Defines.h" />
     <ClInclude Include="Core\Types.h" />
-    <ClInclude Include="Engine\Engine2.h" />
-    <ClInclude Include="Misc\ASEParser.h" />
-    <ClInclude Include="RenderTest\MeshTest.h" />
-    <ClInclude Include="RenderTest\ModelTest.h" />
-    <ClInclude Include="RenderTest\D3D12ResourceTest.h" />
-    <ClInclude Include="Engine\TestGraphics.h" />
+    <ClInclude Include="Misc\ASEParser.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h" />
-    <ClInclude Include="Engine\EngineTest.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Launch\LaunchWindow.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="RenderTest\VertexInfo.h" />
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
@@ -178,25 +170,17 @@
     <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
-    <ClCompile Include="Engine\Engine3.cpp" />
     <ClCompile Include="GraphicsEngine\IdealRenderer.cpp" />
     <ClCompile Include="GraphicsEngine\Model.cpp" />
     <ClCompile Include="GraphicsEngine\Mesh.cpp" />
-    <ClCompile Include="RenderTest\GraphicsEngine.cpp" />
-    <ClCompile Include="Misc\AssimpLoader.cpp" />
-    <ClCompile Include="Engine\Engine2.cpp" />
-    <ClCompile Include="Misc\ASEParser.cpp" />
-    <ClCompile Include="RenderTest\MeshTest.cpp" />
-    <ClCompile Include="RenderTest\ModelTest.cpp" />
-    <ClCompile Include="RenderTest\D3D12ResourceTest.cpp" />
-    <ClCompile Include="Engine\TestGraphics.cpp" />
-    <ClCompile Include="Engine\EngineTest.cpp">
+    <ClCompile Include="Misc\AssimpLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Misc\ASEParser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
     <ClCompile Include="Launch\LaunchWindow.cpp" />
-    <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="RenderTest\VertexInfo.cpp" />
   </ItemGroup>
   <ItemGroup>

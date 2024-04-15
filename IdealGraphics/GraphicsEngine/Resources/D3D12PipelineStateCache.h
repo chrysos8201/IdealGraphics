@@ -25,6 +25,13 @@ namespace Ideal
 		EPipelineStatePSCount
 	};
 
+	enum EPipelineStateRS
+	{
+		ERasterizerStateSolid,
+		ERasterizerStateWireFrame,
+		EPipelineStateRSCount,
+	};
+
 	struct ShaderData
 	{
 		LPCTSTR path;
@@ -40,15 +47,16 @@ namespace Ideal
 
 	public:
 		void Create(ID3D12Device* Device, ID3D12RootSignature* RootSignature);
-		ComPtr<ID3D12PipelineState> GetPipelineState(EPipelineStateInputLayout input, EPipelineStateVS vs, EPipelineStatePS ps);
+		ComPtr<ID3D12PipelineState> GetPipelineState(EPipelineStateInputLayout inputKey, EPipelineStateVS vsKey, EPipelineStatePS psKey, EPipelineStateRS rsKey);
 	private:
-		ComPtr<ID3D12PipelineState> m_pipelineStatesCache[EPipelineStateInputLayoutCount][EPipelineStateVSCount][EPipelineStatePSCount];
+		ComPtr<ID3D12PipelineState> m_pipelineStatesCache[EPipelineStateInputLayoutCount][EPipelineStateVSCount][EPipelineStatePSCount][EPipelineStateRSCount];
 
 	private:
 		static const D3D12_INPUT_ELEMENT_DESC PipelineStateInputLayouts[EPipelineStateInputLayoutCount][5];
 		static const uint32 PipelineStateInputLayoutCount[EPipelineStateInputLayoutCount];
 		static const ShaderData PipelineStateVSData[EPipelineStateVSCount];
 		static const ShaderData PipelineStatePSData[EPipelineStatePSCount];
+		static const D3D12_FILL_MODE PipelineStateRS[EPipelineStateRSCount];
 	};
 }
 

@@ -192,7 +192,8 @@ void IdealRenderer::Tick()
 		ComPtr<ID3D12PipelineState> getPipeline = m_pipelineStateCache.GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS2
+			Ideal::EPipelineStatePS::ESimplePixelShaderPS2,
+			Ideal::EPipelineStateRS::ERasterizerStateWireFrame
 		);
 		if (m_currentPipelineState != getPipeline)
 		{
@@ -204,7 +205,8 @@ void IdealRenderer::Tick()
 		ComPtr<ID3D12PipelineState> getPipeline = m_pipelineStateCache.GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS
+			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
+			Ideal::EPipelineStateRS::ERasterizerStateSolid
 		);
 		if (m_currentPipelineState != getPipeline)
 		{
@@ -269,7 +271,8 @@ void IdealRenderer::LoadAsset2()
 		m_currentPipelineState = m_pipelineStateCache.GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS
+			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
+			Ideal::EPipelineStateRS::ERasterizerStateSolid
 		).Get();
 	}
 

@@ -4,10 +4,16 @@
 
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 #include "GraphicsEngine/Resources/D3D12Resource.h"
-#include "GraphicsEngine/Resources/D3D12PipelineStateCache.h"
+#include "GraphicsEngine/Resources/D3D12PipelineState.h"
 #include "RenderTest/VertexInfo.h"
+//#include "GraphicsEngine/Mesh.h"
 
-class IdealRenderer
+namespace Ideal
+{
+	class Mesh;
+}
+
+class IdealRenderer : public std::enable_shared_from_this<IdealRenderer>
 {
 	enum { FRAME_BUFFER_COUNT = 2 };
 
@@ -26,6 +32,12 @@ public:
 	void LoadAsset2();
 
 	void ExecuteCommandList();
+
+	void CreateMeshObject(const std::string Path);
+
+	void BeginRender();
+	void EndRender();
+
 public:
 	ComPtr<ID3D12Device> GetDevice();
 	// 일단 cmd list는 하나만 쓴다.
@@ -86,7 +98,12 @@ private:
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
 
 	// 2024.04.15 : pso
-	Ideal::D3D12PipelineStateCache m_pipelineStateCache;
+	Ideal::D3D12PipelineState m_pipelineStateCache;
 	ComPtr<ID3D12PipelineState> m_currentPipelineState;
+
+	
+private:
+	// 2024.04.16 : mesh objects
+	std::vector<std::shared_ptr<Ideal::Mesh>> m_objects;
 };
 

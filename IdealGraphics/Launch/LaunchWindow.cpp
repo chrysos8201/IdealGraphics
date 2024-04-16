@@ -48,8 +48,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg = {};
 
     //Engine2 engine(g_hWnd,1280,960);
-    IdealRenderer engine(g_hWnd, 1280, 960);
-    engine.Init();
+    std::shared_ptr<IdealRenderer> renderer = std::make_shared<IdealRenderer>(g_hWnd, 1280, 960);
+    //IdealRenderer engine(g_hWnd, 1280, 960);
+    //engine.Init();
+    renderer->Init();
 
 	while (msg.message != WM_QUIT)
 	{
@@ -61,8 +63,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		else
 		{
 			// MAIN LOOP
-			engine.Tick();
-			engine.Render();
+            renderer->Tick();
+            renderer->Render();
 		}
 	}
 

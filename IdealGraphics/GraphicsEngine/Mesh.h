@@ -5,11 +5,13 @@
 #include "RenderTest/VertexInfo.h"
 
 class IdealRenderer;
+class AssimpLoader;
 
 namespace Ideal
 {
 	class Mesh
 	{
+		friend class AssimpLoader;
 	public:
 		Mesh();
 		virtual ~Mesh();
@@ -27,5 +29,7 @@ namespace Ideal
 	private:
 		std::vector<Vertex> m_vertices;
 		std::vector<uint32> m_indices;
+
+		std::wstring m_diffuseMap;
 	};
 }

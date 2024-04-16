@@ -132,7 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\ForDebug.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineStateCache.h">
+    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineState.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -144,7 +144,8 @@
     <ClInclude Include="Misc\Utils\PIX.h" />
     <ClInclude Include="GraphicsEngine\Model.h" />
     <ClInclude Include="Misc\AssimpLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Defines.h" />
@@ -163,7 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineStateCache.cpp">
+    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineState.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -174,7 +175,8 @@
     <ClCompile Include="GraphicsEngine\Model.cpp" />
     <ClCompile Include="GraphicsEngine\Mesh.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Misc\ASEParser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -3,6 +3,8 @@
 #include <DirectXColors.h>
 #include "Misc/Utils/PIX.h"
 
+#include "GraphicsEngine/Mesh.h"
+#include "Misc/AssimpLoader.h"
 
 IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
@@ -218,7 +220,9 @@ void IdealRenderer::Tick()
 void IdealRenderer::Render()
 {
 	//PopulateCommandList();
+	BeginRender();
 	PopulateCommandList2();
+	EndRender();
 
 	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
 	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -277,6 +281,9 @@ void IdealRenderer::LoadAsset2()
 	}
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
+
+	CreateMeshObject("Resources/Test/window.fbx");
+
 	//Check(m_commandList->Close());
 
 	{
@@ -425,17 +432,33 @@ void IdealRenderer::ExecuteCommandList()
 	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
 }
 
-Microsoft::WRL::ComPtr<ID3D12Device> IdealRenderer::GetDevice()
+void IdealRenderer::CreateMeshObject(const std::string Path)
 {
-	return m_device;
+	//std::vector<Vertex> vertices;
+	//std::vector<uint32> indices;
+	
+	std::vector<std::shared_ptr<Ideal::Mesh>> meshes;
+
+	AssimpLoader assimpLoader;
+
+	ImportSettings3 setting = { Path, meshes };
+	
+	assimpLoader.Load(setting);
+
+	for (auto& mesh : meshes)
+	{
+		//IdealRenderer* renderer = shared_from_this().get();
+		mesh->Create(shared_from_this());
+		m_objects.push_back(mesh);
+	}
+
+	//std::shared_ptr<Ideal::Mesh> mesh = std::make_shared<Ideal::Mesh>();
+	//mesh->Create(shared_from_this());
+	
+	//m_objects.push_back()
 }
 
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> IdealRenderer::GetCommandList()
-{
-	return m_commandList;
-}
-
-void IdealRenderer::PopulateCommandList2()
+void IdealRenderer::BeginRender()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
 
@@ -461,7 +484,34 @@ void IdealRenderer::PopulateCommandList2()
 	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
 	// 2024.04.14 Clear DSV
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+}
 
+void IdealRenderer::EndRender()
+{
+
+	CD3DX12_RESOURCE_BARRIER backBufferPresent = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_renderTargets[m_frameIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	m_commandList->ResourceBarrier(1, &backBufferPresent);
+	Check(m_commandList->Close());
+}
+
+Microsoft::WRL::ComPtr<ID3D12Device> IdealRenderer::GetDevice()
+{
+	return m_device;
+}
+
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> IdealRenderer::GetCommandList()
+{
+	return m_commandList;
+}
+
+void IdealRenderer::PopulateCommandList2()
+{
+	
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	auto vbView = m_idealVertexBuffer.GetView();
 	m_commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -474,14 +524,6 @@ void IdealRenderer::PopulateCommandList2()
 
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 
-	CD3DX12_RESOURCE_BARRIER backBufferPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_renderTargets[m_frameIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
-
-	m_commandList->ResourceBarrier(1, &backBufferPresent);
-	Check(m_commandList->Close());
 }
 
 void IdealRenderer::WaitForGPU()

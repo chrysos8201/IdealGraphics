@@ -64,33 +64,12 @@
     <ClInclude Include="Core\Types.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\EngineTest.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\TestGraphics.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Engine.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
-    <ClInclude Include="RenderTest\ModelTest.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTest\D3D12ResourceTest.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTest\MeshTest.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
     <ClInclude Include="RenderTest\VertexInfo.h">
       <Filter>RenderTest</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Engine2.h">
-      <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h">
       <Filter>Misc\Thirdparty</Filter>
@@ -101,11 +80,7 @@
     <ClInclude Include="Misc\ASEParser.h">
       <Filter>Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Engine3.h" />
     <ClInclude Include="Misc\Utils\PIX.h" />
-    <ClInclude Include="RenderTest\GraphicsEngine.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\IdealRenderer.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
@@ -117,10 +92,14 @@
     <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h">
       <Filter>GraphicsEngine\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Model.h" />
-    <ClInclude Include="GraphicsEngine\Mesh.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineStateCache.h">
+    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineState.h">
       <Filter>GraphicsEngine\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Model.h">
+      <Filter>GraphicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Mesh.h">
+      <Filter>GraphicsEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -140,40 +119,15 @@
     <ClCompile Include="Launch\LaunchWindow.cpp">
       <Filter>Launch</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\EngineTest.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\TestGraphics.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Engine.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
-    <ClCompile Include="RenderTest\ModelTest.cpp">
-      <Filter>RenderTest</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTest\D3D12ResourceTest.cpp">
-      <Filter>RenderTest</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTest\MeshTest.cpp">
-      <Filter>RenderTest</Filter>
-    </ClCompile>
     <ClCompile Include="RenderTest\VertexInfo.cpp">
       <Filter>RenderTest</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Engine2.cpp">
-      <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Misc\AssimpLoader.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
     <ClCompile Include="Misc\ASEParser.cpp">
       <Filter>Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Engine3.cpp" />
-    <ClCompile Include="RenderTest\GraphicsEngine.cpp">
-      <Filter>RenderTest</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\IdealRenderer.cpp">
       <Filter>GraphicsEngine</Filter>
@@ -186,10 +140,14 @@
       <Filter>GraphicsEngine\Resources</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\Model.cpp" />
-    <ClCompile Include="GraphicsEngine\Mesh.cpp" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineStateCache.cpp">
+    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineState.cpp">
       <Filter>GraphicsEngine\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Model.cpp">
+      <Filter>GraphicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Mesh.cpp">
+      <Filter>GraphicsEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

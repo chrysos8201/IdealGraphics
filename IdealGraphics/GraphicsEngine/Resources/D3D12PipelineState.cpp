@@ -117,7 +117,9 @@ void D3D12PipelineState::Create(ID3D12Device* Device, ID3D12RootSignature* RootS
 					psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
 					psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-					psoDesc.DepthStencilState.DepthEnable = FALSE;
+					psoDesc.DepthStencilState.DepthEnable = TRUE;
+					psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+					psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 					psoDesc.DepthStencilState.StencilEnable = FALSE;
 
 

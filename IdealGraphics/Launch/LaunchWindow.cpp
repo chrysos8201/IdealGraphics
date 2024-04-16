@@ -69,6 +69,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 renderer->Render();
             }
         }
+        renderer->Release();
     }
 #ifdef _DEBUG
     _ASSERT(_CrtCheckMemory());

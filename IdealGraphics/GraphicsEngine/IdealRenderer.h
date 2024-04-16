@@ -26,6 +26,7 @@ public:
 	void Init();
 	void Tick();
 	void Render();
+	void Release();
 	void MoveToNextFrame();
 
 	// 다시 수정 버전

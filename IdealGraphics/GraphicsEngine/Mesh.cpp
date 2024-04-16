@@ -80,8 +80,9 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 		m_constantBuffer.Create(m_renderer->GetDevice().Get(), bufferSize, IdealRenderer::FRAME_BUFFER_COUNT);
 	}
 
+	//--------------Test---------------//
 	m_transform.World = Matrix::Identity;
-	m_transform.World = Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
+	m_transform.World = Matrix::CreateRotationY(DirectX::XMConvertToRadians(37.5f)) * Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
 
 	m_transform.WorldInvTranspose = m_transform.World.Invert().Transpose();//
 	m_transform.View = m_renderer->GetView();// .Transpose();
@@ -190,8 +191,10 @@ void Ideal::Mesh::InitPipelineState()
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	psoDesc.DepthStencilState.DepthEnable = FALSE;
+	psoDesc.DepthStencilState.DepthEnable = TRUE;
 	psoDesc.DepthStencilState.StencilEnable = FALSE;
+	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 
 	psoDesc.SampleMask = UINT_MAX;

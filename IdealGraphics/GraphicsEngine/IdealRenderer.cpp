@@ -18,12 +18,9 @@ IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 
 IdealRenderer::~IdealRenderer()
 {
+	int a = 3;
 	//uint32 ref_count = m_device->Release();
-	for (auto obj : m_objects)
-	{
-		obj.reset();
-	}
-	m_objects.clear();
+
 }
 
 void IdealRenderer::Init()
@@ -244,6 +241,16 @@ void IdealRenderer::Render()
 
 	Check(m_swapChain->Present(1, 0));
 	MoveToNextFrame();
+}
+
+void IdealRenderer::Release()
+{
+	for (auto obj : m_objects)
+	{
+		obj.reset();
+		obj = nullptr;
+	}
+	m_objects.clear();
 }
 
 void IdealRenderer::MoveToNextFrame()

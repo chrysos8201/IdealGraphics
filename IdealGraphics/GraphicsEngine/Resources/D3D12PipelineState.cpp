@@ -31,6 +31,7 @@ const ShaderData D3D12PipelineState::PipelineStateVSData[EPipelineStateVSCount] 
 		"main",
 		"vs_5_0"
 	},
+	
 };
 
 const ShaderData D3D12PipelineState::PipelineStatePSData[EPipelineStatePSCount] =
@@ -44,7 +45,7 @@ const ShaderData D3D12PipelineState::PipelineStatePSData[EPipelineStatePSCount] 
 		L"Shaders/SimplePixelShader2.hlsl",
 		"main",
 		"ps_5_0"
-	}
+	},
 };
 
 const D3D12_FILL_MODE D3D12PipelineState::PipelineStateRS[EPipelineStateRSCount] =

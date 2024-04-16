@@ -15,6 +15,7 @@ namespace Ideal
 
 class IdealRenderer : public std::enable_shared_from_this<IdealRenderer>
 {
+public:
 	enum { FRAME_BUFFER_COUNT = 2 };
 
 public:
@@ -42,7 +43,14 @@ public:
 	ComPtr<ID3D12Device> GetDevice();
 	// 일단 cmd list는 하나만 쓴다.
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList();
+	//Ideal::D3D12PipelineState
+	uint32 GetFrameIndex() const;
 
+	std::shared_ptr<Ideal::D3D12PipelineState> GetPipelineStates();
+
+	Matrix GetView() { return m_view; }
+	Matrix GetProj() { return m_proj; }
+	Matrix GetViewProj() { return m_viewProj; }
 private:
 	uint32 m_width;
 	uint32 m_height;
@@ -85,7 +93,8 @@ private:
 	// 임시용 wvp
 	Matrix m_world;
 	Matrix m_viewProj;
-
+	Matrix m_view;
+	Matrix m_proj;
 private:
 	//
 	Ideal::D3D12Viewport m_viewport;
@@ -98,7 +107,7 @@ private:
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
 
 	// 2024.04.15 : pso
-	Ideal::D3D12PipelineState m_pipelineStateCache;
+	std::shared_ptr<Ideal::D3D12PipelineState> m_idealPipelineState;
 	ComPtr<ID3D12PipelineState> m_currentPipelineState;
 
 	

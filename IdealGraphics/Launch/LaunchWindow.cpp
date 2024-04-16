@@ -48,26 +48,28 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg = {};
 
     //Engine2 engine(g_hWnd,1280,960);
-    std::shared_ptr<IdealRenderer> renderer = std::make_shared<IdealRenderer>(g_hWnd, 1280, 960);
-    //IdealRenderer engine(g_hWnd, 1280, 960);
-    //engine.Init();
-    renderer->Init();
+    //_CrtSetBreakAlloc(5419);
+    {
+        std::shared_ptr<IdealRenderer> renderer = std::make_shared<IdealRenderer>(g_hWnd, 1280, 960);
+        //IdealRenderer engine(g_hWnd, 1280, 960);
+        //engine.Init();
+        renderer->Init();
 
-	while (msg.message != WM_QUIT)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			// MAIN LOOP
-            renderer->Tick();
-            renderer->Render();
-		}
-	}
-
+        while (msg.message != WM_QUIT)
+        {
+            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            else
+            {
+                // MAIN LOOP
+                renderer->Tick();
+                renderer->Render();
+            }
+        }
+    }
 #ifdef _DEBUG
     _ASSERT(_CrtCheckMemory());
 #endif

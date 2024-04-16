@@ -13,11 +13,17 @@ IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	m_viewport(hwnd, width, height)
 {
 	m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	m_idealPipelineState = std::make_shared<Ideal::D3D12PipelineState>();
 }
 
 IdealRenderer::~IdealRenderer()
 {
 	//uint32 ref_count = m_device->Release();
+	for (auto obj : m_objects)
+	{
+		obj.reset();
+	}
+	m_objects.clear();
 }
 
 void IdealRenderer::Init()
@@ -57,6 +63,8 @@ void IdealRenderer::Init()
 		Matrix world = Matrix::Identity;
 		Matrix view = Matrix::CreateLookAt(eyePos, targetPos, upward);
 		Matrix proj = Matrix::CreatePerspectiveFieldOfView(fov, aspect, 0.3f, 1000.f);
+		m_view = view;
+		m_proj = proj;
 		m_viewProj = view * proj;
 	}
 
@@ -191,7 +199,7 @@ void IdealRenderer::Tick()
 
 	if (GetAsyncKeyState('Q') & 0x8000)
 	{
-		ComPtr<ID3D12PipelineState> getPipeline = m_pipelineStateCache.GetPipelineState(
+		ComPtr<ID3D12PipelineState> getPipeline = m_idealPipelineState->GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
 			Ideal::EPipelineStatePS::ESimplePixelShaderPS2,
@@ -204,7 +212,7 @@ void IdealRenderer::Tick()
 	}
 	if (GetAsyncKeyState('E') & 0x8000)
 	{
-		ComPtr<ID3D12PipelineState> getPipeline = m_pipelineStateCache.GetPipelineState(
+		ComPtr<ID3D12PipelineState> getPipeline = m_idealPipelineState->GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
 			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
@@ -215,6 +223,13 @@ void IdealRenderer::Tick()
 			m_currentPipelineState = getPipeline;
 		}
 	}
+
+
+	for (auto obj : m_objects)
+	{
+		obj->Tick();
+	}
+
 }
 
 void IdealRenderer::Render()
@@ -270,9 +285,9 @@ void IdealRenderer::LoadAsset2()
 
 	// 2024.04.15 : pso를 미리 만들어두고 사용하겠다!
 	{
-		m_pipelineStateCache.Create(m_device.Get(), m_rootSignature.Get());
+		m_idealPipelineState->Create(m_device.Get(), m_rootSignature.Get());
 
-		m_currentPipelineState = m_pipelineStateCache.GetPipelineState(
+		m_currentPipelineState = m_idealPipelineState->GetPipelineState(
 			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
 			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
 			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
@@ -282,7 +297,8 @@ void IdealRenderer::LoadAsset2()
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
 
-	CreateMeshObject("Resources/Test/window.fbx");
+	//CreateMeshObject("Resources/Test/window.fbx");
+	CreateMeshObject("Assets/JaneD/JaneD.fbx");
 
 	//Check(m_commandList->Close());
 
@@ -350,7 +366,7 @@ void IdealRenderer::LoadAsset2()
 
 			2, 1, 6,
 			5, 6, 1,
-
+			
 			1, 0, 5,
 			4, 5, 0,
 
@@ -437,21 +453,20 @@ void IdealRenderer::CreateMeshObject(const std::string Path)
 	//std::vector<Vertex> vertices;
 	//std::vector<uint32> indices;
 	
-	std::vector<std::shared_ptr<Ideal::Mesh>> meshes;
+	//std::vector<std::shared_ptr<Ideal::Mesh>> meshes;
 
 	AssimpLoader assimpLoader;
 
-	ImportSettings3 setting = { Path, meshes };
+	ImportSettings3 setting = { Path, m_objects };
 	
 	assimpLoader.Load(setting);
 
-	for (auto& mesh : meshes)
+	for (auto& mesh : m_objects)
 	{
 		//IdealRenderer* renderer = shared_from_this().get();
 		mesh->Create(shared_from_this());
-		m_objects.push_back(mesh);
+		//m_objects.push_back(mesh);
 	}
-
 	//std::shared_ptr<Ideal::Mesh> mesh = std::make_shared<Ideal::Mesh>();
 	//mesh->Create(shared_from_this());
 	
@@ -464,7 +479,6 @@ void IdealRenderer::BeginRender()
 
 	// 2024.04.15 pipeline state를 m_currentPipelineState에 있는 것으로 세팅한다.
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
-	m_commandList->SetPipelineState(m_currentPipelineState.Get());
 
 	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
 	m_commandList->RSSetScissorRects(1, &m_viewport.GetScissorRect());
@@ -509,9 +523,21 @@ Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> IdealRenderer::GetCommandList(
 	return m_commandList;
 }
 
+uint32 IdealRenderer::GetFrameIndex() const
+{
+	return m_frameIndex;
+}
+
+std::shared_ptr<Ideal::D3D12PipelineState> IdealRenderer::GetPipelineStates()
+{
+	return m_idealPipelineState;
+}
+
 void IdealRenderer::PopulateCommandList2()
 {
 	
+	m_commandList->SetPipelineState(m_currentPipelineState.Get());
+
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	auto vbView = m_idealVertexBuffer.GetView();
 	m_commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -523,7 +549,10 @@ void IdealRenderer::PopulateCommandList2()
 	m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
 
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
-
+	for (auto obj : m_objects)
+	{
+		obj->Render(m_commandList.Get());
+	}
 }
 
 void IdealRenderer::WaitForGPU()

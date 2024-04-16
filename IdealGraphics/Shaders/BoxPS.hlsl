@@ -1,4 +1,12 @@
-#include "Common.hlsli"
+//#include "Common.hlsli"
+
+struct VSOutput
+{
+    float4 PosH : SV_POSITION;
+    float3 PosW : POSITION;
+    float3 NormalW : NORMAL;
+    float2 UV : TEXCOORD;
+};
 
 float4 PS(VSOutput input) : SV_TARGET
 {

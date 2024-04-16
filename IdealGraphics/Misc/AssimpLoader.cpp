@@ -48,6 +48,7 @@ bool AssimpLoader::Load(ImportSettings3 settings)
 		LoadTexture(settings.filename, newMesh, material);
 
 		meshes.push_back(newMesh);
+		//newMesh.reset();
 	}
 
 	scene = nullptr;

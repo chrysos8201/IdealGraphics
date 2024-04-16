@@ -7,6 +7,7 @@ struct alignas(256) Transform	// 사이즈를 맞추었다?
 	Matrix World;
 	Matrix View;
 	Matrix Proj;
+	Matrix WorldInvTranspose;
 };
 
 struct VertexTest

@@ -20,13 +20,15 @@ bool AssimpLoader::Load(ImportSettings3 settings)
 	Assimp::Importer importer;
 	int32 flag = 0;
 	flag |= aiProcess_Triangulate;
+	flag |= aiProcess_ConvertToLeftHanded;
+	//flag |= aiProcess_FixInfacingNormals;
 	flag |= aiProcess_PreTransformVertices;
 	flag |= aiProcess_CalcTangentSpace;
 	flag |= aiProcess_GenSmoothNormals;
 	flag |= aiProcess_GenUVCoords;
 	flag |= aiProcess_RemoveRedundantMaterials;
 	flag |= aiProcess_OptimizeMeshes;
-
+	// https://hns17.tistory.com/entry/DirectX11-%EB%AA%A8%EB%8D%B8-%EB%B7%B0%EC%96%B4
 	auto scene = importer.ReadFile(settings.filename, flag);
 
 	if (scene == nullptr)

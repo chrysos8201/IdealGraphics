@@ -313,15 +313,15 @@ void IdealRenderer::LoadAsset2()
 		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
 
 		const VertexTest cubeVertices[] = {
-			{ { -1.0f, 1.0f, -1.0f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
-			{ { 1.0f, 1.0f, -1.0f},		{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
-			{ { 1.0f, 1.0f, 1.0f},		{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
-			{ { -1.0f, 1.0f, 1.0f},		{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
+			{ { -0.5f, 0.5f, -0.5f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
+			{ {  0.5f, 0.5f, -0.5f},	{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
+			{ {  0.5f, 0.5f,  0.5f},	{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
+			{ { -0.5f, 0.5f,  0.5f},	{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
 
-			{ { -1.0f, -1.0f, -1.0f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
-			{ { 1.0f, -1.0f, -1.0f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
-			{ { 1.0f, -1.0f, 1.0f},		{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
-			{ { -1.0f, -1.0f, 1.0f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
+			{ { -0.5f, -0.5f,-0.5f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
+			{ {  0.5f, -0.5f,-0.5f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
+			{ {  0.5f, -0.5f, 0.5f},	{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
+			{ { -0.5f, -0.5f, 0.5f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
 		};
 		const uint32 vertexBufferSize = sizeof(cubeVertices);
 
@@ -502,7 +502,7 @@ void IdealRenderer::BeginRender()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::Violet, 0, nullptr);
+	m_commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::DimGray, 0, nullptr);
 	// 2024.04.14 Clear DSV
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
@@ -542,7 +542,10 @@ std::shared_ptr<Ideal::D3D12PipelineState> IdealRenderer::GetPipelineStates()
 
 void IdealRenderer::PopulateCommandList2()
 {
-	
+	for (auto obj : m_objects)
+	{
+		obj->Render(m_commandList.Get());
+	}
 	m_commandList->SetPipelineState(m_currentPipelineState.Get());
 
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -556,10 +559,7 @@ void IdealRenderer::PopulateCommandList2()
 	m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
 
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
-	for (auto obj : m_objects)
-	{
-		obj->Render(m_commandList.Get());
-	}
+	
 }
 
 void IdealRenderer::WaitForGPU()

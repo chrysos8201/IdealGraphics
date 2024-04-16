@@ -94,8 +94,15 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 
 void Ideal::Mesh::Tick()
 {
+	static float rot = 0.f;
+	rot += 0.2f;
+	m_transform.World = Matrix::Identity;
+	m_transform.World = Matrix::CreateRotationY(DirectX::XMConvertToRadians(rot)) * Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
+
 	Transform* t = (Transform*)m_constantBuffer.GetMappedMemory(m_renderer->GetFrameIndex());
 	*t = m_transform;
+
+
 }
 
 void Ideal::Mesh::Render(ID3D12GraphicsCommandList* CommandList)
@@ -183,7 +190,7 @@ void Ideal::Mesh::InitPipelineState()
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	//psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
 
 	// Set RasterizerState
 	//psoDesc.RasterizerState.FillMode = ;
@@ -191,11 +198,12 @@ void Ideal::Mesh::InitPipelineState()
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	psoDesc.DepthStencilState.DepthEnable = TRUE;
-	psoDesc.DepthStencilState.StencilEnable = FALSE;
-	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	//psoDesc.DepthStencilState.DepthEnable = TRUE;
+	//psoDesc.DepthStencilState.StencilEnable = FALSE;
+	//psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	//psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

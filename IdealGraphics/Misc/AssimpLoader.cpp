@@ -5,29 +5,48 @@
 #include "assimp/types.h"
 #include "assimp/mesh.h"
 #include "GraphicsEngine/Resources/D3D12ThirdParty.h"
-#include "RenderTest/VertexInfo.h"
+#include "GraphicsEngine/VertexInfo.h"
 //#include "RenderTest/MeshTest.h"
 //#include "RenderTest/ModelTest.h"
+
+#include "Misc/Assimp/AssimpConverter.h"
 
 #include <filesystem>
 
 bool AssimpLoader::Load(ImportSettings3 settings)
 {
+
+	// Test //
+
+	std::shared_ptr<AssimpConverter> converter = std::make_shared<AssimpConverter>();
+	converter->ReadAssetFile(L"Tower/Tower.fbx");
+	converter->ExportMaterialData(L"Tower/Tower");
+	converter->ExportModelData(L"Tower/Tower");
+	//converter->ReadAssetFile(L"TEST/Window.fbx");
+	//converter->ExportMaterialData(L"Window/Window");
+	//////////
+
+
+
+
+
+
 	auto& meshes = settings.meshes;
 	bool inverseU = settings.inverseU;
 	bool inverseV = settings.inverseV;
 
 	Assimp::Importer importer;
 	int32 flag = 0;
-	flag |= aiProcess_Triangulate;
 	flag |= aiProcess_ConvertToLeftHanded;
+	flag |= aiProcess_Triangulate;
+	flag |= aiProcess_GenUVCoords;
+	flag |= aiProcess_GenNormals;
+	flag |= aiProcess_CalcTangentSpace;
+	flag |= aiProcess_OptimizeMeshes;
 	//flag |= aiProcess_FixInfacingNormals;
 	flag |= aiProcess_PreTransformVertices;
-	flag |= aiProcess_CalcTangentSpace;
-	flag |= aiProcess_GenSmoothNormals;
-	flag |= aiProcess_GenUVCoords;
-	flag |= aiProcess_RemoveRedundantMaterials;
-	flag |= aiProcess_OptimizeMeshes;
+	//flag |= aiProcess_GenSmoothNormals;
+	//flag |= aiProcess_RemoveRedundantMaterials;
 	// https://hns17.tistory.com/entry/DirectX11-%EB%AA%A8%EB%8D%B8-%EB%B7%B0%EC%96%B4
 	auto scene = importer.ReadFile(settings.filename, flag);
 
@@ -82,7 +101,7 @@ void AssimpLoader::LoadMesh(std::shared_ptr<Ideal::Mesh> mesh, const aiMesh* src
 			uv->y = 1 - uv->y;
 		}
 
-		Vertex vertex = {};
+		BasicVertex vertex = {};
 		vertex.Position = Vector3(position->x, position->y, position->z);
 		vertex.Normal = Vector3(normal->x, normal->y, normal->z);
 		vertex.UV = Vector2(uv->x, uv->y);
@@ -181,7 +200,7 @@ void AssimpLoader::LoadTexture(const std::string& filename, std::shared_ptr<Idea
 	aiString path;
 	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
 	{
-
+		//dst->m_diffuseMap =
 	}
 	else
 	{

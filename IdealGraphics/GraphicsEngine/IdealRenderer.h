@@ -5,7 +5,7 @@
 #include "GraphicsEngine/Resources/D3D12Viewport.h"
 #include "GraphicsEngine/Resources/D3D12Resource.h"
 #include "GraphicsEngine/Resources/D3D12PipelineState.h"
-#include "RenderTest/VertexInfo.h"
+#include "GraphicsEngine/VertexInfo.h"
 //#include "GraphicsEngine/Mesh.h"
 
 namespace Ideal

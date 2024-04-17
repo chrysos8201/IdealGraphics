@@ -1,5 +1,5 @@
 #include "IdealRenderer.h"
-#include "RenderTest/VertexInfo.h"
+#include "GraphicsEngine/VertexInfo.h"
 #include <DirectXColors.h>
 #include "Misc/Utils/PIX.h"
 
@@ -305,7 +305,7 @@ void IdealRenderer::LoadAsset2()
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
 
 	//CreateMeshObject("Resources/Test/window.fbx");
-	CreateMeshObject("Assets/JaneD/JaneD.fbx");
+	CreateMeshObject("Resources/Assets/JaneD/JaneD.fbx");
 
 	//Check(m_commandList->Close());
 

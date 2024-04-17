@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugConsole|Win32">
+      <Configuration>DebugConsole</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugConsole|x64">
+      <Configuration>DebugConsole</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -51,6 +59,12 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='DebugConsole|Win32'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -131,6 +145,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Misc\Utils\FileUtils.h" />
+    <ClInclude Include="GraphicsEngine\Bone.h" />
+    <ClInclude Include="GraphicsEngine\Material.h" />
+    <ClInclude Include="Misc\Assimp\AssimpConverter.h" />
     <ClInclude Include="Core\ForDebug.h" />
     <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineState.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -157,12 +175,17 @@
     <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Launch\LaunchWindow.h" />
+    <ClInclude Include="Misc\Utils\tinyxml2.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="RenderTest\VertexInfo.h" />
+    <ClInclude Include="GraphicsEngine\VertexInfo.h" />
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Misc\Utils\FileUtils.cpp" />
+    <ClCompile Include="GraphicsEngine\Bone.cpp" />
+    <ClCompile Include="GraphicsEngine\Material.cpp" />
+    <ClCompile Include="Misc\Assimp\AssimpConverter.cpp" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
     <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineState.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -183,7 +206,8 @@
     </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
     <ClCompile Include="Launch\LaunchWindow.cpp" />
-    <ClCompile Include="RenderTest\VertexInfo.cpp" />
+    <ClCompile Include="GraphicsEngine\VertexInfo.cpp" />
+    <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc" />

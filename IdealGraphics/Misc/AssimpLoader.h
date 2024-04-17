@@ -1,8 +1,11 @@
 #pragma once
 #include "Core/Core.h"
 #include "GraphicsEngine/Mesh.h"
+
+//#pragma comment(lib, "ThirdParty/Libraries/ForDebug/assimpTool/Assimp.lib")
+
 struct Mesh;
-struct Vertex;
+struct BasicVertex;
 
 struct aiMesh;
 struct aiMaterial;

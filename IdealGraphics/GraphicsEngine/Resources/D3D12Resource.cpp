@@ -197,14 +197,18 @@ D3D12_INDEX_BUFFER_VIEW D3D12IndexBuffer::GetView() const
 D3D12ConstantBuffer::D3D12ConstantBuffer()
 	: m_bufferSize(0),
 	m_perFrameBufferSize(0),
-	m_mappedConstantBuffer(nullptr)
+	m_mappedConstantBuffer(nullptr),
+	m_isMapped(false)
 {
 
 }
 
 D3D12ConstantBuffer::~D3D12ConstantBuffer()
 {
-	m_resource->Unmap(0, nullptr);
+	if (m_isMapped)
+	{
+		m_resource->Unmap(0, nullptr);
+	}
 }
 
 void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize, uint32 FrameCount)
@@ -229,6 +233,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 
 	CD3DX12_RANGE readRange(0, 0);
 	Check(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedConstantBuffer)));
+	m_isMapped = true;
 }
 
 D3D12_GPU_VIRTUAL_ADDRESS D3D12ConstantBuffer::GetGPUVirtualAddress(uint32 FrameIndex)

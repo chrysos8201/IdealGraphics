@@ -41,6 +41,9 @@
     <Filter Include="GraphicsEngine\Resources">
       <UniqueIdentifier>{2a38037a-4dae-4186-9dee-e51d8069894d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Misc\Assimp">
+      <UniqueIdentifier>{c5991eed-9658-4fe4-9326-525aeeede696}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Launch\LaunchWindow.h">
@@ -68,9 +71,6 @@
       <Filter>RenderTest</Filter>
     </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
-    <ClInclude Include="RenderTest\VertexInfo.h">
-      <Filter>RenderTest</Filter>
-    </ClInclude>
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h">
       <Filter>Misc\Thirdparty</Filter>
     </ClInclude>
@@ -101,6 +101,18 @@
     <ClInclude Include="GraphicsEngine\Mesh.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
+    <ClInclude Include="Misc\Assimp\AssimpConverter.h">
+      <Filter>Misc\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\VertexInfo.h">
+      <Filter>GraphicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Material.h" />
+    <ClInclude Include="Misc\Utils\tinyxml2.h" />
+    <ClInclude Include="GraphicsEngine\Bone.h">
+      <Filter>GraphicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\Utils\FileUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -120,9 +132,6 @@
       <Filter>Launch</Filter>
     </ClCompile>
     <ClCompile Include="Engine\IEngine.cpp" />
-    <ClCompile Include="RenderTest\VertexInfo.cpp">
-      <Filter>RenderTest</Filter>
-    </ClCompile>
     <ClCompile Include="Misc\AssimpLoader.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
@@ -149,6 +158,18 @@
     <ClCompile Include="GraphicsEngine\Mesh.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Misc\Assimp\AssimpConverter.cpp">
+      <Filter>Misc\Assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\VertexInfo.cpp">
+      <Filter>GraphicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Material.cpp" />
+    <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
+    <ClCompile Include="GraphicsEngine\Bone.cpp">
+      <Filter>GraphicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\Utils\FileUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

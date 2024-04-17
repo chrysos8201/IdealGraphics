@@ -18,5 +18,7 @@
 #include <algorithm>
 
 #include "Misc/ThirdParty/Thirdparty.h"
+
+#include <cassert>
 //#include <wrl.h>
 //using namespace Microsoft::WRL;

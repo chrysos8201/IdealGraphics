@@ -21,7 +21,7 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 
 	//--------------VB---------------//
 	{
-		const uint32 vertexBufferSize = m_vertices.size() * sizeof(Vertex);
+		const uint32 vertexBufferSize = m_vertices.size() * sizeof(BasicVertex);
 
 		Ideal::D3D12UploadBuffer uploadBuffer;
 		uploadBuffer.Create(Renderer->GetDevice().Get(), vertexBufferSize);
@@ -31,7 +31,7 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 			memcpy(mappedUploadHeap, m_vertices.data(), vertexBufferSize);
 			uploadBuffer.UnMap();
 		}
-		const uint32 elementSize = sizeof(Vertex);
+		const uint32 elementSize = sizeof(BasicVertex);
 		const uint32 elementCount = m_vertices.size();
 
 		m_vertexBuffer.Create(
@@ -190,8 +190,8 @@ void Ideal::Mesh::InitPipelineState()
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
-
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+	psoDesc.RasterizerState.FrontCounterClockwise = TRUE;
 	// Set RasterizerState
 	//psoDesc.RasterizerState.FillMode = ;
 

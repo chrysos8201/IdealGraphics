@@ -124,5 +124,7 @@ namespace Ideal
 
 		// 버퍼를 할당받은 영역의 첫 주소를 가리킨다.
 		void* m_mappedConstantBuffer;
+
+		bool m_isMapped;
 	};
 }

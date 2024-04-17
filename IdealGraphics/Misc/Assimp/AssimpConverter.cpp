@@ -5,6 +5,7 @@
 #include "GraphicsEngine/Bone.h"
 
 #include "Misc/Utils/tinyxml2.h"
+#include "Misc/Utils/FileUtils.h"
 
 #include <filesystem>
 
@@ -81,7 +82,7 @@ void AssimpConverter::ReadAssetFile(const std::wstring& file)
 
 void AssimpConverter::ExportModelData(std::wstring savePath)
 {
-	std::wstring finalPath = savePath + L".mesh";
+	std::wstring finalPath = m_modelPath + savePath + L".mesh";
 	ReadModelData(m_scene->mRootNode, -1, -1);
 	WriteModelFile(finalPath);
 }
@@ -103,7 +104,14 @@ std::string AssimpConverter::WriteTexture(std::string SaveFolder, std::string Fi
 	// 텍스쳐가 내장되어있을 경우
 	if (srcTexture)
 	{
-		//int a = 3;
+		std::string pathStr = SaveFolder + fileName;
+
+		if (srcTexture->mHeight == 0)
+		{
+			std::shared_ptr<FileUtils> file = std::make_shared<FileUtils>();
+			file->Open(ConvertStringToWString(pathStr), FileMode::Write);
+			file->Write(srcTexture->pcData, srcTexture->mWidth);
+		}
 	}
 	// 텍스쳐가 따로 있을 경우
 	else
@@ -193,7 +201,38 @@ void AssimpConverter::WriteMaterialData(std::wstring FilePath)
 
 void AssimpConverter::WriteModelFile(const std::wstring& filePath)
 {
+	auto path = std::filesystem::path(filePath);
 
+	std::filesystem::create_directory(path.parent_path());
+
+	std::shared_ptr<FileUtils> file = std::make_shared<FileUtils>();
+	file->Open(filePath, FileMode::Write);
+
+	// Bone Data
+	file->Write<uint32>(m_bones.size());
+	for(auto& bone : m_bones)
+	{
+		file->Write<int32>(bone->index);
+		file->Write<std::string>(bone->name);
+		file->Write<int32>(bone->parent);
+		file->Write<Matrix>(bone->transform);
+	}
+	file->Write<uint32>(m_meshes.size());
+	for (auto& mesh : m_meshes)
+	{
+		file->Write<std::string>(mesh->m_name);
+		file->Write<int32>(mesh->m_boneIndex);
+		file->Write<std::string>(mesh->m_materialName);
+
+		// vertex
+		file->Write<uint32>(mesh->m_vertices.size());
+		file->Write(&mesh->m_vertices[0], sizeof(BasicVertex)* mesh->m_vertices.size());
+
+		// index
+		file->Write<uint32>(mesh->m_indices.size());
+		file->Write(&mesh->m_indices[0], sizeof(uint32) * mesh->m_indices.size());
+
+	}
 }
 
 void AssimpConverter::ReadModelData(aiNode* node, int32 index, int32 parent)

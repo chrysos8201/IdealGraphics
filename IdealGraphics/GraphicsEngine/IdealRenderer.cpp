@@ -306,6 +306,7 @@ void IdealRenderer::LoadAsset2()
 
 	//CreateMeshObject("Resources/Test/window.fbx");
 	CreateMeshObject("Resources/Assets/JaneD/JaneD.fbx");
+	CreateMeshObject("Resources/Assets/porsche/Porsche_918_Spyder.fbx");
 
 	//Check(m_commandList->Close());
 
@@ -546,6 +547,7 @@ void IdealRenderer::PopulateCommandList2()
 	{
 		obj->Render(m_commandList.Get());
 	}
+	return;
 	m_commandList->SetPipelineState(m_currentPipelineState.Get());
 
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

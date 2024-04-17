@@ -19,9 +19,9 @@ bool AssimpLoader::Load(ImportSettings3 settings)
 	// Test //
 
 	std::shared_ptr<AssimpConverter> converter = std::make_shared<AssimpConverter>();
-	converter->ReadAssetFile(L"Tower/Tower.fbx");
-	converter->ExportMaterialData(L"Tower/Tower");
-	converter->ExportModelData(L"Tower/Tower");
+	converter->ReadAssetFile(L"porsche/Porsche_918_Spyder.fbx");
+	converter->ExportMaterialData(L"porsche/porsche");
+	converter->ExportModelData(L"porsche/porsche");
 	//converter->ReadAssetFile(L"TEST/Window.fbx");
 	//converter->ExportMaterialData(L"Window/Window");
 	//////////

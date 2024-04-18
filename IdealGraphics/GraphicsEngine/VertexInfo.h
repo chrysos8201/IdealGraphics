@@ -16,6 +16,12 @@ struct VertexTest
 	Vector4 Color;
 };
 
+struct VertexTest2
+{
+	Vector3 Position;
+	Vector2 UV;
+};
+
 struct BasicVertex
 {
 	Vector3 Position;

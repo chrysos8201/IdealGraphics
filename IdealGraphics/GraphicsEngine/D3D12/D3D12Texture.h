@@ -1,10 +1,14 @@
 #pragma once
 #include "Core/Core.h"
 #include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
+#include "GraphicsEngine/D3D12/D3D12Resource.h"
 
-class D3D12Texture
+namespace Ideal
 {
-public:
+	class D3D12Texture : public D3D12Resource
+	{
+	public:
 
-};
+	};
+}
 

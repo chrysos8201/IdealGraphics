@@ -209,19 +209,19 @@ void Ideal::Model::Create(std::shared_ptr<IdealRenderer> Renderer)
 	}
 }
 
-void Ideal::Model::Tick()
+void Ideal::Model::Tick(uint32 FrameIndex)
 {
 	for (auto m : m_meshes)
 	{
-		m->Tick();
+		m->Tick(FrameIndex);
 	}
 }
 
-void Ideal::Model::Render(ID3D12GraphicsCommandList* CommandList)
+void Ideal::Model::Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex)
 {
 	for (auto& m : m_meshes)
 	{
-		m->Render(CommandList);
+		m->Render(CommandList, FrameIndex);
 	}
 }
 

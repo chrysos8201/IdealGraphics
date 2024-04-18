@@ -29,16 +29,15 @@ namespace Ideal
 		void Create(std::shared_ptr<IdealRenderer> Renderer);
 
 		// Temp
-		void Tick();
-
-		void Render(ID3D12GraphicsCommandList* CommandList);
-
-	private:
-		void InitRootSignature();
-		void InitPipelineState();
+		void Tick(uint32 FrameIndex);
+		void Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex);
 
 	private:
-		std::shared_ptr<IdealRenderer> m_renderer;
+		void InitRootSignature(std::shared_ptr<IdealRenderer> Renderer);
+		void InitPipelineState(std::shared_ptr<IdealRenderer> Renderer);
+
+	private:
+		//std::shared_ptr<IdealRenderer> m_renderer;
 
 		ComPtr<ID3D12PipelineState> m_pipelineState;
 		ComPtr<ID3D12RootSignature> m_rootSignature;

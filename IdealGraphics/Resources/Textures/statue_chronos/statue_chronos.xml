@@ -6,6 +6,7 @@
         <SpecularFile></SpecularFile>
         <NormalFile></NormalFile>
         <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80011946" G="0.052854966" B="0.61441821" A="1"/>
         <Specular R="0.80011946" G="0.052854966" B="0.61441821" A="25"/>
         <Emissive R="0" G="0" B="0" A="1"/>
     </Material>
@@ -15,6 +16,7 @@
         <SpecularFile></SpecularFile>
         <NormalFile></NormalFile>
         <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80018926" G="0.21920505" B="0.036543146" A="1"/>
         <Specular R="0.80018926" G="0.21920505" B="0.036543146" A="25"/>
         <Emissive R="0" G="0" B="0" A="1"/>
     </Material>
@@ -24,6 +26,7 @@
         <SpecularFile></SpecularFile>
         <NormalFile></NormalFile>
         <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.39021397" G="0.80123574" B="0.10021414" A="1"/>
         <Specular R="0.39021397" G="0.80123574" B="0.10021414" A="25"/>
         <Emissive R="0" G="0" B="0" A="1"/>
     </Material>

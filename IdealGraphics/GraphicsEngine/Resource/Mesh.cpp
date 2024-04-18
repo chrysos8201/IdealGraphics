@@ -11,15 +11,14 @@ Ideal::Mesh::Mesh()
 
 Ideal::Mesh::~Mesh()
 {
-	//m_renderer = nullptr;
+
 }
 
 void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 {
 	//--------------Init---------------//
-	m_renderer = Renderer;
-	InitRootSignature();
-	InitPipelineState();
+	InitRootSignature(Renderer);
+	InitPipelineState(Renderer);
 
 	//--------------VB---------------//
 	{
@@ -37,15 +36,15 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 		const uint32 elementCount = m_vertices.size();
 
 		m_vertexBuffer.Create(
-			m_renderer->GetDevice().Get(),
-			m_renderer->GetCommandList().Get(),
+			Renderer->GetDevice().Get(),
+			Renderer->GetCommandList().Get(),
 			elementSize,
 			elementCount,
 			uploadBuffer
 		);
 
 		// Wait
-		m_renderer->ExecuteCommandList();
+		Renderer->ExecuteCommandList();
 	}
 
 	//--------------IB---------------//
@@ -64,22 +63,22 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 		const uint32 elementCount = m_indices.size();
 
 		m_indexBuffer.Create(
-			m_renderer->GetDevice().Get(),
-			m_renderer->GetCommandList().Get(),
+			Renderer->GetDevice().Get(),
+			Renderer->GetCommandList().Get(),
 			elementSize,
 			elementCount,
 			uploadBuffer
 		);
 
 		// Wait
-		m_renderer->ExecuteCommandList();
+		Renderer->ExecuteCommandList();
 	}
 
 	//--------------CB---------------//
 	{
 		const uint32 bufferSize = sizeof(Transform);
 
-		m_constantBuffer.Create(m_renderer->GetDevice().Get(), bufferSize, IdealRenderer::FRAME_BUFFER_COUNT);
+		m_constantBuffer.Create(Renderer->GetDevice().Get(), bufferSize, IdealRenderer::FRAME_BUFFER_COUNT);
 	}
 
 	//--------------Test---------------//
@@ -87,27 +86,27 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 	m_transform.World = Matrix::CreateRotationY(DirectX::XMConvertToRadians(37.5f)) * Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
 
 	m_transform.WorldInvTranspose = m_transform.World.Invert().Transpose();//
-	m_transform.View = m_renderer->GetView();// .Transpose();
-	m_transform.Proj = m_renderer->GetProj();// .Transpose();
+	m_transform.View = Renderer->GetView();// .Transpose();
+	m_transform.Proj = Renderer->GetProj();// .Transpose();
 
 	m_vertices.clear();
 	m_indices.clear();
 }
 
-void Ideal::Mesh::Tick()
+void Ideal::Mesh::Tick(uint32 FrameIndex)
 {
 	static float rot = 0.f;
 	rot += 0.2f;
 	m_transform.World = Matrix::Identity;
 	m_transform.World = Matrix::CreateRotationY(DirectX::XMConvertToRadians(rot)) * Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
 
-	Transform* t = (Transform*)m_constantBuffer.GetMappedMemory(m_renderer->GetFrameIndex());
+	Transform* t = (Transform*)m_constantBuffer.GetMappedMemory(FrameIndex);
 	*t = m_transform;
 
 
 }
 
-void Ideal::Mesh::Render(ID3D12GraphicsCommandList* CommandList)
+void Ideal::Mesh::Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex)
 {
 	CommandList->SetPipelineState(m_pipelineState.Get());
 	CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -118,14 +117,14 @@ void Ideal::Mesh::Render(ID3D12GraphicsCommandList* CommandList)
 
 	CommandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
-	uint32 currentIndex = m_renderer->GetFrameIndex();
+	uint32 currentIndex = FrameIndex;
 	CommandList->SetGraphicsRootConstantBufferView(0, m_constantBuffer.GetGPUVirtualAddress(currentIndex));
 
 
 	CommandList->DrawIndexedInstanced(m_indexBuffer.GetElementCount(), 1, 0, 0, 0);
 }
 
-void Ideal::Mesh::InitRootSignature()
+void Ideal::Mesh::InitRootSignature(std::shared_ptr<IdealRenderer> Renderer)
 {
 	CD3DX12_ROOT_PARAMETER1 rootParameters[1];
 
@@ -139,7 +138,7 @@ void Ideal::Mesh::InitRootSignature()
 	ComPtr<ID3DBlob> signature;
 	ComPtr<ID3DBlob> error;
 	Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-	Check(m_renderer->GetDevice()->CreateRootSignature(
+	Check(Renderer->GetDevice()->CreateRootSignature(
 		0,
 		signature->GetBufferPointer(),
 		signature->GetBufferSize(),
@@ -147,7 +146,7 @@ void Ideal::Mesh::InitRootSignature()
 	));
 }
 
-void Ideal::Mesh::InitPipelineState()
+void Ideal::Mesh::InitPipelineState(std::shared_ptr<IdealRenderer> Renderer)
 {
 	ComPtr<ID3DBlob> errorBlob;
 	uint32 compileFlags = 0;
@@ -214,7 +213,7 @@ void Ideal::Mesh::InitPipelineState()
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	psoDesc.SampleDesc.Count = 1;
 
-	Check(m_renderer->GetDevice()->CreateGraphicsPipelineState(
+	Check(Renderer->GetDevice()->CreateGraphicsPipelineState(
 		&psoDesc,
 		IID_PPV_ARGS(m_pipelineState.GetAddressOf())
 	));

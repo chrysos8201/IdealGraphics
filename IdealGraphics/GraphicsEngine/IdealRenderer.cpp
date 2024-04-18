@@ -9,6 +9,8 @@
 // Test
 #include "Misc/Assimp/AssimpConverter.h"
 #include "GraphicsEngine/Resource/Model.h"
+//#include "ThirdParty/DirectXTex/DirectXTex.h"
+#include "ThirdParty/Include/DirectXTK12/WICTextureLoader.h"
 
 IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
@@ -175,6 +177,20 @@ void IdealRenderer::Init()
 		m_device->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
+	// 2024.04.18 : SRV heap을 만들겠다. 임시용이다.
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 1;	// 일단 한 개?
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	Check(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_srvHeap.GetAddressOf())));
+
+	// 2024.04.18 : Sampler Heap을 만들겠다. 임시용이다.
+	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {};
+	samplerHeapDesc.NumDescriptors = 1;
+	samplerHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+	samplerHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	Check(m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(m_samplerHeap.GetAddressOf())));
+
 	// 2024.04.11 cbv Heap을 만든다.
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
 	cbvHeapDesc.NumDescriptors = 1;
@@ -184,14 +200,21 @@ void IdealRenderer::Init()
 
 	////////////////////////////////////// Load ASSET
 	// 2024.04.18 Convert to my format
-	//std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
-	//assimpConverter->ReadAssetFile(L"porsche/Porsche_918_Spyder.fbx");
-	//assimpConverter->ExportModelData(L"porsche/porsche");
-	//assimpConverter->ExportMaterialData(L"porsche/porsche");
+	std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
+	assimpConverter->ReadAssetFile(L"statue_chronos/statue_join.fbx");
+	assimpConverter->ExportModelData(L"statue_chronos/statue_chronos");
+	assimpConverter->ExportMaterialData(L"statue_chronos/statue_chronos");
+	assimpConverter.reset();
 
-	m_model = std::make_shared<Ideal::Model>();
-	m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
-	m_model->ReadMaterial(L"porsche/porsche");
+	assimpConverter = std::make_shared<AssimpConverter>();
+	assimpConverter->ReadAssetFile(L"Tower/Tower.fbx");
+	assimpConverter->ExportModelData(L"Tower/Tower");
+	assimpConverter->ExportMaterialData(L"Tower/Tower");
+
+
+	//m_model = std::make_shared<Ideal::Model>();
+	//m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
+	//m_model->ReadMaterial(L"porsche/porsche");
 	int a = 3;
 
 	// Load Asset
@@ -236,13 +259,10 @@ void IdealRenderer::Tick()
 		}
 	}
 
-
-	for (auto obj : m_objects)
+	for (auto m : m_models)
 	{
-		obj->Tick();
+		m->Tick(m_frameIndex);
 	}
-
-	m_model->Tick();
 }
 
 void IdealRenderer::Render()
@@ -261,12 +281,7 @@ void IdealRenderer::Render()
 
 void IdealRenderer::Release()
 {
-	for (auto obj : m_objects)
-	{
-		obj.reset();
-		obj = nullptr;
-	}
-	m_objects.clear();
+
 }
 
 void IdealRenderer::MoveToNextFrame()
@@ -320,28 +335,40 @@ void IdealRenderer::LoadAsset2()
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
 	//m_commandList->Close();
-	//CreateMeshObject("Resources/Test/window.fbx");
-	CreateMeshObject("Resources/Assets/JaneD/JaneD.fbx");
-	//CreateMeshObject("Resources/Assets/porsche/Porsche_918_Spyder.fbx");
-
-	m_model->Create(shared_from_this());
-
+	CreateMeshObject(L"porsche/porsche");
+	CreateMeshObject(L"statue_chronos/statue_chronos");
+	CreateMeshObject(L"Tower/Tower");
+	//m_model->Create(shared_from_this());
+	CreateSampler();
+	CreateTexPipeline();
+	CreateTexture();
 
 	//Check(m_commandList->Close());
 
 	{
 		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
 
-		const VertexTest cubeVertices[] = {
-			{ { -0.5f, 0.5f, -0.5f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
-			{ {  0.5f, 0.5f, -0.5f},	{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
-			{ {  0.5f, 0.5f,  0.5f},	{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
-			{ { -0.5f, 0.5f,  0.5f},	{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
+		//const VertexTest cubeVertices[] = {
+		//	{ { -0.5f, 0.5f, -0.5f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
+		//	{ {  0.5f, 0.5f, -0.5f},	{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
+		//	{ {  0.5f, 0.5f,  0.5f},	{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
+		//	{ { -0.5f, 0.5f,  0.5f},	{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
 
-			{ { -0.5f, -0.5f,-0.5f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
-			{ {  0.5f, -0.5f,-0.5f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
-			{ {  0.5f, -0.5f, 0.5f},	{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
-			{ { -0.5f, -0.5f, 0.5f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
+		//	{ { -0.5f, -0.5f,-0.5f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
+		//	{ {  0.5f, -0.5f,-0.5f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
+		//	{ {  0.5f, -0.5f, 0.5f},	{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
+		//	{ { -0.5f, -0.5f, 0.5f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
+		//};
+		const VertexTest2 cubeVertices[] = {
+			{ { -0.5f, 0.5f, -0.5f},	Vector2(0.0f, 1.0f) },    // Back Top Left
+			{ {  0.5f, 0.5f, -0.5f},	Vector2(0.0f, 0.0f) },    // Back Top Right
+			{ {  0.5f, 0.5f,  0.5f},	Vector2(1.0f, 0.0f) },    // Front Top Right
+			{ { -0.5f, 0.5f,  0.5f},	Vector2(1.0f, 1.0f)	},    // Front Top Left
+
+			{ { -0.5f, -0.5f,-0.5f},	Vector2(0.0f, 1.0f)	},    // Back Bottom Left
+			{ {  0.5f, -0.5f,-0.5f},	Vector2(0.0f, 0.0f) },    // Back Bottom Right
+			{ {  0.5f, -0.5f, 0.5f},	Vector2(1.0f, 0.0f) },    // Front Bottom Right
+			{ { -0.5f, -0.5f, 0.5f},	Vector2(1.0f, 1.0f) },    // Front Bottom Left
 		};
 		const uint32 vertexBufferSize = sizeof(cubeVertices);
 
@@ -353,7 +380,7 @@ void IdealRenderer::LoadAsset2()
 		memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
 		uploadBuffer.UnMap();
 
-		uint32 vertexTypeSize = sizeof(VertexTest);
+		uint32 vertexTypeSize = sizeof(VertexTest2);
 		uint32 vertexCount = _countof(cubeVertices);
 		m_idealVertexBuffer.Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
 
@@ -475,29 +502,13 @@ void IdealRenderer::ExecuteCommandList()
 	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
 }
 
-void IdealRenderer::CreateMeshObject(const std::string Path)
+void IdealRenderer::CreateMeshObject(const std::wstring FileName)
 {
-	//std::vector<Vertex> vertices;
-	//std::vector<uint32> indices;
-	
-	//std::vector<std::shared_ptr<Ideal::Mesh>> meshes;
-
-	AssimpLoader assimpLoader;
-
-	ImportSettings3 setting = { Path, m_objects };
-	
-	assimpLoader.Load(setting);
-
-	for (auto& mesh : m_objects)
-	{
-		//IdealRenderer* renderer = shared_from_this().get();
-		mesh->Create(shared_from_this());
-		//m_objects.push_back(mesh);
-	}
-	//std::shared_ptr<Ideal::Mesh> mesh = std::make_shared<Ideal::Mesh>();
-	//mesh->Create(shared_from_this());
-	
-	//m_objects.push_back()
+	std::shared_ptr<Ideal::Model> model = std::make_shared<Ideal::Model>();
+	model->ReadModel(FileName);
+	//model->ReadMaterial(FileName);
+	model->Create(shared_from_this());
+	m_models.push_back(model);
 }
 
 void IdealRenderer::BeginRender()
@@ -560,16 +571,169 @@ std::shared_ptr<Ideal::D3D12PipelineState> IdealRenderer::GetPipelineStates()
 	return m_idealPipelineState;
 }
 
-void IdealRenderer::PopulateCommandList2()
+void IdealRenderer::CreateTexPipeline()
 {
-	for (auto obj : m_objects)
+	// Root Signature
+	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+
+	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+	if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
 	{
-		obj->Render(m_commandList.Get());
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 	}
 
-	m_model->Render(m_commandList.Get());
-	return;
-	m_commandList->SetPipelineState(m_currentPipelineState.Get());
+	CD3DX12_DESCRIPTOR_RANGE1 ranges[3];
+	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+	ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+	ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
+	
+	CD3DX12_ROOT_PARAMETER1 rootParameters[3];
+	rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[2].InitAsDescriptorTable(1, &ranges[2], D3D12_SHADER_VISIBILITY_PIXEL);
+	
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> signature;
+	ComPtr<ID3DBlob> error;
+	Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+	Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_texRootSignature.GetAddressOf())));
+
+	ComPtr<ID3DBlob> errorBlob;
+	uint32 compileFlags = 0;
+
+	D3D12_INPUT_ELEMENT_DESC inputElements[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+
+#if defined(_DEBUG)
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+	// Set VS
+	ComPtr<ID3DBlob> vertexShader;
+	Check(D3DCompileFromFile(
+		L"Shaders/BoxUV.hlsl",
+		nullptr,
+		nullptr,
+		"VS",
+		"vs_5_0",
+		compileFlags, 0, &vertexShader, nullptr));
+
+	// Set PS
+	ComPtr<ID3DBlob> pixelShader;
+	Check(D3DCompileFromFile(
+		L"Shaders/BoxUV.hlsl",
+		nullptr,
+		nullptr,
+		"PS",
+		"ps_5_0",
+		compileFlags, 0, &pixelShader, nullptr));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+
+	// Set Input Layout
+	psoDesc.InputLayout = { inputElements, 2 };
+
+	psoDesc.pRootSignature = m_texRootSignature.Get();
+
+	psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
+	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	//psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+
+	// Set RasterizerState
+	//psoDesc.RasterizerState.FillMode = PipelineStateRS[rsNum];
+
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	psoDesc.DepthStencilState.DepthEnable = TRUE;
+	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoDesc.DepthStencilState.StencilEnable = FALSE;
+
+
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	psoDesc.SampleDesc.Count = 1;
+
+	Check(m_device->CreateGraphicsPipelineState(
+		&psoDesc,
+		IID_PPV_ARGS(m_pipelineState.GetAddressOf())
+	));
+}
+
+void IdealRenderer::CreateSampler()
+{
+	// 2024.04.18
+
+	// 현재 디바이스에서 사용되는 샘플러 descriptor의 사이즈를 가져온다.
+	const uint32 samplerDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+	// 만들어둔 sampler heap의 핸들을 가져오고
+	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerHandle(m_samplerHeap->GetCPUDescriptorHandleForHeapStart());
+
+	D3D12_SAMPLER_DESC wrapSamplerDesc = {};
+	wrapSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	wrapSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	wrapSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	wrapSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	wrapSamplerDesc.MinLOD = 0;
+	wrapSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+	wrapSamplerDesc.MipLODBias = 0.f;
+	wrapSamplerDesc.MaxAnisotropy = 1;
+	wrapSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	wrapSamplerDesc.BorderColor[0] = wrapSamplerDesc.BorderColor[1] = wrapSamplerDesc.BorderColor[2] = wrapSamplerDesc.BorderColor[3] = 0;
+	m_device->CreateSampler(&wrapSamplerDesc, samplerHandle);
+	ExecuteCommandList();
+}
+
+void IdealRenderer::CreateTexture()
+{
+	std::unique_ptr<uint8_t[]> decodedData;
+	D3D12_SUBRESOURCE_DATA subResource;
+	// 바로 GPU로 올라가는 것 같다.
+	Check(DirectX::LoadWICTextureFromFile(
+		m_device.Get(),
+		L"Resources/Test/test.jpg",
+		m_tex.ReleaseAndGetAddressOf(),
+		decodedData,
+		subResource
+	));
+	m_tex->SetName(L"Test");
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_tex.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+	m_commandList->ResourceBarrier(1, &barrier);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = m_tex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
+	ExecuteCommandList();
+}
+
+void IdealRenderer::PopulateCommandList2()
+{
+	/*for (auto m : m_models)
+	{
+		m->Render(m_commandList.Get(), m_frameIndex);
+	}*/
+	//m_model->Render(m_commandList.Get());
+	//return;
+
+	//m_commandList->SetPipelineState(m_currentPipelineState.Get());
+	m_commandList->SetPipelineState(m_pipelineState.Get());
 
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	auto vbView = m_idealVertexBuffer.GetView();
@@ -577,10 +741,18 @@ void IdealRenderer::PopulateCommandList2()
 	auto ibView = m_idealIndexBuffer.GetView();
 	m_commandList->IASetIndexBuffer(&ibView);
 
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
-	// 2024.04.13 : 현재 frameIndex에 맞는 CB의 주소를 가져와서 바인딩한다.
-	m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
+	m_commandList->SetGraphicsRootSignature(m_texRootSignature.Get());
 
+	ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get(), m_cbvHeap.Get(), m_samplerHeap.Get()};
+	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+
+	m_commandList->SetGraphicsRootDescriptorTable(0, m_srvHeap->GetGPUDescriptorHandleForHeapStart());
+	//m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
+	//m_commandList->SetGraphicsRootDescriptorTable(1, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_commandList->SetGraphicsRootDescriptorTable(2, m_samplerHeap->GetGPUDescriptorHandleForHeapStart());
+
+	// 2024.04.13 : 현재 frameIndex에 맞는 CB의 주소를 가져와서 바인딩한다.
+	//m_commandList->SetGraphicsRootDescriptorTable(0, m_)
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 	
 }

@@ -36,7 +36,7 @@ public:
 
 	void ExecuteCommandList();
 
-	void CreateMeshObject(const std::string Path);
+	void CreateMeshObject(const std::wstring FileName);
 
 	void BeginRender();
 	void EndRender();
@@ -53,6 +53,13 @@ public:
 	Matrix GetView() { return m_view; }
 	Matrix GetProj() { return m_proj; }
 	Matrix GetViewProj() { return m_viewProj; }
+
+	// Texture로딩해보는 테스트용 함수
+	void CreateTexPipeline();
+	void CreateSampler();
+	void CreateTexture();
+	ComPtr<ID3D12Resource> m_tex;
+	ComPtr<ID3D12RootSignature> m_texRootSignature;
 private:
 	uint32 m_width;
 	uint32 m_height;
@@ -67,6 +74,10 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
 	// 2024.04.14 : dsv
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+	// 2024.04.18 : srv, sampler heap
+	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
+	ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
+
 	ComPtr<ID3D12Resource> m_depthStencil;
 
 	// 2024.04.11 : cbv
@@ -112,13 +123,9 @@ private:
 	std::shared_ptr<Ideal::D3D12PipelineState> m_idealPipelineState;
 	ComPtr<ID3D12PipelineState> m_currentPipelineState;
 
-	
-private:
-	// 2024.04.16 : mesh objects
-	std::vector<std::shared_ptr<Ideal::Mesh>> m_objects;
-
 private:
 	// Temp assimp model import
-	std::shared_ptr<Ideal::Model> m_model;
+	//std::shared_ptr<Ideal::Model> m_model;
+	std::vector<std::shared_ptr<Ideal::Model>> m_models;
 };
 

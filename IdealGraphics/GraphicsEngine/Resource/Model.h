@@ -28,8 +28,8 @@ namespace Ideal
 
 		// TEMP
 		void Create(std::shared_ptr<IdealRenderer> Renderer);
-		void Tick();
-		void Render(ID3D12GraphicsCommandList* CommandList);
+		void Tick(uint32 FrameIndex);
+		void Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex);
 
 	private:
 		void BindCacheInfo();

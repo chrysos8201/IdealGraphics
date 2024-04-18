@@ -3,8 +3,12 @@
 #include <DirectXColors.h>
 #include "Misc/Utils/PIX.h"
 
-#include "GraphicsEngine/Mesh.h"
+#include "GraphicsEngine/Resource/Mesh.h"
 #include "Misc/AssimpLoader.h"
+
+// Test
+#include "Misc/Assimp/AssimpConverter.h"
+#include "GraphicsEngine/Resource/Model.h"
 
 IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
@@ -179,7 +183,18 @@ void IdealRenderer::Init()
 	Check(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(m_cbvHeap.GetAddressOf())));
 
 	////////////////////////////////////// Load ASSET
-	//LoadAsset();
+	// 2024.04.18 Convert to my format
+	//std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
+	//assimpConverter->ReadAssetFile(L"porsche/Porsche_918_Spyder.fbx");
+	//assimpConverter->ExportModelData(L"porsche/porsche");
+	//assimpConverter->ExportMaterialData(L"porsche/porsche");
+
+	m_model = std::make_shared<Ideal::Model>();
+	m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
+	m_model->ReadMaterial(L"porsche/porsche");
+	int a = 3;
+
+	// Load Asset
 	LoadAsset2();
 }
 
@@ -227,6 +242,7 @@ void IdealRenderer::Tick()
 		obj->Tick();
 	}
 
+	m_model->Tick();
 }
 
 void IdealRenderer::Render()
@@ -303,10 +319,13 @@ void IdealRenderer::LoadAsset2()
 	}
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
-
+	//m_commandList->Close();
 	//CreateMeshObject("Resources/Test/window.fbx");
 	CreateMeshObject("Resources/Assets/JaneD/JaneD.fbx");
-	CreateMeshObject("Resources/Assets/porsche/Porsche_918_Spyder.fbx");
+	//CreateMeshObject("Resources/Assets/porsche/Porsche_918_Spyder.fbx");
+
+	m_model->Create(shared_from_this());
+
 
 	//Check(m_commandList->Close());
 
@@ -547,6 +566,8 @@ void IdealRenderer::PopulateCommandList2()
 	{
 		obj->Render(m_commandList.Get());
 	}
+
+	m_model->Render(m_commandList.Get());
 	return;
 	m_commandList->SetPipelineState(m_currentPipelineState.Get());
 

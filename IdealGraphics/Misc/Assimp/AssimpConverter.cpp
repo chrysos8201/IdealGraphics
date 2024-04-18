@@ -1,12 +1,7 @@
 #include "Misc/Assimp/AssimpConverter.h"
 
-#include "GraphicsEngine/Mesh.h"
-#include "GraphicsEngine/Material.h"
-#include "GraphicsEngine/Bone.h"
-
 #include "Misc/Utils/tinyxml2.h"
 #include "Misc/Utils/FileUtils.h"
-
 #include <filesystem>
 
 AssimpConverter::AssimpConverter()
@@ -152,7 +147,7 @@ void AssimpConverter::WriteMaterialData(std::wstring FilePath)
 	tinyxml2::XMLElement* root = document->NewElement("Materials");
 	document->LinkEndChild(root);
 
-	for (std::shared_ptr<Ideal::Material> material : m_materials)
+	for (std::shared_ptr<AssimpConvert::Material> material : m_materials)
 	{
 		tinyxml2::XMLElement* node = document->NewElement("Material");
 		root->LinkEndChild(node);
@@ -160,38 +155,45 @@ void AssimpConverter::WriteMaterialData(std::wstring FilePath)
 		tinyxml2::XMLElement* element = nullptr;
 
 		element = document->NewElement("Name");
-		element->SetText(material->m_name.c_str());
+		element->SetText(material->name.c_str());
 		node->LinkEndChild(element);
 
 		element = document->NewElement("DiffuseFile");
-		element->SetText(WriteTexture(folder, material->m_diffuseTextureFile).c_str());
+		element->SetText(WriteTexture(folder, material->diffuseTextureFile).c_str());
 		node->LinkEndChild(element);
 		element = document->NewElement("SpecularFile");
-		element->SetText(WriteTexture(folder, material->m_specularTextureFile).c_str());
+		element->SetText(WriteTexture(folder, material->specularTextureFile).c_str());
 		node->LinkEndChild(element);
 		element = document->NewElement("NormalFile");
-		element->SetText(WriteTexture(folder, material->m_normalTextureFile).c_str());
+		element->SetText(WriteTexture(folder, material->normalTextureFile).c_str());
 		node->LinkEndChild(element);
 
 		element = document->NewElement("Ambient");
-		element->SetAttribute("R", material->m_ambient.x);
-		element->SetAttribute("G", material->m_ambient.y);
-		element->SetAttribute("B", material->m_ambient.z);
-		element->SetAttribute("A", material->m_ambient.w);
+		element->SetAttribute("R", material->ambient.x);
+		element->SetAttribute("G", material->ambient.y);
+		element->SetAttribute("B", material->ambient.z);
+		element->SetAttribute("A", material->ambient.w);
+		node->LinkEndChild(element);
+
+		element = document->NewElement("Diffuse");
+		element->SetAttribute("R", material->diffuse.x);
+		element->SetAttribute("G", material->diffuse.y);
+		element->SetAttribute("B", material->diffuse.z);
+		element->SetAttribute("A", material->diffuse.w);
 		node->LinkEndChild(element);
 
 		element = document->NewElement("Specular");
-		element->SetAttribute("R", material->m_specular.x);
-		element->SetAttribute("G", material->m_specular.y);
-		element->SetAttribute("B", material->m_specular.z);
-		element->SetAttribute("A", material->m_specular.w);
+		element->SetAttribute("R", material->specular.x);
+		element->SetAttribute("G", material->specular.y);
+		element->SetAttribute("B", material->specular.z);
+		element->SetAttribute("A", material->specular.w);
 		node->LinkEndChild(element);
 
 		element = document->NewElement("Emissive");
-		element->SetAttribute("R", material->m_emissive.x);
-		element->SetAttribute("G", material->m_emissive.y);
-		element->SetAttribute("B", material->m_emissive.z);
-		element->SetAttribute("A", material->m_emissive.w);
+		element->SetAttribute("R", material->emissive.x);
+		element->SetAttribute("G", material->emissive.y);
+		element->SetAttribute("B", material->emissive.z);
+		element->SetAttribute("A", material->emissive.w);
 		node->LinkEndChild(element);
 	}
 
@@ -220,24 +222,24 @@ void AssimpConverter::WriteModelFile(const std::wstring& filePath)
 	file->Write<uint32>(m_meshes.size());
 	for (auto& mesh : m_meshes)
 	{
-		file->Write<std::string>(mesh->m_name);
-		file->Write<int32>(mesh->m_boneIndex);
-		file->Write<std::string>(mesh->m_materialName);
+		file->Write<std::string>(mesh->name);
+		file->Write<int32>(mesh->boneIndex);
+		file->Write<std::string>(mesh->materialName);
 
 		// vertex
-		file->Write<uint32>(mesh->m_vertices.size());
-		file->Write(&mesh->m_vertices[0], sizeof(BasicVertex)* mesh->m_vertices.size());
+		file->Write<uint32>(mesh->vertices.size());
+		file->Write(&mesh->vertices[0], sizeof(BasicVertex)* mesh->vertices.size());
 
 		// index
-		file->Write<uint32>(mesh->m_indices.size());
-		file->Write(&mesh->m_indices[0], sizeof(uint32) * mesh->m_indices.size());
+		file->Write<uint32>(mesh->indices.size());
+		file->Write(&mesh->indices[0], sizeof(uint32) * mesh->indices.size());
 
 	}
 }
 
 void AssimpConverter::ReadModelData(aiNode* node, int32 index, int32 parent)
 {
-	std::shared_ptr<Ideal::Bone> bone = std::make_shared<Ideal::Bone>();
+	std::shared_ptr<AssimpConvert::Bone> bone = std::make_shared<AssimpConvert::Bone>();
 	bone->index = index;
 	bone->parent = parent;
 	bone->name = node->mName.C_Str();
@@ -273,43 +275,46 @@ void AssimpConverter::ReadMaterialData()
 	{
 		aiMaterial* srcMaterial = m_scene->mMaterials[i];
 
-		std::shared_ptr<Ideal::Material> material = std::make_shared<Ideal::Material>();
-		material->m_name = srcMaterial->GetName().C_Str();
+		std::shared_ptr<AssimpConvert::Material> material = std::make_shared<AssimpConvert::Material>();
+		material->name = srcMaterial->GetName().C_Str();
 		
 		aiColor3D color;
 
 		// Ambient
 		srcMaterial->Get(AI_MATKEY_COLOR_AMBIENT, color);
-		material->m_ambient = Color(color.r, color.g, color.b, 1.f);
+		material->ambient = Color(color.r, color.g, color.b, 1.f);
 
 		// Diffuse
 		srcMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-		material->m_diffuse = Color(color.r, color.g, color.b, 1.f);
+		material->diffuse = Color(color.r, color.g, color.b, 1.f);
 
 		// Specular
 		srcMaterial->Get(AI_MATKEY_COLOR_SPECULAR, color);
-		material->m_specular = Color(color.r, color.g, color.b, 1.f);
-		srcMaterial->Get(AI_MATKEY_SHININESS, material->m_specular.w);
+		material->specular = Color(color.r, color.g, color.b, 1.f);
+		srcMaterial->Get(AI_MATKEY_SHININESS, material->specular.w);
 
 		// Emissive
 		srcMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-		material->m_emissive = Color(color.r, color.g, color.b, 1.f);
+		material->emissive = Color(color.r, color.g, color.b, 1.f);
 
 		//----------------Texture----------------//
 		aiString file;
 		
 		// Diffuse Texture
 		srcMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &file);
-		material->m_diffuseTextureFile = file.C_Str();
+		material->diffuseTextureFile = file.C_Str();
 
+		// Specular Texture
 		srcMaterial->GetTexture(aiTextureType_SPECULAR, 0, &file);
-		material->m_specularTextureFile = file.C_Str();
+		material->specularTextureFile = file.C_Str();
 
+		// Emissive Texture
 		srcMaterial->GetTexture(aiTextureType_EMISSIVE, 0, &file);
-		material->m_emissiveTextureFile = file.C_Str();
+		material->emissiveTextureFile = file.C_Str();
 
+		// Normal Texture
 		srcMaterial->GetTexture(aiTextureType_NORMALS, 0, &file);
-		material->m_normalTextureFile = file.C_Str();
+		material->normalTextureFile = file.C_Str();
 
 		m_materials.push_back(material);
 	}
@@ -323,9 +328,9 @@ void AssimpConverter::ReadMeshData(aiNode* node, int32 bone)
 		return;
 	}
 
-	std::shared_ptr<Ideal::Mesh> mesh = std::make_shared<Ideal::Mesh>();
-	mesh->m_name = node->mName.C_Str();
-	mesh->m_boneIndex = bone;
+	std::shared_ptr<AssimpConvert::Mesh> mesh = std::make_shared<AssimpConvert::Mesh>();
+	mesh->name = node->mName.C_Str();
+	mesh->boneIndex = bone;
 
 	// submesh
 	for (uint32 i = 0; i < node->mNumMeshes; ++i)
@@ -335,12 +340,12 @@ void AssimpConverter::ReadMeshData(aiNode* node, int32 bone)
 
 		// Material 이름
 		const aiMaterial* material = m_scene->mMaterials[srcMesh->mMaterialIndex];
-		mesh->m_materialName = material->GetName().C_Str();
+		mesh->materialName = material->GetName().C_Str();
 
 		// mesh가 여러개일 경우 index가 중복될 수 있다. 
 		// 하나로 관리하기 위해 미리 이전 vertex의 size를 가져와서 이번에 추가하는 index에 더해 중복을 피한다.
 
-		const uint32 startVertex = mesh->m_vertices.size();
+		const uint32 startVertex = mesh->vertices.size();
 
 		// Vertex
 		for (uint32 v = 0; v < srcMesh->mNumVertices; ++v)
@@ -362,7 +367,7 @@ void AssimpConverter::ReadMeshData(aiNode* node, int32 bone)
 				memcpy(&vertex.Normal, &srcMesh->mNormals[v], sizeof(Vector3));
 			}
 
-			mesh->m_vertices.push_back(vertex);
+			mesh->vertices.push_back(vertex);
 		}
 
 		// Index
@@ -372,7 +377,7 @@ void AssimpConverter::ReadMeshData(aiNode* node, int32 bone)
 
 			for (uint32 k = 0; k < face.mNumIndices; ++k)
 			{
-				mesh->m_indices.push_back(face.mIndices[k] + startVertex);
+				mesh->indices.push_back(face.mIndices[k] + startVertex);
 			}
 		}
 	}

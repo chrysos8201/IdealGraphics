@@ -145,22 +145,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GraphicsEngine\ResourceManager.h" />
     <ClInclude Include="Misc\Utils\FileUtils.h" />
-    <ClInclude Include="GraphicsEngine\Bone.h" />
-    <ClInclude Include="GraphicsEngine\Material.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Bone.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Material.h" />
     <ClInclude Include="Misc\Assimp\AssimpConverter.h" />
     <ClInclude Include="Core\ForDebug.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineState.h">
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineState.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Resource.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h" />
     <ClInclude Include="GraphicsEngine\IdealRenderer.h" />
-    <ClInclude Include="GraphicsEngine\Mesh.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Mesh.h" />
     <ClInclude Include="Misc\Utils\PIX.h" />
-    <ClInclude Include="GraphicsEngine\Model.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Model.h" />
     <ClInclude Include="Misc\AssimpLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -172,31 +173,34 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12ThirdParty.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Launch\LaunchWindow.h" />
+    <ClInclude Include="Misc\Utils\StringUtils.h" />
     <ClInclude Include="Misc\Utils\tinyxml2.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="GraphicsEngine\Resource\ResourceBase.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="GraphicsEngine\VertexInfo.h" />
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
     <ClCompile Include="Misc\Utils\FileUtils.cpp" />
-    <ClCompile Include="GraphicsEngine\Bone.cpp" />
-    <ClCompile Include="GraphicsEngine\Material.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Bone.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Material.cpp" />
     <ClCompile Include="Misc\Assimp\AssimpConverter.cpp" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineState.cpp">
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineState.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Resource.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp" />
     <ClCompile Include="GraphicsEngine\IdealRenderer.cpp" />
-    <ClCompile Include="GraphicsEngine\Model.cpp" />
-    <ClCompile Include="GraphicsEngine\Mesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Model.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Mesh.cpp" />
     <ClCompile Include="Misc\AssimpLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -207,7 +211,9 @@
     <ClCompile Include="Engine\IEngine.cpp" />
     <ClCompile Include="Launch\LaunchWindow.cpp" />
     <ClCompile Include="GraphicsEngine\VertexInfo.cpp" />
+    <ClCompile Include="Misc\Utils\StringUtils.cpp" />
     <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc" />

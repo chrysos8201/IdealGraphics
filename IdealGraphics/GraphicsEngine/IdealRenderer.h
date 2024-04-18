@@ -1,16 +1,17 @@
 #pragma once
 #include "Core/Core.h"
-#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
+#include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
 
-#include "GraphicsEngine/Resources/D3D12Viewport.h"
-#include "GraphicsEngine/Resources/D3D12Resource.h"
-#include "GraphicsEngine/Resources/D3D12PipelineState.h"
+#include "GraphicsEngine/D3D12/D3D12Viewport.h"
+#include "GraphicsEngine/D3D12/D3D12Resource.h"
+#include "GraphicsEngine/D3D12/D3D12PipelineState.h"
 #include "GraphicsEngine/VertexInfo.h"
 //#include "GraphicsEngine/Mesh.h"
 
 namespace Ideal
 {
 	class Mesh;
+	class Model;
 }
 
 class IdealRenderer : public std::enable_shared_from_this<IdealRenderer>
@@ -115,5 +116,9 @@ private:
 private:
 	// 2024.04.16 : mesh objects
 	std::vector<std::shared_ptr<Ideal::Mesh>> m_objects;
+
+private:
+	// Temp assimp model import
+	std::shared_ptr<Ideal::Model> m_model;
 };
 

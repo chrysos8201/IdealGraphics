@@ -79,7 +79,7 @@ void FileUtils::Read(OUT std::string& Data)
 
 	char* temp = new char[size + 1];
 	temp[size] = 0;
-	Read((void**)&Data, size);
+	Read((void**)&temp, size);
 	Data = temp;
 	delete[] temp;
 }

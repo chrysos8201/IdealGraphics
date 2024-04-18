@@ -38,11 +38,14 @@
     <Filter Include="GraphicsEngine">
       <UniqueIdentifier>{77a23861-768d-4e51-b092-604c7392c8ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GraphicsEngine\Resources">
-      <UniqueIdentifier>{2a38037a-4dae-4186-9dee-e51d8069894d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Misc\Assimp">
       <UniqueIdentifier>{c5991eed-9658-4fe4-9326-525aeeede696}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GraphicsEngine\D3D12">
+      <UniqueIdentifier>{2a38037a-4dae-4186-9dee-e51d8069894d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GraphicsEngine\Resource">
+      <UniqueIdentifier>{23d95df8-c66f-4a73-a2bd-fdb50f88157d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -67,7 +70,7 @@
     <ClInclude Include="Core\Types.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resources\D3D12ThirdParty.h">
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12ThirdParty.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
     <ClInclude Include="Engine\IEngine.h" />
@@ -84,22 +87,16 @@
     <ClInclude Include="GraphicsEngine\IdealRenderer.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Viewport.h">
-      <Filter>GraphicsEngine\Resources</Filter>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Texture.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h" />
     <ClInclude Include="Core\ForDebug.h" />
-    <ClInclude Include="GraphicsEngine\Resources\D3D12Resource.h">
-      <Filter>GraphicsEngine\Resources</Filter>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Resource.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resources\D3D12PipelineState.h">
-      <Filter>GraphicsEngine\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsEngine\Model.h">
-      <Filter>GraphicsEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsEngine\Mesh.h">
-      <Filter>GraphicsEngine</Filter>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineState.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Misc\Assimp\AssimpConverter.h">
       <Filter>Misc\Assimp</Filter>
@@ -107,12 +104,23 @@
     <ClInclude Include="GraphicsEngine\VertexInfo.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Material.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Material.h" />
     <ClInclude Include="Misc\Utils\tinyxml2.h" />
-    <ClInclude Include="GraphicsEngine\Bone.h">
-      <Filter>GraphicsEngine</Filter>
-    </ClInclude>
     <ClInclude Include="Misc\Utils\FileUtils.h" />
+    <ClInclude Include="GraphicsEngine\ResourceManager.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Bone.h">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Resource\Mesh.h">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Resource\Model.h">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\Utils\StringUtils.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\Resource\ResourceBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -141,22 +149,16 @@
     <ClCompile Include="GraphicsEngine\IdealRenderer.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Viewport.cpp">
-      <Filter>GraphicsEngine\Resources</Filter>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Texture.cpp" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Resource.cpp">
-      <Filter>GraphicsEngine\Resources</Filter>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Resource.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resources\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\Resources\D3D12PipelineState.cpp">
-      <Filter>GraphicsEngine\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\Model.cpp">
-      <Filter>GraphicsEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\Mesh.cpp">
-      <Filter>GraphicsEngine</Filter>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineState.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Misc\Assimp\AssimpConverter.cpp">
       <Filter>Misc\Assimp</Filter>
@@ -164,12 +166,21 @@
     <ClCompile Include="GraphicsEngine\VertexInfo.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Material.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Material.cpp" />
     <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
-    <ClCompile Include="GraphicsEngine\Bone.cpp">
-      <Filter>GraphicsEngine</Filter>
-    </ClCompile>
     <ClCompile Include="Misc\Utils\FileUtils.cpp" />
+    <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
+    <ClCompile Include="GraphicsEngine\Resource\Bone.cpp">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resource\Mesh.cpp">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resource\Model.cpp">
+      <Filter>GraphicsEngine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\Utils\StringUtils.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

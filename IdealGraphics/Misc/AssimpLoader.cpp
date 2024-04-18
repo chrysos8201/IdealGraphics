@@ -4,10 +4,8 @@
 #include "assimp/postprocess.h"
 #include "assimp/types.h"
 #include "assimp/mesh.h"
-#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
+#include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
 #include "GraphicsEngine/VertexInfo.h"
-//#include "RenderTest/MeshTest.h"
-//#include "RenderTest/ModelTest.h"
 
 #include "Misc/Assimp/AssimpConverter.h"
 
@@ -18,10 +16,16 @@ bool AssimpLoader::Load(ImportSettings3 settings)
 
 	// Test //
 
-	std::shared_ptr<AssimpConverter> converter = std::make_shared<AssimpConverter>();
-	converter->ReadAssetFile(L"porsche/Porsche_918_Spyder.fbx");
+	//std::shared_ptr<AssimpConverter> converter = std::make_shared<AssimpConverter>();
+
+	/*converter->ReadAssetFile(L"porsche/Porsche_918_Spyder.fbx");
 	converter->ExportMaterialData(L"porsche/porsche");
-	converter->ExportModelData(L"porsche/porsche");
+	converter->ExportModelData(L"porsche/porsche");*/
+
+	//converter->ReadAssetFile(L"statue_chronos/statue_join.fbx");
+	//converter->ExportMaterialData(L"statue_chronos/statue_chronos");
+	//converter->ExportModelData(L"statue_chronos/statue_chronos");
+
 	//converter->ReadAssetFile(L"TEST/Window.fbx");
 	//converter->ExportMaterialData(L"Window/Window");
 	//////////

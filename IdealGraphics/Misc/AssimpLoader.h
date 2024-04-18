@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "GraphicsEngine/Mesh.h"
+#include "GraphicsEngine/Resource/Mesh.h"
 
 //#pragma comment(lib, "ThirdParty/Libraries/ForDebug/assimpTool/Assimp.lib")
 

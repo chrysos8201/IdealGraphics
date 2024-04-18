@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "GraphicsEngine/Resources/D3D12ThirdParty.h"
+#include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
 
 struct alignas(256) Transform	// 사이즈를 맞추었다?
 {

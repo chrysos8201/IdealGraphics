@@ -5,7 +5,9 @@
 #include <Assimp/scene.h>
 #include <Assimp/postprocess.h>
 
-namespace Ideal
+#include "Misc/Assimp/AssimpConvertType.h"
+
+namespace AssimpConvert
 {
 	class Mesh;
 	class Material;
@@ -46,7 +48,7 @@ private:
 	std::wstring m_texturePath = L"Resources/Textures/";
 
 private:
-	std::vector<std::shared_ptr<Ideal::Material>> m_materials;
-	std::vector<std::shared_ptr<Ideal::Mesh>> m_meshes;
-	std::vector<std::shared_ptr<Ideal::Bone>> m_bones;
+	std::vector<std::shared_ptr<AssimpConvert::Material>> m_materials;
+	std::vector<std::shared_ptr<AssimpConvert::Mesh>> m_meshes;
+	std::vector<std::shared_ptr<AssimpConvert::Bone>> m_bones;
 };

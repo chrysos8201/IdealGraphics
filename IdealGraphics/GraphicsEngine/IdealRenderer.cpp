@@ -506,7 +506,7 @@ void IdealRenderer::CreateMeshObject(const std::wstring FileName)
 {
 	std::shared_ptr<Ideal::Model> model = std::make_shared<Ideal::Model>();
 	model->ReadModel(FileName);
-	//model->ReadMaterial(FileName);
+	model->ReadMaterial(FileName);
 	model->Create(shared_from_this());
 	m_models.push_back(model);
 }

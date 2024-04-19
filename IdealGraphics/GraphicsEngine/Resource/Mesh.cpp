@@ -91,6 +91,9 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 
 	m_vertices.clear();
 	m_indices.clear();
+
+	//--------------Material---------------//
+	//if(m_material->Create(Renderer->GetDevice().Get(), Renderer->GetCommandList().Get(), )
 }
 
 void Ideal::Mesh::Tick(uint32 FrameIndex)

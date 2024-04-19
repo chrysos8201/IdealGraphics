@@ -11,7 +11,7 @@ Ideal::D3D12Texture::~D3D12Texture()
 
 }
 
-void Ideal::D3D12Texture::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, const std::wstring& Path, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle)
+void Ideal::D3D12Texture::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle, const std::wstring& Path)
 {
 	// TODO : SET NAME
 

@@ -15,8 +15,8 @@ namespace Ideal
 		void Create(
 			ID3D12Device* Device,
 			ID3D12GraphicsCommandList* CommandList,
-			const std::wstring& Path,
-			D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle
+			D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle,
+			const std::wstring& Path
 			);
 	};
 }

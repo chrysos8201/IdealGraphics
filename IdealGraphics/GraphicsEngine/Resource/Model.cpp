@@ -50,8 +50,10 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 			std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
 			if (textureStr.length() > 0)
 			{
+				material->m_diffuseTextureFile = textureStr;
 				// TODO : Texture만들기
 				//auto texture
+				// TEMP : 2024.04.19 임시로 여기다가 텍스쳐를 만들겠다.
 			}
 		}
 
@@ -62,6 +64,7 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 			std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
 			if (textureStr.length() > 0)
 			{
+				material->m_specularTextureFile = textureStr;
 				// TODO : Texture만들기
 				//auto texture
 			}
@@ -74,6 +77,7 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 			std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
 			if (textureStr.length() > 0)
 			{
+				material->m_normalTextureFile = textureStr;
 				// TODO : Texture만들기
 				//auto texture
 			}
@@ -149,7 +153,6 @@ void Ideal::Model::ReadModel(const std::wstring& filename)
 		{
 			std::shared_ptr<Ideal::Bone> bone = std::make_shared<Ideal::Bone>();
 			bone->index = file->Read<int32>();
-			//bone->name = StringUtils::ConvertStringToWString(file->Read<std::string>());
 			bone->name = file->Read<std::string>();
 			bone->parent = file->Read<int32>();
 			bone->transform = file->Read<Matrix>();
@@ -198,7 +201,7 @@ void Ideal::Model::ReadModel(const std::wstring& filename)
 			m_meshes.push_back(mesh);
 		}
 	}
-	//BindCacheInfo();
+	BindCacheInfo();
 }
 
 void Ideal::Model::Create(std::shared_ptr<IdealRenderer> Renderer)

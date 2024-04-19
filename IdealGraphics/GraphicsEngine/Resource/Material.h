@@ -5,10 +5,12 @@
 
 namespace Ideal
 {
+	class D3D12Texture;
 
 	class Material : public ResourceBase
 	{
 		friend class AssimpConverter;
+		friend class Model;
 
 	public:
 		Material();
@@ -18,16 +20,24 @@ namespace Ideal
 		void SetDiffuse(Color c) { m_diffuse = c; }
 		void SetSpecular(Color c) { m_specular = c; }
 		void SetEmissive(Color c) { m_emissive = c; }
+
+		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle);
+
 	private:
 		Color m_ambient;
 		Color m_specular;
 		Color m_diffuse;
 		Color m_emissive;
 
-		std::string m_diffuseTextureFile;
-		std::string m_specularTextureFile;
-		std::string m_emissiveTextureFile;
-		std::string m_normalTextureFile;
+		std::wstring m_diffuseTextureFile;
+		std::wstring m_specularTextureFile;
+		std::wstring m_emissiveTextureFile;
+		std::wstring m_normalTextureFile;
+
+		std::shared_ptr<Ideal::D3D12Texture> m_diffuseTexture;
+		std::shared_ptr<Ideal::D3D12Texture> m_specularTexture;
+		std::shared_ptr<Ideal::D3D12Texture> m_emissiveTexture;
+		std::shared_ptr<Ideal::D3D12Texture> m_normalTexture;
 	};
 }
 

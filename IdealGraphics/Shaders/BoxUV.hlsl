@@ -1,49 +1,49 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// This code is licensed under the MIT License (MIT).
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
-
-// cbuffer Transform : register(b0)
-// {
-//     float4x4 World;
-//     float4x4 View;
-//     float4x4 Proj;
-//     float4x4 WorldInvTranspose;
-// }
-
-//
-cbuffer TestOffset : register(b0)
+cbuffer Transform : register(b0)
 {
-    float4 offset;
-    float4 padding[15];
+    float4x4 World;
+    float4x4 View;
+    float4x4 Proj;
+    float4x4 WorldInvTranspose;
 }
 
-struct PSInput
+struct VSInput
 {
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
+    float3 Pos : POSITION;
+    float3 Normal : NORMAL;
+    float2 UV : TEXCOORD;
+    float3 tangent : TANGENT;
+    float4 color : COLOR;
 };
 
-Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
-
-PSInput VS(float4 position : POSITION, float2 uv : TEXCOORD)
+struct VSOutput
 {
-    PSInput result;
+    float4 PosH : SV_POSITION;
+    float3 PosW : POSITION;
+    float3 NormalW : NORMAL;
+    float2 UV : TEXCOORD;
+};
 
-    result.position = position + offset;
-    result.uv = uv;
+VSOutput VS(VSInput input)
+{
+    VSOutput output = (VSOutput)0;
 
-    return result;
+    float4 localPos = float4(input.Pos, 1.f);
+    float4 worldPos = mul(World, localPos);
+    float4 viewPos = mul(View, worldPos);
+    float4 projPos = mul(Proj, viewPos);
+
+    output.PosW = worldPos;
+    output.PosH = projPos;
+    output.NormalW = mul(WorldInvTranspose, float3(0.f,0.f,0.f));
+    output.UV = input.UV;
+
+    return output;
 }
 
-float4 PS(PSInput input) : SV_TARGET
+Texture2D texture0 : register(b0);
+SamplerState sampler0 : register(s0);
+
+float4 PS(VSOutput input)
 {
     float4 color = texture0.Sample(sampler0, input.uv);
     return color;

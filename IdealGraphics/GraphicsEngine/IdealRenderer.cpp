@@ -185,11 +185,11 @@ void IdealRenderer::Init()
 	Check(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_srvHeap.GetAddressOf())));
 
 	// 2024.04.18 : Sampler Heap을 만들겠다. 임시용이다.
-	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {};
+	/*D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {};
 	samplerHeapDesc.NumDescriptors = 1;
 	samplerHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
 	samplerHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	Check(m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(m_samplerHeap.GetAddressOf())));
+	Check(m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(m_samplerHeap.GetAddressOf())));*/
 
 	// 2024.04.11 cbv Heap을 만든다.
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
@@ -200,7 +200,7 @@ void IdealRenderer::Init()
 
 	////////////////////////////////////// Load ASSET
 	// 2024.04.18 Convert to my format
-	std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
+	/*std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
 	assimpConverter->ReadAssetFile(L"statue_chronos/statue_join.fbx");
 	assimpConverter->ExportModelData(L"statue_chronos/statue_chronos");
 	assimpConverter->ExportMaterialData(L"statue_chronos/statue_chronos");
@@ -209,7 +209,7 @@ void IdealRenderer::Init()
 	assimpConverter = std::make_shared<AssimpConverter>();
 	assimpConverter->ReadAssetFile(L"Tower/Tower.fbx");
 	assimpConverter->ExportModelData(L"Tower/Tower");
-	assimpConverter->ExportMaterialData(L"Tower/Tower");
+	assimpConverter->ExportMaterialData(L"Tower/Tower");*/
 
 
 	//m_model = std::make_shared<Ideal::Model>();
@@ -333,14 +333,14 @@ void IdealRenderer::LoadAsset2()
 		).Get();
 	}
 
-	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
+	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 	//m_commandList->Close();
-	CreateMeshObject(L"porsche/porsche");
-	CreateMeshObject(L"statue_chronos/statue_chronos");
+	//CreateMeshObject(L"porsche/porsche");
+	//CreateMeshObject(L"statue_chronos/statue_chronos");
 	CreateMeshObject(L"Tower/Tower");
 	//m_model->Create(shared_from_this());
-	CreateSampler();
-	CreateTexPipeline();
+	//CreateTexPipeline();
+	CreateTexPipeline2();
 	CreateTexture();
 
 	//Check(m_commandList->Close());
@@ -571,34 +571,37 @@ std::shared_ptr<Ideal::D3D12PipelineState> IdealRenderer::GetPipelineStates()
 	return m_idealPipelineState;
 }
 
-void IdealRenderer::CreateTexPipeline()
-{
+void IdealRenderer::CreateTexPipeline2()
+{	
+	// LinearWrap
+	CD3DX12_STATIC_SAMPLER_DESC sampler(
+		0,
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP
+	);
+
 	// Root Signature
 	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-
 	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-
 	if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
 	{
 		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 	}
 
-	CD3DX12_DESCRIPTOR_RANGE1 ranges[3];
-	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-	ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-	ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
-	
-	CD3DX12_ROOT_PARAMETER1 rootParameters[3];
-	rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
-	rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[2].InitAsDescriptorTable(1, &ranges[2], D3D12_SHADER_VISIBILITY_PIXEL);
-	
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	CD3DX12_DESCRIPTOR_RANGE1 descRange[1];
+	descRange[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
+	CD3DX12_ROOT_PARAMETER1 rootParameter[2];
+	rootParameter[0].InitAsDescriptorTable(1, &descRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParameter[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
+	
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc(2, rootParameter, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	
 	ComPtr<ID3DBlob> signature;
 	ComPtr<ID3DBlob> error;
-	Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+	Check(D3DX12SerializeVersionedRootSignature(&rootSigDesc, featureData.HighestVersion, &signature, &error));
 	Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_texRootSignature.GetAddressOf())));
 
 	ComPtr<ID3DBlob> errorBlob;
@@ -616,22 +619,23 @@ void IdealRenderer::CreateTexPipeline()
 	// Set VS
 	ComPtr<ID3DBlob> vertexShader;
 	Check(D3DCompileFromFile(
-		L"Shaders/BoxUV.hlsl",
+		L"Shaders/SimpleVertexShaderUV.hlsl",
 		nullptr,
 		nullptr,
 		"VS",
 		"vs_5_0",
-		compileFlags, 0, &vertexShader, nullptr));
+		compileFlags, 0, &vertexShader, &errorBlob));
 
 	// Set PS
 	ComPtr<ID3DBlob> pixelShader;
 	Check(D3DCompileFromFile(
-		L"Shaders/BoxUV.hlsl",
+		L"Shaders/SimpleVertexShaderUV.hlsl",
 		nullptr,
 		nullptr,
 		"PS",
 		"ps_5_0",
-		compileFlags, 0, &pixelShader, nullptr));
+		compileFlags, 0, &pixelShader, &errorBlob));
+
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 
@@ -643,10 +647,6 @@ void IdealRenderer::CreateTexPipeline()
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	//psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-
-	// Set RasterizerState
-	//psoDesc.RasterizerState.FillMode = PipelineStateRS[rsNum];
 
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
@@ -669,36 +669,12 @@ void IdealRenderer::CreateTexPipeline()
 	));
 }
 
-void IdealRenderer::CreateSampler()
-{
-	// 2024.04.18
-
-	// 현재 디바이스에서 사용되는 샘플러 descriptor의 사이즈를 가져온다.
-	const uint32 samplerDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-
-	// 만들어둔 sampler heap의 핸들을 가져오고
-	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerHandle(m_samplerHeap->GetCPUDescriptorHandleForHeapStart());
-
-	D3D12_SAMPLER_DESC wrapSamplerDesc = {};
-	wrapSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	wrapSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	wrapSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	wrapSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	wrapSamplerDesc.MinLOD = 0;
-	wrapSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-	wrapSamplerDesc.MipLODBias = 0.f;
-	wrapSamplerDesc.MaxAnisotropy = 1;
-	wrapSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	wrapSamplerDesc.BorderColor[0] = wrapSamplerDesc.BorderColor[1] = wrapSamplerDesc.BorderColor[2] = wrapSamplerDesc.BorderColor[3] = 0;
-	m_device->CreateSampler(&wrapSamplerDesc, samplerHandle);
-	ExecuteCommandList();
-}
-
 void IdealRenderer::CreateTexture()
 {
+	//----------------Load WIC Texture From File----------------//
+
 	std::unique_ptr<uint8_t[]> decodedData;
 	D3D12_SUBRESOURCE_DATA subResource;
-	// 바로 GPU로 올라가는 것 같다.
 	Check(DirectX::LoadWICTextureFromFile(
 		m_device.Get(),
 		L"Resources/Test/test.jpg",
@@ -706,13 +682,42 @@ void IdealRenderer::CreateTexture()
 		decodedData,
 		subResource
 	));
+
+	//----------------Create Upload Buffer----------------//
+
+	uint64 uploadBufferSize = GetRequiredIntermediateSize(m_tex.Get(), 0, 1);
+	CD3DX12_HEAP_PROPERTIES heapProp(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+
+	ComPtr<ID3D12Resource> uploadBuffer;
+	Check(m_device->CreateCommittedResource(
+		&heapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(uploadBuffer.GetAddressOf())
+	));
+
+	//----------------Update Subresources----------------//
+
+	UpdateSubresources(
+		m_commandList.Get(), m_tex.Get(),
+		uploadBuffer.Get(),
+		0, 0, 1, &subResource
+	);
 	m_tex->SetName(L"Test");
+
+	//----------------Resource Barrier----------------//
+
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_tex.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
 	m_commandList->ResourceBarrier(1, &barrier);
+
+	//----------------Create Shader Resource View----------------//
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -725,34 +730,31 @@ void IdealRenderer::CreateTexture()
 
 void IdealRenderer::PopulateCommandList2()
 {
-	/*for (auto m : m_models)
+	for (auto m : m_models)
 	{
 		m->Render(m_commandList.Get(), m_frameIndex);
-	}*/
+	}
 	//m_model->Render(m_commandList.Get());
 	//return;
 
-	//m_commandList->SetPipelineState(m_currentPipelineState.Get());
 	m_commandList->SetPipelineState(m_pipelineState.Get());
 
+	//---------------------IA--------------------//
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	auto vbView = m_idealVertexBuffer.GetView();
 	m_commandList->IASetVertexBuffers(0, 1, &vbView);
 	auto ibView = m_idealIndexBuffer.GetView();
 	m_commandList->IASetIndexBuffer(&ibView);
 
+	//---------------------Root Signature--------------------//
 	m_commandList->SetGraphicsRootSignature(m_texRootSignature.Get());
 
-	ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get(), m_cbvHeap.Get(), m_samplerHeap.Get()};
+	ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
 	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
-
 	m_commandList->SetGraphicsRootDescriptorTable(0, m_srvHeap->GetGPUDescriptorHandleForHeapStart());
-	//m_commandList->SetGraphicsRootConstantBufferView(0, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
-	//m_commandList->SetGraphicsRootDescriptorTable(1, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
-	m_commandList->SetGraphicsRootDescriptorTable(2, m_samplerHeap->GetGPUDescriptorHandleForHeapStart());
+	m_commandList->SetGraphicsRootConstantBufferView(1, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
 
-	// 2024.04.13 : 현재 frameIndex에 맞는 CB의 주소를 가져와서 바인딩한다.
-	//m_commandList->SetGraphicsRootDescriptorTable(0, m_)
+	//---------------------Draw--------------------//
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 	
 }

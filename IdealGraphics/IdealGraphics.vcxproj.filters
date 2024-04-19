@@ -202,6 +202,7 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\BoxUV.hlsl" />
+    <FxCompile Include="Shaders\SimpleVertexShaderUV.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli">

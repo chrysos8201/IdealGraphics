@@ -55,11 +55,11 @@ public:
 	Matrix GetViewProj() { return m_viewProj; }
 
 	// Texture로딩해보는 테스트용 함수
-	void CreateTexPipeline();
-	void CreateSampler();
+	void CreateTexPipeline2();
 	void CreateTexture();
 	ComPtr<ID3D12Resource> m_tex;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
+
 private:
 	uint32 m_width;
 	uint32 m_height;
@@ -76,7 +76,7 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	// 2024.04.18 : srv, sampler heap
 	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-	ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
+	//ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
 
 	ComPtr<ID3D12Resource> m_depthStencil;
 

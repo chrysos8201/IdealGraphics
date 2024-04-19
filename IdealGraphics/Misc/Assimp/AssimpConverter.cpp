@@ -299,7 +299,10 @@ void AssimpConverter::ReadMaterialData()
 
 		//----------------Texture----------------//
 		aiString file;
-		
+		/*if (srcMaterial->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), file) == AI_SUCCESS)
+		{
+			int a = 3;
+		}*/
 		// Diffuse Texture
 		srcMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &file);
 		material->diffuseTextureFile = file.C_Str();

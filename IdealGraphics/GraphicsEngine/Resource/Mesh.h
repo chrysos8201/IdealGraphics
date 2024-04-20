@@ -30,11 +30,14 @@ namespace Ideal
 
 		// Temp
 		void Tick(uint32 FrameIndex);
-		void Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex);
+		void Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex);
 
 	private:
 		void InitRootSignature(std::shared_ptr<IdealRenderer> Renderer);
 		void InitPipelineState(std::shared_ptr<IdealRenderer> Renderer);
+
+		void InitRootSignature2(std::shared_ptr<IdealRenderer> Renderer);
+		void InitPipelineState2(std::shared_ptr<IdealRenderer> Renderer);
 
 	private:
 		//std::shared_ptr<IdealRenderer> m_renderer;
@@ -62,6 +65,10 @@ namespace Ideal
 		std::vector<BasicVertex> m_vertices;	// 나중에 가지고 있을 필요가 없다
 		std::vector<uint32> m_indices;	// 마찬가지
 
+		// TODO : Delete
 		std::wstring m_diffuseMap;
+
+		private:
+		uint32 m_descriptorIncrementSize = 0;
 	};
 }

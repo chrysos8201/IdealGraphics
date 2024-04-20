@@ -26,3 +26,12 @@ inline void Check(HRESULT hr)
 		assert(false);
 	}
 }
+
+inline void GetErrorBlob(ID3DBlob* ErrorBlob)
+{
+	if (ErrorBlob != nullptr)
+	{
+		const char* errorMessage = (char*)ErrorBlob->GetBufferPointer();
+		__debugbreak();
+	}
+}

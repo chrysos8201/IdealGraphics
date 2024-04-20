@@ -11,7 +11,7 @@
 #include "GraphicsEngine/Resource/Model.h"
 //#include "ThirdParty/DirectXTex/DirectXTex.h"
 #include "ThirdParty/Include/DirectXTK12/WICTextureLoader.h"
-
+#include "GraphicsEngine/D3D12/D3D12Texture.h"
 IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_width(width),
@@ -45,10 +45,15 @@ void IdealRenderer::Init()
 #if defined(_DEBUG)
 	{
 		ComPtr<ID3D12Debug> debugController;
+		ComPtr<ID3D12Debug1> debugController1;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 		{
 			debugController->EnableDebugLayer();
-
+			
+			if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
+			{
+				debugController1->SetEnableGPUBasedValidation(true);	
+			}
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
 	}
@@ -179,7 +184,7 @@ void IdealRenderer::Init()
 
 	// 2024.04.18 : SRV heap을 만들겠다. 임시용이다.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1;	// 일단 한 개?
+	srvHeapDesc.NumDescriptors = 1024;	// 일단 한 개? // 2024.04.20 일단 크개 잡아두기로 했다.
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	Check(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_srvHeap.GetAddressOf())));
@@ -192,24 +197,25 @@ void IdealRenderer::Init()
 	Check(m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(m_samplerHeap.GetAddressOf())));*/
 
 	// 2024.04.11 cbv Heap을 만든다.
-	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
-	cbvHeapDesc.NumDescriptors = 1;
-	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	Check(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(m_cbvHeap.GetAddressOf())));
+	//D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
+	//cbvHeapDesc.NumDescriptors = 1;
+	//cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//Check(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(m_cbvHeap.GetAddressOf())));
 
 	////////////////////////////////////// Load ASSET
 	// 2024.04.18 Convert to my format
-	/*std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
+	std::shared_ptr<AssimpConverter> assimpConverter = std::make_shared<AssimpConverter>();
+	/*
 	assimpConverter->ReadAssetFile(L"statue_chronos/statue_join.fbx");
 	assimpConverter->ExportModelData(L"statue_chronos/statue_chronos");
 	assimpConverter->ExportMaterialData(L"statue_chronos/statue_chronos");
 	assimpConverter.reset();
-
+	*/
 	assimpConverter = std::make_shared<AssimpConverter>();
 	assimpConverter->ReadAssetFile(L"Tower/Tower.fbx");
 	assimpConverter->ExportModelData(L"Tower/Tower");
-	assimpConverter->ExportMaterialData(L"Tower/Tower");*/
+	assimpConverter->ExportMaterialData(L"Tower/Tower");
 
 
 	//m_model = std::make_shared<Ideal::Model>();
@@ -337,10 +343,10 @@ void IdealRenderer::LoadAsset2()
 	//m_commandList->Close();
 	//CreateMeshObject(L"porsche/porsche");
 	//CreateMeshObject(L"statue_chronos/statue_chronos");
-	CreateMeshObject(L"Tower/Tower");
 	//m_model->Create(shared_from_this());
 	//CreateTexPipeline();
 	CreateTexPipeline2();
+	CreateMeshObject(L"Tower/Tower");
 	CreateTexture();
 
 	//Check(m_commandList->Close());
@@ -383,7 +389,6 @@ void IdealRenderer::LoadAsset2()
 		uint32 vertexTypeSize = sizeof(VertexTest2);
 		uint32 vertexCount = _countof(cubeVertices);
 		m_idealVertexBuffer.Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
-
 		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
 		// command List를 일단 닫아주고 실행시킨다.
 		{
@@ -677,7 +682,7 @@ void IdealRenderer::CreateTexture()
 	D3D12_SUBRESOURCE_DATA subResource;
 	Check(DirectX::LoadWICTextureFromFile(
 		m_device.Get(),
-		L"Resources/Test/test.jpg",
+		L"Resources/Test/test2.png",
 		m_tex.ReleaseAndGetAddressOf(),
 		decodedData,
 		subResource
@@ -725,15 +730,13 @@ void IdealRenderer::CreateTexture()
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
+
 	ExecuteCommandList();
 }
 
 void IdealRenderer::PopulateCommandList2()
 {
-	for (auto m : m_models)
-	{
-		m->Render(m_commandList.Get(), m_frameIndex);
-	}
+	
 	//m_model->Render(m_commandList.Get());
 	//return;
 
@@ -757,6 +760,10 @@ void IdealRenderer::PopulateCommandList2()
 	//---------------------Draw--------------------//
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 	
+	for (auto m : m_models)
+	{
+		m->Render(shared_from_this(), m_commandList.Get(), m_frameIndex);
+	}
 }
 
 void IdealRenderer::WaitForGPU()

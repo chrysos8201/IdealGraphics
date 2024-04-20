@@ -36,7 +36,7 @@ VSOutput VS(VSInput input)
 
     output.PosW = worldPos;
     output.PosH = projPos;
-    output.NormalW = mul(WorldInvTranspose, float3(0.f,0.f,0.f));
+    //output.NormalW = mul(WorldInvTranspose, float3(0.f,0.f,0.f));
     output.UV = input.UV;
 
     return output;

@@ -3,6 +3,8 @@
 #include "Core/Core.h"
 #include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
 
+class IdealRenderer;
+
 namespace Ideal
 {
 	class D3D12Texture;
@@ -21,7 +23,7 @@ namespace Ideal
 		void SetSpecular(Color c) { m_specular = c; }
 		void SetEmissive(Color c) { m_emissive = c; }
 
-		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle);
+		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle, std::shared_ptr<IdealRenderer> Renderer);
 
 	private:
 		Color m_ambient;

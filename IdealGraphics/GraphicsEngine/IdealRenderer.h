@@ -12,6 +12,7 @@ namespace Ideal
 {
 	class Mesh;
 	class Model;
+	class D3D12Texture;
 }
 
 class IdealRenderer : public std::enable_shared_from_this<IdealRenderer>
@@ -59,7 +60,11 @@ public:
 	void CreateTexture();
 	ComPtr<ID3D12Resource> m_tex;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE GetSRVHeapHandler() { return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_srvHeap->GetCPUDescriptorHandleForHeapStart()); };
+	ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return m_srvHeap; }
 
+	// 2024.04.20 temp 
+	std::shared_ptr<Ideal::D3D12Texture> texture;
 private:
 	uint32 m_width;
 	uint32 m_height;
@@ -81,7 +86,7 @@ private:
 	ComPtr<ID3D12Resource> m_depthStencil;
 
 	// 2024.04.11 : cbv
-	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
+	//ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
 
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];

@@ -27,7 +27,8 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 
 	std::filesystem::path parentPath = std::filesystem::path(fullPath).parent_path();
 
-	tinyxml2::XMLDocument* document = new tinyxml2::XMLDocument();
+	//tinyxml2::XMLDocument* document = new tinyxml2::XMLDocument();
+	std::shared_ptr<tinyxml2::XMLDocument> document = std::make_shared<tinyxml2::XMLDocument>();
 	tinyxml2::XMLError error = document->LoadFile(StringUtils::ConvertWStringToString(fullPath).c_str());
 	assert(error == tinyxml2::XML_SUCCESS);
 
@@ -50,7 +51,12 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 			std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
 			if (textureStr.length() > 0)
 			{
-				material->m_diffuseTextureFile = textureStr;
+				// Temp 2024.04.20
+				std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
+
+				material->m_diffuseTextureFile = finalTextureStr;
+				//material->m_diffuseTextureFile = textureStr;
+				
 				// TODO : Texture만들기
 				//auto texture
 				// TEMP : 2024.04.19 임시로 여기다가 텍스쳐를 만들겠다.
@@ -135,6 +141,7 @@ void Ideal::Model::ReadMaterial(const std::wstring& filename)
 
 		materialNode = materialNode->NextSiblingElement();
 	}
+	BindCacheInfo();
 }
 
 void Ideal::Model::ReadModel(const std::wstring& filename)
@@ -220,11 +227,11 @@ void Ideal::Model::Tick(uint32 FrameIndex)
 	}
 }
 
-void Ideal::Model::Render(ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex)
+void Ideal::Model::Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12GraphicsCommandList* CommandList, uint32 FrameIndex)
 {
 	for (auto& m : m_meshes)
 	{
-		m->Render(CommandList, FrameIndex);
+		m->Render(Renderer, CommandList, FrameIndex);
 	}
 }
 

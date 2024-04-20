@@ -18,14 +18,14 @@ struct VSInput
 struct VSOutput
 {
     float4 PosH : SV_POSITION;
-    float3 PosW : POSITION;
-    float3 NormalW : NORMAL;
+    float4 PosW : POSITION;
+    float4 NormalW : NORMAL;
     float2 UV : TEXCOORD;
 };
 
 VSOutput VS(VSInput input)
 {
-    VSOutput output = (VSOutput)0;
+    VSOutput output;
 
     float4 localPos = float4(input.Pos, 1.f);
     float4 worldPos = mul(World, localPos);
@@ -34,17 +34,17 @@ VSOutput VS(VSInput input)
 
     output.PosW = worldPos;
     output.PosH = projPos;
-    output.NormalW = mul(WorldInvTranspose, float3(0.f,0.f,0.f));
+    output.NormalW = mul(WorldInvTranspose, float4(input.Normal, 0.f));
     output.UV = input.UV;
 
     return output;
 }
 
-Texture2D texture0 : register(b0);
+Texture2D texture0 : register(t0);
 SamplerState sampler0 : register(s0);
 
-float4 PS(VSOutput input)
+float4 PS(VSOutput input) : SV_TARGET
 {
-    float4 color = texture0.Sample(sampler0, input.uv);
+    float4 color = texture0.Sample(sampler0, input.UV);
     return color;
 }

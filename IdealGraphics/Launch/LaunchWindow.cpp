@@ -48,7 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg = {};
 
     //Engine2 engine(g_hWnd,1280,960);
-    //_CrtSetBreakAlloc(538);
+    //_CrtSetBreakAlloc(520);
     {
         std::shared_ptr<IdealRenderer> renderer = std::make_shared<IdealRenderer>(g_hWnd, 1280, 960);
         //IdealRenderer engine(g_hWnd, 1280, 960);

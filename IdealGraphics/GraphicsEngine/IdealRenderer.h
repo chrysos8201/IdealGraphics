@@ -33,8 +33,8 @@ public:
 	void MoveToNextFrame();
 
 	// 다시 수정 버전
-	void PopulateCommandList2();
-	void LoadAsset2();
+	void DrawBox();
+	void LoadAssets();
 
 	void ExecuteCommandList();
 
@@ -43,6 +43,13 @@ public:
 	void BeginRender();
 	void EndRender();
 
+	// 2024.04.21 fence
+	
+	void CreateFence();
+	uint64 Fence();
+	void WaitForFenceValue();
+	uint64 m_fenceValue;
+	//HANDLE m_fenceEvent;
 public:
 	ComPtr<ID3D12Device> GetDevice();
 	// 일단 cmd list는 하나만 쓴다.
@@ -50,20 +57,17 @@ public:
 	//Ideal::D3D12PipelineState
 	uint32 GetFrameIndex() const;
 
-	std::shared_ptr<Ideal::D3D12PipelineState> GetPipelineStates();
-
 	Matrix GetView() { return m_view; }
 	Matrix GetProj() { return m_proj; }
 	Matrix GetViewProj() { return m_viewProj; }
 
 	// Texture로딩해보는 테스트용 함수
-	void CreateTexPipeline2();
-	void CreateTexture();
+	void LoadBox();
+	void CreateBoxTexPipeline();
+	void CreateBoxTexture();
 	ComPtr<ID3D12Resource> m_tex;
 	Ideal::D3D12DescriptorHandle m_texHandle;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
-	CD3DX12_CPU_DESCRIPTOR_HANDLE GetSRVHeapHandler() { return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_srvHeap->GetCPUDescriptorHandleForHeapStart()); };
-	ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return m_srvHeap; }
 
 	// 2024.04.20 temp 
 	std::shared_ptr<Ideal::D3D12Texture> texture;
@@ -77,8 +81,6 @@ private:
 	uint32 m_width;
 	uint32 m_height;
 	HWND m_hwnd;
-	//CD3DX12_VIEWPORT m_viewport;
-	//CD3DX12_RECT m_scissorRect;
 
 	ComPtr<ID3D12Device> m_device;
 	ComPtr<ID3D12CommandQueue> m_commandQueue;
@@ -87,21 +89,16 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
 	// 2024.04.14 : dsv
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
-	// 2024.04.18 : srv, sampler heap
-	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-	//ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
 
 	ComPtr<ID3D12Resource> m_depthStencil;
-
-	// 2024.04.11 : cbv
-	//ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
 
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];
 	ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
+	ComPtr<ID3D12GraphicsCommandList> m_commandList;
+
 	ComPtr<ID3D12RootSignature> m_rootSignature;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
-	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
 private:
 	float m_aspectRatio = 0.f;
@@ -125,20 +122,22 @@ private:
 	//
 	Ideal::D3D12Viewport m_viewport;
 
+
+
+private:
+	// Temp assimp model import
+	std::vector<std::shared_ptr<Ideal::Model>> m_models;
+
+
+private:
+	// BOX
+	void BoxTick();
+	
 	// 2024.04.11 :
 	// VertexBuffer와 IndexBuffer를 묶어줘보겠다.
 	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
 	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
 	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
-
-	// 2024.04.15 : pso
-	std::shared_ptr<Ideal::D3D12PipelineState> m_idealPipelineState;
-	ComPtr<ID3D12PipelineState> m_currentPipelineState;
-
-private:
-	// Temp assimp model import
-	//std::shared_ptr<Ideal::Model> m_model;
-	std::vector<std::shared_ptr<Ideal::Model>> m_models;
 };
 

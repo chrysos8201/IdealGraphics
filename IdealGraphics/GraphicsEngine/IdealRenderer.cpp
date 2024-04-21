@@ -20,7 +20,6 @@ IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	m_viewport(hwnd, width, height)
 {
 	m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	m_idealPipelineState = std::make_shared<Ideal::D3D12PipelineState>();
 }
 
 IdealRenderer::~IdealRenderer()
@@ -139,6 +138,13 @@ void IdealRenderer::Init()
 		}
 	}
 
+	// create Command List
+	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+	m_commandList->Close();
+
+	// create Fence
+	CreateFence();
+
 	// 2024.04.14 : dsv를 만들겠다. 먼저 descriptor heap을 만든다.
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 	dsvHeapDesc.NumDescriptors = 1;
@@ -182,31 +188,8 @@ void IdealRenderer::Init()
 		m_device->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
-	// 2024.04.18 : SRV heap을 만들겠다. 임시용이다.
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1024;	// 일단 한 개? // 2024.04.20 일단 크개 잡아두기로 했다.
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	Check(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_srvHeap.GetAddressOf())));
-
 	// 2024.04.21 Ideal::Descriptor Heap
 	m_idealSrvHeap.Create(shared_from_this(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, m_srvHeapNum);
-
-	//m_idealSrvHeap.Allocate();
-
-	// 2024.04.18 : Sampler Heap을 만들겠다. 임시용이다.
-	/*D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {};
-	samplerHeapDesc.NumDescriptors = 1;
-	samplerHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-	samplerHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	Check(m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(m_samplerHeap.GetAddressOf())));*/
-
-	// 2024.04.11 cbv Heap을 만든다.
-	//D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
-	//cbvHeapDesc.NumDescriptors = 1;
-	//cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	//cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	//Check(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(m_cbvHeap.GetAddressOf())));
 
 	////////////////////////////////////// Load ASSET
 	// 2024.04.18 Convert to my format
@@ -232,49 +215,14 @@ void IdealRenderer::Init()
 	//m_model = std::make_shared<Ideal::Model>();
 	//m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
 	//m_model->ReadMaterial(L"porsche/porsche");
-	int a = 3;
 
 	// Load Asset
-	LoadAsset2();
+	//LoadAssets();
 }
 
 void IdealRenderer::Tick()
 {
-	// 2024.04.14 constantBuffer 수정
-	//m_constantBufferDataSimpleBox
-	static float rot = 0.0f;
-	m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
-	Matrix mat = Matrix::CreateRotationY(rot) * Matrix::CreateRotationX(-rot) * m_viewProj;
-	Matrix tMat = mat.Transpose();
-	rot += 0.01f;
-	m_simpleBoxConstantBufferDataBegin->worldViewProjection = tMat;
-
-	if (GetAsyncKeyState('Q') & 0x8000)
-	{
-		ComPtr<ID3D12PipelineState> getPipeline = m_idealPipelineState->GetPipelineState(
-			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
-			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS2,
-			Ideal::EPipelineStateRS::ERasterizerStateWireFrame
-		);
-		if (m_currentPipelineState != getPipeline)
-		{
-			m_currentPipelineState = getPipeline;
-		}
-	}
-	if (GetAsyncKeyState('E') & 0x8000)
-	{
-		ComPtr<ID3D12PipelineState> getPipeline = m_idealPipelineState->GetPipelineState(
-			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
-			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
-			Ideal::EPipelineStateRS::ERasterizerStateSolid
-		);
-		if (m_currentPipelineState != getPipeline)
-		{
-			m_currentPipelineState = getPipeline;
-		}
-	}
+	//BoxTick();
 
 	for (auto m : m_models)
 	{
@@ -284,16 +232,27 @@ void IdealRenderer::Tick()
 
 void IdealRenderer::Render()
 {
-	//PopulateCommandList();
 	BeginRender();
-	PopulateCommandList2();
+
+	//-------------Render Command-------------//
+	//{
+	//	ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
+	//	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	//	//DrawBox();
+	//	// Test Models Render
+	//	for (auto m : m_models)
+	//	{
+	//		m->Render(shared_from_this(), m_commandList.Get(), m_frameIndex);
+	//	}
+	//}
 	EndRender();
 
-	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
 	Check(m_swapChain->Present(1, 0));
-	MoveToNextFrame();
+	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+	Fence();
+	WaitForFenceValue();
+	//MoveToNextFrame();
 }
 
 void IdealRenderer::Release()
@@ -317,206 +276,43 @@ void IdealRenderer::MoveToNextFrame()
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
-void IdealRenderer::LoadAsset2()
+void IdealRenderer::LoadAssets()
 {
-	{
-		// CBV를 다시 만들었으니 Root Signature을 다시 만든다.
-		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
-		// 2024.04.13 : 루트 시그니쳐 뭔가 바꿔보겠다
-		// 1개 있고, b0에 들어갈 것이고, data_static은 일반적으로 상수 버퍼 설정에 넣는 것이라고 한다(?), 그리고 이 데이터는 vertex 쉐이더에서 사용할 것이다
-		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
-
-
-		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
-
-		ComPtr<ID3DBlob> signature;
-		ComPtr<ID3DBlob> error;
-		Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-		Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_rootSignature.GetAddressOf())));
-	}
-
-	// 2024.04.15 : pso를 미리 만들어두고 사용하겠다!
-	{
-		m_idealPipelineState->Create(m_device.Get(), m_rootSignature.Get());
-
-		m_currentPipelineState = m_idealPipelineState->GetPipelineState(
-			Ideal::EPipelineStateInputLayout::ESimpleInputElement,
-			Ideal::EPipelineStateVS::ESimpleVertexShaderVS,
-			Ideal::EPipelineStatePS::ESimplePixelShaderPS,
-			Ideal::EPipelineStateRS::ERasterizerStateSolid
-		).Get();
-	}
-
-	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+	//CreateMeshObject(L"Tower/Tower");
+	//CreateMeshObject(L"House2/House2");
+	LoadBox();
 	//m_commandList->Close();
-	//CreateMeshObject(L"porsche/porsche");
-	//CreateMeshObject(L"statue_chronos/statue_chronos");
-	//m_model->Create(shared_from_this());
-	//CreateTexPipeline();
-	CreateTexPipeline2();
-	CreateMeshObject(L"Tower/Tower");
-	CreateMeshObject(L"House2/House2");
-	CreateTexture();
-
-	//Check(m_commandList->Close());
-
-	{
-		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
-
-		//const VertexTest cubeVertices[] = {
-		//	{ { -0.5f, 0.5f, -0.5f },	{1.0f, 0.0f,0.0f,1.0f } },    // Back Top Left
-		//	{ {  0.5f, 0.5f, -0.5f},	{0.0f, 1.0f,0.0f,1.0f } },    // Back Top Right
-		//	{ {  0.5f, 0.5f,  0.5f},	{0.0f, 0.0f,1.0f,1.0f } },    // Front Top Right
-		//	{ { -0.5f, 0.5f,  0.5f},	{1.0f, 1.0f,0.0f,1.0f } },    // Front Top Left
-
-		//	{ { -0.5f, -0.5f,-0.5f},	{0.0f, 1.0f,1.0f,1.0f } },    // Back Bottom Left
-		//	{ {  0.5f, -0.5f,-0.5f},	{1.0f, 0.0f,1.0f,1.0f } },    // Back Bottom Right
-		//	{ {  0.5f, -0.5f, 0.5f},	{1.0f, 1.0f,1.0f,1.0f } },    // Front Bottom Right
-		//	{ { -0.5f, -0.5f, 0.5f},	{0.0f, 0.0f,0.0f,1.0f } },    // Front Bottom Left
-		//};
-		const VertexTest2 cubeVertices[] = {
-			{ { -0.5f, 0.5f, -0.5f},	Vector2(0.0f, 1.0f) },    // Back Top Left
-			{ {  0.5f, 0.5f, -0.5f},	Vector2(0.0f, 0.0f) },    // Back Top Right
-			{ {  0.5f, 0.5f,  0.5f},	Vector2(1.0f, 0.0f) },    // Front Top Right
-			{ { -0.5f, 0.5f,  0.5f},	Vector2(1.0f, 1.0f)	},    // Front Top Left
-
-			{ { -0.5f, -0.5f,-0.5f},	Vector2(0.0f, 1.0f)	},    // Back Bottom Left
-			{ {  0.5f, -0.5f,-0.5f},	Vector2(0.0f, 0.0f) },    // Back Bottom Right
-			{ {  0.5f, -0.5f, 0.5f},	Vector2(1.0f, 0.0f) },    // Front Bottom Right
-			{ { -0.5f, -0.5f, 0.5f},	Vector2(1.0f, 1.0f) },    // Front Bottom Left
-		};
-		const uint32 vertexBufferSize = sizeof(cubeVertices);
-
-		// UploadBuffer를 만든다.
-		Ideal::D3D12UploadBuffer uploadBuffer;
-		uploadBuffer.Create(m_device.Get(), vertexBufferSize);
-
-		void* mappedUploadHeap = uploadBuffer.Map();
-		memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
-		uploadBuffer.UnMap();
-
-		uint32 vertexTypeSize = sizeof(VertexTest2);
-		uint32 vertexCount = _countof(cubeVertices);
-		m_idealVertexBuffer.Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
-		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
-		// command List를 일단 닫아주고 실행시킨다.
-		{
-			Check(m_commandList->Close());
-			ID3D12CommandList* commandLists[] = { m_commandList.Get() };	// 하나밖에 없다
-			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-			// 동기화 오브젝트를 만들고 에셋 정보가 GPU에 업로드되기까지 기다린다.
-			{
-				Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-				m_fenceValues[m_frameIndex]++;
-
-				m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-				if (m_fenceEvent == nullptr)
-				{
-					Check(HRESULT_FROM_WIN32(GetLastError()));
-				}
-
-				WaitForGPU();
-			}
-		}
-	}
-	m_commandAllocators[m_frameIndex]->Reset();
-	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
-
-	// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
-	{
-		uint32 indices[] = {
-			0, 1, 3,
-			1, 2, 3,
-
-			3, 2, 7,
-			6, 7, 2,
-
-			2, 1, 6,
-			5, 6, 1,
-			
-			1, 0, 5,
-			4, 5, 0,
-
-			0, 3, 4,
-			7, 4, 3,
-
-			7, 6, 4,
-			5, 4, 6, };
-		const uint32 indexBufferSize = sizeof(indices);
-
-		Ideal::D3D12UploadBuffer uploadBuffer;
-		uploadBuffer.Create(m_device.Get(), indexBufferSize);
-
-
-		// 업로드버퍼에 먼저 복사
-		void* mappedUploadBuffer = uploadBuffer.Map();
-		memcpy(mappedUploadBuffer, indices, indexBufferSize);
-		uploadBuffer.UnMap();
-
-		uint32 indexTypeSize = sizeof(uint32);
-		uint32 indexCount = _countof(indices);
-
-		m_idealIndexBuffer.Create(m_device.Get(), m_commandList.Get(), indexTypeSize, indexCount, uploadBuffer);
-
-		// 일단 커맨드 리스트를 닫는다
-		{
-			Check(m_commandList->Close());
-			ID3D12CommandList* commandLists[] = { m_commandList.Get() };
-			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-			// 여기서도 Wait를 걸면 될까?
-			{
-				Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-				m_fenceValues[m_frameIndex]++;
-
-				m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-				if (m_fenceEvent == nullptr)
-				{
-					Check(HRESULT_FROM_WIN32(GetLastError()));
-				}
-
-				WaitForGPU();
-			}
-		}
-
-		// 2024.04.13 : ConstantBuffer 다시 만든다.
-		// 프레임 개수 만큼 메모리를 할당 할 것이다.
-		{
-			const uint32 testConstantBufferSize = sizeof(SimpleBoxConstantBuffer);
-
-			m_idealConstantBuffer.Create(m_device.Get(), testConstantBufferSize, FRAME_BUFFER_COUNT);
-
-			//void* beginData = m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
-			//memcpy(beginData, &m_constantBufferData, sizeof(m_constantBufferData));
-			m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
-			//m_testOffsetConstantBufferDataBegin->offset = m_constantBufferData.offset;
-		}
-	}
 }
 
 void IdealRenderer::ExecuteCommandList()
 {
-	Check(m_commandList->Close());
+	//Check(m_commandList->Close());
 	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
 	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-	// 여기서도 Wait를 걸면 될까?
-	{
-		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-		m_fenceValues[m_frameIndex]++;
 
-		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-		if (m_fenceEvent == nullptr)
-		{
-			Check(HRESULT_FROM_WIN32(GetLastError()));
-		}
+	Fence();
+	WaitForFenceValue();
 
-		WaitForGPU();
-	}
-	m_commandAllocators[m_frameIndex]->Reset();
-	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+	return;
+	//Check(m_commandList->Close());
+	//ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+	//m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+	//// 여기서도 Wait를 걸면 될까?
+	//{
+	//	Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+	//	m_fenceValues[m_frameIndex]++;
+
+	//	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	//	if (m_fenceEvent == nullptr)
+	//	{
+	//		Check(HRESULT_FROM_WIN32(GetLastError()));
+	//	}
+
+	//	WaitForGPU();
+	//}
+	//m_commandAllocators[m_frameIndex]->Reset();
+	//m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+	
 }
 
 void IdealRenderer::CreateMeshObject(const std::wstring FileName)
@@ -531,9 +327,9 @@ void IdealRenderer::CreateMeshObject(const std::wstring FileName)
 void IdealRenderer::BeginRender()
 {
 	Check(m_commandAllocators[m_frameIndex]->Reset());
+	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
 	// 2024.04.15 pipeline state를 m_currentPipelineState에 있는 것으로 세팅한다.
-	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
 	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
 	m_commandList->RSSetScissorRects(1, &m_viewport.GetScissorRect());
@@ -566,6 +362,35 @@ void IdealRenderer::EndRender()
 
 	m_commandList->ResourceBarrier(1, &backBufferPresent);
 	Check(m_commandList->Close());
+
+	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+}
+
+void IdealRenderer::CreateFence()
+{
+	Check(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.GetAddressOf())));
+
+	m_fenceValue = 0;
+	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+}
+
+uint64 IdealRenderer::Fence()
+{
+	m_fenceValue++;
+	m_commandQueue->Signal(m_fence.Get(), m_fenceValue);
+	return m_fenceValue;
+}
+
+void IdealRenderer::WaitForFenceValue()
+{
+	const uint64 expectedFenceValue = m_fenceValue;
+
+	if (m_fence->GetCompletedValue() < expectedFenceValue)
+	{
+		m_fence->SetEventOnCompletion(expectedFenceValue, m_fenceEvent);
+		WaitForSingleObject(m_fenceEvent, INFINITE);
+	}
 }
 
 Microsoft::WRL::ComPtr<ID3D12Device> IdealRenderer::GetDevice()
@@ -583,12 +408,155 @@ uint32 IdealRenderer::GetFrameIndex() const
 	return m_frameIndex;
 }
 
-std::shared_ptr<Ideal::D3D12PipelineState> IdealRenderer::GetPipelineStates()
+void IdealRenderer::LoadBox()
 {
-	return m_idealPipelineState;
+	{
+		// CBV를 다시 만들었으니 Root Signature을 다시 만든다.
+		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+		// 2024.04.13 : 루트 시그니쳐 뭔가 바꿔보겠다
+		// 1개 있고, b0에 들어갈 것이고, data_static은 일반적으로 상수 버퍼 설정에 넣는 것이라고 한다(?), 그리고 이 데이터는 vertex 쉐이더에서 사용할 것이다
+		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
+
+
+		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
+
+		ComPtr<ID3DBlob> signature;
+		ComPtr<ID3DBlob> error;
+		Check(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+		Check(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(m_rootSignature.GetAddressOf())));
+	}
+
+	CreateBoxTexPipeline();
+	{
+		ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
+		const VertexTest2 cubeVertices[] = {
+			{ { -0.5f, 0.5f, -0.5f},	Vector2(0.0f, 1.0f) },    // Back Top Left
+			{ {  0.5f, 0.5f, -0.5f},	Vector2(0.0f, 0.0f) },    // Back Top Right
+			{ {  0.5f, 0.5f,  0.5f},	Vector2(1.0f, 0.0f) },    // Front Top Right
+			{ { -0.5f, 0.5f,  0.5f},	Vector2(1.0f, 1.0f)	},    // Front Top Left
+
+			{ { -0.5f, -0.5f,-0.5f},	Vector2(0.0f, 1.0f)	},    // Back Bottom Left
+			{ {  0.5f, -0.5f,-0.5f},	Vector2(0.0f, 0.0f) },    // Back Bottom Right
+			{ {  0.5f, -0.5f, 0.5f},	Vector2(1.0f, 0.0f) },    // Front Bottom Right
+			{ { -0.5f, -0.5f, 0.5f},	Vector2(1.0f, 1.0f) },    // Front Bottom Left
+		};
+		const uint32 vertexBufferSize = sizeof(cubeVertices);
+
+		// UploadBuffer를 만든다.
+		Ideal::D3D12UploadBuffer uploadBuffer;
+		uploadBuffer.Create(m_device.Get(), vertexBufferSize);
+
+		void* mappedUploadHeap = uploadBuffer.Map();
+		memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
+		uploadBuffer.UnMap();
+
+		uint32 vertexTypeSize = sizeof(VertexTest2);
+		uint32 vertexCount = _countof(cubeVertices);
+		m_idealVertexBuffer.Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
+		m_commandList->Close();
+		ExecuteCommandList();
+		// 자 vertexBuffer를 GPU에 복사해주어야 하니까 Wait를 일단 걸어준다.
+		// command List를 일단 닫아주고 실행시킨다.
+		//{
+		//	Check(m_commandList->Close());
+		//	ID3D12CommandList* commandLists[] = { m_commandList.Get() };	// 하나밖에 없다
+		//	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+
+		//	// 동기화 오브젝트를 만들고 에셋 정보가 GPU에 업로드되기까지 기다린다.
+		//	{
+		//		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+		//		m_fenceValues[m_frameIndex]++;
+
+		//		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		//		if (m_fenceEvent == nullptr)
+		//		{
+		//			Check(HRESULT_FROM_WIN32(GetLastError()));
+		//		}
+
+		//		WaitForGPU();
+		//	}
+		//}
+	}
+	m_commandAllocators[m_frameIndex]->Reset();
+	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+
+	// Index Buffer도 만들겠다. 여기서도 아마 wait을 걸 것 같기는 한데 해결하는 전략이 있어보이긴 하지만 일단은 그냥 wait걸어서 만들겠따.
+	{
+		uint32 indices[] = {
+			0, 1, 3,
+			1, 2, 3,
+
+			3, 2, 7,
+			6, 7, 2,
+
+			2, 1, 6,
+			5, 6, 1,
+
+			1, 0, 5,
+			4, 5, 0,
+
+			0, 3, 4,
+			7, 4, 3,
+
+			7, 6, 4,
+			5, 4, 6, };
+		const uint32 indexBufferSize = sizeof(indices);
+
+		Ideal::D3D12UploadBuffer uploadBuffer;
+		uploadBuffer.Create(m_device.Get(), indexBufferSize);
+
+
+		// 업로드버퍼에 먼저 복사
+		void* mappedUploadBuffer = uploadBuffer.Map();
+		memcpy(mappedUploadBuffer, indices, indexBufferSize);
+		uploadBuffer.UnMap();
+
+		uint32 indexTypeSize = sizeof(uint32);
+		uint32 indexCount = _countof(indices);
+
+		m_idealIndexBuffer.Create(m_device.Get(), m_commandList.Get(), indexTypeSize, indexCount, uploadBuffer);
+		//ExecuteCommandList();
+		// 일단 커맨드 리스트를 닫는다
+		//{
+		//	Check(m_commandList->Close());
+		//	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+		//	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+		//	// 여기서도 Wait를 걸면 될까?
+		//	{
+		//		Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+		//		m_fenceValues[m_frameIndex]++;
+
+		//		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		//		if (m_fenceEvent == nullptr)
+		//		{
+		//			Check(HRESULT_FROM_WIN32(GetLastError()));
+		//		}
+
+		//		WaitForGPU();
+		//	}
+		//}
+		m_commandList->Close();
+		ExecuteCommandList();
+
+		// 2024.04.13 : ConstantBuffer 다시 만든다.
+		// 프레임 개수 만큼 메모리를 할당 할 것이다.
+		{
+			const uint32 testConstantBufferSize = sizeof(SimpleBoxConstantBuffer);
+
+			m_idealConstantBuffer.Create(m_device.Get(), testConstantBufferSize, FRAME_BUFFER_COUNT);
+
+			m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+		}
+	}
+	CreateBoxTexture();
+
+	return;
 }
 
-void IdealRenderer::CreateTexPipeline2()
+void IdealRenderer::CreateBoxTexPipeline()
 {	
 	// LinearWrap
 	CD3DX12_STATIC_SAMPLER_DESC sampler(
@@ -686,7 +654,7 @@ void IdealRenderer::CreateTexPipeline2()
 	));
 }
 
-void IdealRenderer::CreateTexture()
+void IdealRenderer::CreateBoxTexture()
 {
 	//----------------Load WIC Texture From File----------------//
 
@@ -734,6 +702,8 @@ void IdealRenderer::CreateTexture()
 	);
 	m_commandList->ResourceBarrier(1, &barrier);
 
+	m_commandList->Close();
+	ExecuteCommandList();
 	//----------------Create Shader Resource View----------------//
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -744,16 +714,11 @@ void IdealRenderer::CreateTexture()
 	//m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
 	m_texHandle = AllocateSRV();
 	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_texHandle.GetCpuHandle());
-
-	ExecuteCommandList();
+	//m_commandList->Close();
 }
 
-void IdealRenderer::PopulateCommandList2()
+void IdealRenderer::DrawBox()
 {
-	
-	//m_model->Render(m_commandList.Get());
-	//return;
-
 	m_commandList->SetPipelineState(m_pipelineState.Get());
 
 	//---------------------IA--------------------//
@@ -777,10 +742,6 @@ void IdealRenderer::PopulateCommandList2()
 	//---------------------Draw--------------------//
 	m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 	
-	for (auto m : m_models)
-	{
-		m->Render(shared_from_this(), m_commandList.Get(), m_frameIndex);
-	}
 }
 
 void IdealRenderer::WaitForGPU()
@@ -791,4 +752,16 @@ void IdealRenderer::WaitForGPU()
 	WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 
 	m_fenceValues[m_frameIndex]++;
+}
+
+void IdealRenderer::BoxTick()
+{
+	// 2024.04.14 constantBuffer 수정
+	//m_constantBufferDataSimpleBox
+	static float rot = 0.0f;
+	m_simpleBoxConstantBufferDataBegin = (SimpleBoxConstantBuffer*)m_idealConstantBuffer.GetMappedMemory(m_frameIndex);
+	Matrix mat = Matrix::CreateRotationY(rot) * Matrix::CreateRotationX(-rot) * m_viewProj;
+	Matrix tMat = mat.Transpose();
+	rot += 0.01f;
+	m_simpleBoxConstantBufferDataBegin->worldViewProjection = tMat;
 }

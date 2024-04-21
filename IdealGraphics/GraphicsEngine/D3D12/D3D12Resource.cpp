@@ -220,7 +220,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 
 	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
-
+	
 	Check(Device->CreateCommittedResource(
 		&heapProp,
 		D3D12_HEAP_FLAG_NONE,
@@ -230,7 +230,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 		IID_PPV_ARGS(m_resource.GetAddressOf())
 	));
 	m_resource->SetName(L"ConstantBuffer");
-
+	 
 	CD3DX12_RANGE readRange(0, 0);
 	Check(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedConstantBuffer)));
 	m_isMapped = true;

@@ -147,8 +147,6 @@ void Ideal::Mesh::Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12Graphics
 
 	uint32 currentIndex = FrameIndex;
 	CommandList->SetGraphicsRootConstantBufferView(1, m_constantBuffer.GetGPUVirtualAddress(currentIndex));
-
-
 	CommandList->DrawIndexedInstanced(m_indexBuffer.GetElementCount(), 1, 0, 0, 0);
 }
 

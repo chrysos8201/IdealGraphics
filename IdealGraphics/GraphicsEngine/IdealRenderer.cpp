@@ -12,6 +12,7 @@
 //#include "ThirdParty/DirectXTex/DirectXTex.h"
 #include "ThirdParty/Include/DirectXTK12/WICTextureLoader.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
+
 IdealRenderer::IdealRenderer(HWND hwnd, uint32 width, uint32 height)
 	: m_hwnd(hwnd),
 	m_width(width),
@@ -135,7 +136,6 @@ void IdealRenderer::Init()
 			rtvHandle.Offset(1, m_rtvDescriptorSize);
 
 			Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
-
 		}
 	}
 
@@ -189,6 +189,11 @@ void IdealRenderer::Init()
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	Check(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_srvHeap.GetAddressOf())));
 
+	// 2024.04.21 Ideal::Descriptor Heap
+	m_idealSrvHeap.Create(shared_from_this(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, m_srvHeapNum);
+
+	//m_idealSrvHeap.Allocate();
+
 	// 2024.04.18 : Sampler Heap을 만들겠다. 임시용이다.
 	/*D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {};
 	samplerHeapDesc.NumDescriptors = 1;
@@ -216,7 +221,13 @@ void IdealRenderer::Init()
 	assimpConverter->ReadAssetFile(L"Tower/Tower.fbx");
 	assimpConverter->ExportModelData(L"Tower/Tower");
 	assimpConverter->ExportMaterialData(L"Tower/Tower");
+	assimpConverter.reset();
 
+	assimpConverter = std::make_shared<AssimpConverter>();
+	assimpConverter->ReadAssetFile(L"House2/untitled.fbx");
+	assimpConverter->ExportModelData(L"House2/House2");
+	assimpConverter->ExportMaterialData(L"House2/House2");
+	assimpConverter.reset();
 
 	//m_model = std::make_shared<Ideal::Model>();
 	//m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
@@ -347,6 +358,7 @@ void IdealRenderer::LoadAsset2()
 	//CreateTexPipeline();
 	CreateTexPipeline2();
 	CreateMeshObject(L"Tower/Tower");
+	CreateMeshObject(L"House2/House2");
 	CreateTexture();
 
 	//Check(m_commandList->Close());
@@ -729,7 +741,9 @@ void IdealRenderer::CreateTexture()
 	srvDesc.Format = m_tex->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
-	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
+	//m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
+	m_texHandle = AllocateSRV();
+	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_texHandle.GetCpuHandle());
 
 	ExecuteCommandList();
 }
@@ -752,9 +766,12 @@ void IdealRenderer::PopulateCommandList2()
 	//---------------------Root Signature--------------------//
 	m_commandList->SetGraphicsRootSignature(m_texRootSignature.Get());
 
-	ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
+	//ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
+	ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
 	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	m_commandList->SetGraphicsRootDescriptorTable(0, m_srvHeap->GetGPUDescriptorHandleForHeapStart());
+
+	//m_commandList->SetGraphicsRootDescriptorTable(0, m_srvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_commandList->SetGraphicsRootDescriptorTable(0, m_texHandle.GetGpuHandle());
 	m_commandList->SetGraphicsRootConstantBufferView(1, m_idealConstantBuffer.GetGPUVirtualAddress(m_frameIndex));
 
 	//---------------------Draw--------------------//

@@ -121,6 +121,7 @@
       <Filter>Misc</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Resource\ResourceBase.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -181,6 +182,7 @@
     </ClCompile>
     <ClCompile Include="Misc\Utils\StringUtils.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

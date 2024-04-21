@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
     <ClInclude Include="GraphicsEngine\ResourceManager.h" />
     <ClInclude Include="Misc\Utils\FileUtils.h" />
     <ClInclude Include="GraphicsEngine\Resource\Bone.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
     <ClCompile Include="Misc\Utils\FileUtils.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Bone.cpp" />

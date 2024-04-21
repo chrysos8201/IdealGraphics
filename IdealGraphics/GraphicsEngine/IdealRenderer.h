@@ -7,6 +7,7 @@
 #include "GraphicsEngine/D3D12/D3D12PipelineState.h"
 #include "GraphicsEngine/VertexInfo.h"
 //#include "GraphicsEngine/Mesh.h"
+#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
 
 namespace Ideal
 {
@@ -59,12 +60,19 @@ public:
 	void CreateTexPipeline2();
 	void CreateTexture();
 	ComPtr<ID3D12Resource> m_tex;
+	Ideal::D3D12DescriptorHandle m_texHandle;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE GetSRVHeapHandler() { return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_srvHeap->GetCPUDescriptorHandleForHeapStart()); };
 	ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return m_srvHeap; }
 
 	// 2024.04.20 temp 
 	std::shared_ptr<Ideal::D3D12Texture> texture;
+
+	// 2024.04.21 Temp : Ideal::DescriptorHeap
+	Ideal::D3D12DescriptorHandle AllocateSRV() { return m_idealSrvHeap.Allocate(); }
+	uint32 m_srvHeapNum = 256U;
+	Ideal::D3D12DescriptorHeap m_idealSrvHeap;
+
 private:
 	uint32 m_width;
 	uint32 m_height;

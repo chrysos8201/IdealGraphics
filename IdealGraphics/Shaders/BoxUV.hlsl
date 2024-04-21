@@ -40,11 +40,14 @@ VSOutput VS(VSInput input)
     return output;
 }
 
-Texture2D texture0 : register(t0);
+Texture2D diffuseTexture : register(t0);
+//Texture2D normalTexture : register(t1);
+
 SamplerState sampler0 : register(s0);
 
 float4 PS(VSOutput input) : SV_TARGET
 {
-    float4 color = texture0.Sample(sampler0, input.UV);
+    float4 color = diffuseTexture.Sample(sampler0, input.UV);
+    //float4 color = float4(input.UV.xy, 1, 1);
     return color;
 }

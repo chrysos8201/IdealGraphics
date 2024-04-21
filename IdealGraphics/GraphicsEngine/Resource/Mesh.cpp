@@ -98,18 +98,14 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 	if (m_material)
 	{
 		// 2024.04.20 : descriptor heap 두번째에 접근하기 위해 사이즈를 구하고 건내주겠다.
-		 m_descriptorIncrementSize = Renderer->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	/*	 m_descriptorIncrementSize = Renderer->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		 CD3DX12_CPU_DESCRIPTOR_HANDLE handler = Renderer->GetSRVHeapHandler();
-		 handler.Offset(m_descriptorIncrementSize);
+		 handler.Offset(m_descriptorIncrementSize);*/
 
-		m_material->Create(
-			Renderer->GetDevice().Get(),
-			Renderer->GetCommandList().Get(),
-			//Renderer->GetSRVHeapHandler(),
-			handler,
-			Renderer
-			);
+		// 2024.04.21 : 그냥 Renderer만 전해주면 Allocate를 통해 따로 Offset 계산해주지 않아도 알아서 할당한다.
+		m_material->Create(Renderer);
+
 		Renderer->ExecuteCommandList();
 	}
 }
@@ -140,10 +136,13 @@ void Ideal::Mesh::Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12Graphics
 	//CommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	// 2024.04.20 두번째 srv에 접근!!!!!!
-	CD3DX12_GPU_DESCRIPTOR_HANDLE handler = CD3DX12_GPU_DESCRIPTOR_HANDLE(Renderer->GetSRVDescriptorHeap().Get()->GetGPUDescriptorHandleForHeapStart());
-	handler.Offset(m_descriptorIncrementSize);
-	CommandList->SetGraphicsRootDescriptorTable(0, handler);
+	//CD3DX12_GPU_DESCRIPTOR_HANDLE handler = CD3DX12_GPU_DESCRIPTOR_HANDLE(Renderer->GetSRVDescriptorHeap().Get()->GetGPUDescriptorHandleForHeapStart());
+	//handler.Offset(m_descriptorIncrementSize);
+	//CommandList->SetGraphicsRootDescriptorTable(0, handler);
 	
+	// 2024.04.21 다시 만든 Material이 가지고 있는 Texture들의 Descriptor Handle을 세팅
+	m_material->BindToShader(Renderer);
+
 	//CommandList->SetGraphicsRootDescriptorTable(0, Renderer->GetSRVDescriptorHeap().Get()->GetGPUDescriptorHandleForHeapStart());
 
 	uint32 currentIndex = FrameIndex;

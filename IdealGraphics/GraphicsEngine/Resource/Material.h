@@ -23,7 +23,9 @@ namespace Ideal
 		void SetSpecular(Color c) { m_specular = c; }
 		void SetEmissive(Color c) { m_emissive = c; }
 
-		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList, D3D12_CPU_DESCRIPTOR_HANDLE SRVHeapHandle, std::shared_ptr<IdealRenderer> Renderer);
+		void Create(std::shared_ptr<IdealRenderer> Renderer);
+		// 쉐이더랑 바인드를 한다.
+		void BindToShader(std::shared_ptr<IdealRenderer> Renderer);
 
 	private:
 		Color m_ambient;

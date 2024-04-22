@@ -114,6 +114,7 @@ uint32 D3D12GPUBuffer::GetElemnetSize() const
 
 void D3D12GPUBuffer::SetName(const LPCTSTR& name)
 {
+	m_name = name;
 	m_resource->SetName(name);
 }
 

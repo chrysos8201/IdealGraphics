@@ -42,6 +42,8 @@ namespace Ideal
 		D3D12GPUBuffer();
 		virtual ~D3D12GPUBuffer();
 
+		void SetName(const LPCTSTR& name);
+
 	public:
 		// GPU에서 사용할 버퍼를 만든다.
 		// 만들 때 리소스 스테이트를 COPY_DEST로 초기화 해준다.
@@ -54,8 +56,7 @@ namespace Ideal
 		uint32 GetElemnetSize() const;
 
 	protected:
-		void SetName(const LPCTSTR& name);
-
+		std::wstring m_name;
 		uint32 m_bufferSize;
 		uint32 m_elementSize;
 		uint32 m_elementCount;

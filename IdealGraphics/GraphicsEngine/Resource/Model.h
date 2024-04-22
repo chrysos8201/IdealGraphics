@@ -11,7 +11,7 @@ namespace Ideal
 	class Bone;
 }
 
-class ID3D12GraphicsCommandList;
+struct ID3D12GraphicsCommandList;
 class IdealRenderer;
 
 namespace Ideal

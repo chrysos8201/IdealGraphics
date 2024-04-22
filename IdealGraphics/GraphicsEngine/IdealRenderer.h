@@ -14,6 +14,7 @@ namespace Ideal
 	class Mesh;
 	class Model;
 	class D3D12Texture;
+	class D3D12ResourceManager;
 }
 
 class IdealRenderer : public std::enable_shared_from_this<IdealRenderer>
@@ -30,26 +31,14 @@ public:
 	void Tick();
 	void Render();
 	void Release();
-	void MoveToNextFrame();
 
 	// 다시 수정 버전
 	void DrawBox();
 	void LoadAssets();
-
-	void ExecuteCommandList();
-
 	void CreateMeshObject(const std::wstring FileName);
-
 	void BeginRender();
 	void EndRender();
 
-	// 2024.04.21 fence
-	
-	void CreateFence();
-	uint64 Fence();
-	void WaitForFenceValue();
-	uint64 m_fenceValue;
-	//HANDLE m_fenceEvent;
 public:
 	ComPtr<ID3D12Device> GetDevice();
 	// 일단 cmd list는 하나만 쓴다.
@@ -65,6 +54,7 @@ public:
 	void LoadBox();
 	void CreateBoxTexPipeline();
 	void CreateBoxTexture();
+
 	ComPtr<ID3D12Resource> m_tex;
 	Ideal::D3D12DescriptorHandle m_texHandle;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
@@ -95,7 +85,10 @@ private:
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];
 	ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
+	//ComPtr<ID3D12CommandAllocator> m_commandAllocator;
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
+
+
 
 	ComPtr<ID3D12RootSignature> m_rootSignature;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
@@ -105,11 +98,6 @@ private:
 	SimpleBoxConstantBuffer m_constantBufferDataSimpleBox;
 	const float m_offsetSpeed = 0.02f;
 private:
-	ComPtr<ID3D12Fence> m_fence;
-	uint64 m_fenceValues[FRAME_BUFFER_COUNT];
-	HANDLE m_fenceEvent;
-
-	void WaitForGPU();
 
 private:
 	// 2024.04.14
@@ -132,12 +120,36 @@ private:
 private:
 	// BOX
 	void BoxTick();
-	
+
 	// 2024.04.11 :
 	// VertexBuffer와 IndexBuffer를 묶어줘보겠다.
 	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
 	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
 	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
 	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
+
+private:
+	void CreateCommandList();
+
+	// 2024.04.22 다시 fence를 만든다.
+	void CreateFence();
+	void Present();
+	ComPtr<ID3D12Fence> m_fence;
+	uint64 m_fenceValues[FRAME_BUFFER_COUNT];
+	HANDLE m_fenceEvent;
+
+	//ComPtr<ID3D12Fence> m_uploadFence;
+	//uint64 m_uploadFenceValue;
+	//HANDLE m_uploadFenceEvent;
+
+	// Resource Manager
+	std::shared_ptr<Ideal::D3D12ResourceManager> m_resourceManager = nullptr;
+	
+	// Test
+	std::shared_ptr<Ideal::D3D12VertexBuffer> m_testVB;
+	std::shared_ptr<Ideal::D3D12IndexBuffer> m_testIB;
+
+public:
+	void ExecuteCommandList();
 };
 

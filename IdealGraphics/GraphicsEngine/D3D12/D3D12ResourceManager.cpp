@@ -1,7 +1,10 @@
 #include "GraphicsEngine/D3D12/D3D12ResourceManager.h"
 
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
+#include "GraphicsEngine/D3D12/D3D12Texture.h"
 #include "GraphicsEngine/VertexInfo.h"
+
+#include "ThirdParty/Include/DirectXTK12/WICTextureLoader.h"
 
 using namespace Ideal;
 
@@ -37,6 +40,9 @@ void D3D12ResourceManager::Init(ComPtr<ID3D12Device> Device)
 	m_fenceValue = 0;
 	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	m_fence->SetName(L"ResourceManager Fence");
+
+	//------------SRV Descriptor-----------//
+	m_srvHeap.Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, m_srvHeapCount);
 }
 
 void D3D12ResourceManager::Fence()
@@ -150,96 +156,107 @@ void D3D12ResourceManager::CreateIndexBufferBox(std::shared_ptr<Ideal::D3D12Inde
 	WaitForFenceValue();
 }
 
-void D3D12ResourceManager::CreateVertexBufferTest(UINT SizePerVertex, DWORD dwVertexNum, D3D12_VERTEX_BUFFER_VIEW* pOutVertexBufferView, ID3D12Resource** ppOutBuffer, void* pInitData)
+void D3D12ResourceManager::CreateIndexBuffer(std::shared_ptr<Ideal::D3D12IndexBuffer> OutIndexBuffer, std::vector<uint32>& Indices)
 {
-	ID3D12Device* m_pD3DDevice = m_device.Get();
-	ID3D12CommandAllocator* m_pCommandAllocator = m_commandAllocator.Get();
-	ID3D12GraphicsCommandList* m_pCommandList = m_commandList.Get();
-	ID3D12CommandQueue* m_pCommandQueue = m_commandQueue.Get();
+	m_commandAllocator->Reset();
+	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
 
-	HRESULT hr = S_OK;
+	const uint32 elementSize = sizeof(uint32);
+	const uint32 elementCount = Indices.size();
+	const uint32 bufferSize = elementSize * elementCount;
 
-	D3D12_VERTEX_BUFFER_VIEW	VertexBufferView = {};
-	ID3D12Resource* pVertexBuffer = nullptr;
-	ID3D12Resource* pUploadBuffer = nullptr;
-	UINT		VertexBufferSize = SizePerVertex * dwVertexNum;
-
-	// create vertexbuffer for rendering
-	hr = m_pD3DDevice->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(VertexBufferSize),
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr,
-		IID_PPV_ARGS(&pVertexBuffer));
-
-	if (FAILED(hr))
+	Ideal::D3D12UploadBuffer uploadBuffer;
+	uploadBuffer.Create(m_device.Get(), bufferSize);
 	{
-		__debugbreak();
-		goto lb_return;
+		void* mappedData = uploadBuffer.Map();
+		memcpy(mappedData, Indices.data(), bufferSize);
+		uploadBuffer.UnMap();
 	}
-	if (pInitData)
-	{
-		if (FAILED(m_pCommandAllocator->Reset()))
-			__debugbreak();
+	OutIndexBuffer->Create(m_device.Get(),
+		m_commandList.Get(),
+		elementSize,
+		elementCount,
+		uploadBuffer
+	);
 
-		if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
-			__debugbreak();
+	//-----------Execute-----------//
+	m_commandList->Close();
 
-		hr = m_pD3DDevice->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(VertexBufferSize),
-			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
-			IID_PPV_ARGS(&pUploadBuffer));
+	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
-		if (FAILED(hr))
-		{
-			__debugbreak();
-			goto lb_return;
-		}
-
-		// Copy the triangle data to the vertex buffer.
-		UINT8* pVertexDataBegin = nullptr;
-		CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-
-		hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));
-		if (FAILED(hr))
-		{
-			__debugbreak();
-			goto lb_return;
-		}
-		memcpy(pVertexDataBegin, pInitData, VertexBufferSize);
-		pUploadBuffer->Unmap(0, nullptr);
-
-		m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pVertexBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
-		m_pCommandList->CopyBufferRegion(pVertexBuffer, 0, pUploadBuffer, 0, VertexBufferSize);
-		m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pVertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
-
-		m_pCommandList->Close();
-
-		ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
-		m_pCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-		Fence();
-		WaitForFenceValue();
-	}
-
-
-	// Initialize the vertex buffer view.
-	VertexBufferView.BufferLocation = pVertexBuffer->GetGPUVirtualAddress();
-	VertexBufferView.StrideInBytes = SizePerVertex;
-	VertexBufferView.SizeInBytes = VertexBufferSize;
-
-	*pOutVertexBufferView = VertexBufferView;
-	*ppOutBuffer = pVertexBuffer;
-
-lb_return:
-	if (pUploadBuffer)
-	{
-		pUploadBuffer->Release();
-		pUploadBuffer = nullptr;
-	}
+	Fence();
+	WaitForFenceValue();
 }
 
+void Ideal::D3D12ResourceManager::CreateTexture(std::shared_ptr<Ideal::D3D12Texture> OutTexture, const std::wstring& Path)
+{
+	//----------------------Init--------------------------//
+	m_commandAllocator->Reset();
+	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
+
+	ComPtr<ID3D12Resource> resource;
+	Ideal::D3D12DescriptorHandle srvHandle;
+
+	//----------------------Load WIC Texture From File--------------------------//
+
+	std::unique_ptr<uint8_t[]> decodeData;
+	D3D12_SUBRESOURCE_DATA subResource;
+	Check(DirectX::LoadWICTextureFromFile(
+		m_device.Get(),
+		Path.c_str(),
+		resource.ReleaseAndGetAddressOf(),
+		decodeData,
+		subResource
+	));
+
+	//----------------------Upload Buffer--------------------------//
+
+	uint64 bufferSize = GetRequiredIntermediateSize(resource.Get(), 0, 1);
+
+	Ideal::D3D12UploadBuffer uploadBuffer;
+	uploadBuffer.Create(m_device.Get(), bufferSize);
+
+	//----------------------Update Subresources--------------------------//
+
+	UpdateSubresources(
+		m_commandList.Get(),
+		resource.Get(),
+		uploadBuffer.GetResource(),
+		0, 0, 1, &subResource
+	);
+
+	//----------------------Resource Barrier--------------------------//
+
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		resource.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+	m_commandList->ResourceBarrier(1, &barrier);
+
+	//----------------------Execute--------------------------//
+
+	m_commandList->Close();
+
+	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+
+	Fence();
+	WaitForFenceValue();
+
+	//----------------------Create Shader Resource View--------------------------//
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = resource->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	//----------------------Allocate Descriptor-----------------------//
+	srvHandle = m_srvHeap.Allocate();
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvHandle.GetCpuHandle();
+	m_device->CreateShaderResourceView(resource.Get(), &srvDesc, cpuHandle);
+
+	OutTexture->Create(resource, srvHandle);
+}

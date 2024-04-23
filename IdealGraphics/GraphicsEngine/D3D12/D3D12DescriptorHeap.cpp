@@ -63,6 +63,26 @@ void D3D12DescriptorHeap::Create(std::shared_ptr<IdealRenderer> Renderer, D3D12_
 	);
 }
 
+void D3D12DescriptorHeap::Create(ID3D12Device* Device, D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint32 MaxCount)
+{
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+	heapDesc.NumDescriptors = MaxCount;
+	heapDesc.Type = HeapType;
+	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	Check(Device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(m_descriptorHeap.GetAddressOf())));
+
+	m_descriptorSize = Device->GetDescriptorHandleIncrementSize(heapDesc.Type);
+	m_numFreeDescriptors = heapDesc.NumDescriptors;
+
+	auto aaa = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	auto bbb = m_descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	// 첫 위치로 Handle을 만든다.
+	m_freeHandle = Ideal::D3D12DescriptorHandle(
+		m_descriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_descriptorHeap->GetGPUDescriptorHandleForHeapStart()
+	);
+}
+
 Ideal::D3D12DescriptorHandle D3D12DescriptorHeap::Allocate(uint32 Count /* = 1*/)
 {
 	if (Count == 0)

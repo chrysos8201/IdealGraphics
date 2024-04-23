@@ -50,6 +50,7 @@ namespace Ideal
 
 	public:
 		void Create(std::shared_ptr<IdealRenderer> Renderer, D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint32 MaxCount);
+		void Create(ID3D12Device* Device, D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint32 MaxCount);
 		ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return m_descriptorHeap; }
 
 		// 메모리를 할당할 주소를 받아오고 Count만큼 Handle을 이동시킨다.

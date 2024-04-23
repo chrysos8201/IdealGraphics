@@ -45,8 +45,10 @@ namespace Ideal
 		ComPtr<ID3D12PipelineState> m_pipelineState;
 		ComPtr<ID3D12RootSignature> m_rootSignature;
 
-		D3D12VertexBuffer m_vertexBuffer;
-		D3D12IndexBuffer m_indexBuffer;
+		//D3D12VertexBuffer m_vertexBuffer;
+		std::shared_ptr<D3D12VertexBuffer> m_vertexBuffer;
+		//D3D12IndexBuffer m_indexBuffer;
+		std::shared_ptr<D3D12IndexBuffer> m_indexBuffer;
 		D3D12ConstantBuffer m_constantBuffer;
 
 		Transform m_transform;

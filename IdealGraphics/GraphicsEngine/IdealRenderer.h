@@ -39,6 +39,8 @@ public:
 	void BeginRender();
 	void EndRender();
 
+	std::shared_ptr<Ideal::D3D12ResourceManager> GetResourceManager();
+
 public:
 	ComPtr<ID3D12Device> GetDevice();
 	// 일단 cmd list는 하나만 쓴다.
@@ -58,6 +60,8 @@ public:
 	ComPtr<ID3D12Resource> m_tex;
 	Ideal::D3D12DescriptorHandle m_texHandle;
 	ComPtr<ID3D12RootSignature> m_texRootSignature;
+
+	std::shared_ptr<Ideal::D3D12Texture> m_texture;
 
 	// 2024.04.20 temp 
 	std::shared_ptr<Ideal::D3D12Texture> texture;

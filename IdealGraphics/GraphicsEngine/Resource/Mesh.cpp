@@ -3,6 +3,8 @@
 #include "GraphicsEngine/Resource/Model.h"
 
 #include "GraphicsEngine/IdealRenderer.h"
+#include "GraphicsEngine/VertexInfo.h"
+#include "GraphicsEngine/D3D12/D3D12ResourceManager.h"
 
 Ideal::Mesh::Mesh()
 {
@@ -16,6 +18,8 @@ Ideal::Mesh::~Mesh()
 
 void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 {
+	std::shared_ptr<Ideal::D3D12ResourceManager> resourceManager = Renderer->GetResourceManager();
+	
 	//--------------Init---------------//
 	//InitRootSignature(Renderer);
 	//InitPipelineState(Renderer);
@@ -23,57 +27,71 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 	InitPipelineState2(Renderer);
 
 	//--------------VB---------------//
+	// 구버전
 	{
-		const uint32 vertexBufferSize = m_vertices.size() * sizeof(BasicVertex);
+		//const uint32 vertexBufferSize = m_vertices.size() * sizeof(BasicVertex);
 
-		Ideal::D3D12UploadBuffer uploadBuffer;
-		uploadBuffer.Create(Renderer->GetDevice().Get(), vertexBufferSize);
-		{
-			void* mappedUploadHeap = uploadBuffer.Map();
-			//std::copy(m_vertices.begin(), m_vertices.end(), &mappedUploadHeap);
-			memcpy(mappedUploadHeap, m_vertices.data(), vertexBufferSize);
-			uploadBuffer.UnMap();
-		}
-		const uint32 elementSize = sizeof(BasicVertex);
-		const uint32 elementCount = m_vertices.size();
+		//Ideal::D3D12UploadBuffer uploadBuffer;
+		//uploadBuffer.Create(Renderer->GetDevice().Get(), vertexBufferSize);
+		//{
+		//	void* mappedUploadHeap = uploadBuffer.Map();
+		//	//std::copy(m_vertices.begin(), m_vertices.end(), &mappedUploadHeap);
+		//	memcpy(mappedUploadHeap, m_vertices.data(), vertexBufferSize);
+		//	uploadBuffer.UnMap();
+		//}
+		//const uint32 elementSize = sizeof(BasicVertex);
+		//const uint32 elementCount = m_vertices.size();
 
-		m_vertexBuffer.Create(
-			Renderer->GetDevice().Get(),
-			Renderer->GetCommandList().Get(),
-			elementSize,
-			elementCount,
-			uploadBuffer
-		);
+		//m_vertexBuffer.Create(
+		//	Renderer->GetDevice().Get(),
+		//	Renderer->GetCommandList().Get(),
+		//	elementSize,
+		//	elementCount,
+		//	uploadBuffer
+		//);
 
-		// Wait
-		Renderer->ExecuteCommandList();
+		//// Wait
+		//Renderer->ExecuteCommandList();
+	}
+
+	// 2024.04.22 : Renderer가 가지고 있는 ResourceManager를 이용하여 만들게 하였다.
+	{
+		m_vertexBuffer = std::make_shared<D3D12VertexBuffer>();
+		resourceManager->CreateVertexBuffer<BasicVertex>(m_vertexBuffer, m_vertices);
 	}
 
 	//--------------IB---------------//
+	// 구버전
 	{
-		const uint32 indexBufferSize = m_indices.size() * sizeof(uint32);
+		//const uint32 indexBufferSize = m_indices.size() * sizeof(uint32);
 
-		Ideal::D3D12UploadBuffer uploadBuffer;
-		uploadBuffer.Create(Renderer->GetDevice().Get(), indexBufferSize);
-		{
-			void* mappedUploadHeap = uploadBuffer.Map();
-			//std::copy(m_indices.begin(), m_indices.end(), mappedUploadHeap);
-			memcpy(mappedUploadHeap, m_indices.data(), indexBufferSize);
-			uploadBuffer.UnMap();
-		}
-		const uint32 elementSize = sizeof(uint32);
-		const uint32 elementCount = m_indices.size();
+		//Ideal::D3D12UploadBuffer uploadBuffer;
+		//uploadBuffer.Create(Renderer->GetDevice().Get(), indexBufferSize);
+		//{
+		//	void* mappedUploadHeap = uploadBuffer.Map();
+		//	//std::copy(m_indices.begin(), m_indices.end(), mappedUploadHeap);
+		//	memcpy(mappedUploadHeap, m_indices.data(), indexBufferSize);
+		//	uploadBuffer.UnMap();
+		//}
+		//const uint32 elementSize = sizeof(uint32);
+		//const uint32 elementCount = m_indices.size();
 
-		m_indexBuffer.Create(
-			Renderer->GetDevice().Get(),
-			Renderer->GetCommandList().Get(),
-			elementSize,
-			elementCount,
-			uploadBuffer
-		);
+		//m_indexBuffer.Create(
+		//	Renderer->GetDevice().Get(),
+		//	Renderer->GetCommandList().Get(),
+		//	elementSize,
+		//	elementCount,
+		//	uploadBuffer
+		//);
 
-		// Wait
-		Renderer->ExecuteCommandList();
+		//// Wait
+		//Renderer->ExecuteCommandList();
+	}
+
+	// 2024.04.22 : Renderer가 가지고 있는 ResourceManager를 이용하여 만들게 하였다.
+	{
+		m_indexBuffer = std::make_shared<D3D12IndexBuffer>();
+		resourceManager->CreateIndexBuffer(m_indexBuffer, m_indices);
 	}
 
 	//--------------CB---------------//
@@ -101,12 +119,13 @@ void Ideal::Mesh::Create(std::shared_ptr<IdealRenderer> Renderer)
 	/*	 m_descriptorIncrementSize = Renderer->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		 CD3DX12_CPU_DESCRIPTOR_HANDLE handler = Renderer->GetSRVHeapHandler();
+
 		 handler.Offset(m_descriptorIncrementSize);*/
 
 		// 2024.04.21 : 그냥 Renderer만 전해주면 Allocate를 통해 따로 Offset 계산해주지 않아도 알아서 할당한다.
 		m_material->Create(Renderer);
 
-		Renderer->ExecuteCommandList();
+		//Renderer->ExecuteCommandList();
 	}
 }
 
@@ -116,7 +135,7 @@ void Ideal::Mesh::Tick(uint32 FrameIndex)
 	rot += 0.2f;
 	m_transform.World = Matrix::Identity;
 	m_transform.World = Matrix::CreateRotationY(DirectX::XMConvertToRadians(rot)) * Matrix::CreateTranslation(Vector3(0.f, 0.f, -800.f));
-
+	//
 	Transform* t = (Transform*)m_constantBuffer.GetMappedMemory(FrameIndex);
 	*t = m_transform;
 }
@@ -125,9 +144,9 @@ void Ideal::Mesh::Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12Graphics
 {
 	CommandList->SetPipelineState(m_pipelineState.Get());
 	CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_vertexBuffer.GetView();
+	const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_vertexBuffer->GetView();
 	CommandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	const D3D12_INDEX_BUFFER_VIEW& indexBufferView = m_indexBuffer.GetView();
+	const D3D12_INDEX_BUFFER_VIEW& indexBufferView = m_indexBuffer->GetView();
 	CommandList->IASetIndexBuffer(&indexBufferView);
 
 	//-------------------Root Signature--------------------//
@@ -147,7 +166,7 @@ void Ideal::Mesh::Render(std::shared_ptr<IdealRenderer> Renderer, ID3D12Graphics
 
 	uint32 currentIndex = FrameIndex;
 	CommandList->SetGraphicsRootConstantBufferView(1, m_constantBuffer.GetGPUVirtualAddress(currentIndex));
-	CommandList->DrawIndexedInstanced(m_indexBuffer.GetElementCount(), 1, 0, 0, 0);
+	CommandList->DrawIndexedInstanced(m_indexBuffer->GetElementCount(), 1, 0, 0, 0);
 }
 
 void Ideal::Mesh::InitRootSignature(std::shared_ptr<IdealRenderer> Renderer)

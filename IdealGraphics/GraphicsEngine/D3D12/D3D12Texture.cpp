@@ -83,3 +83,9 @@ void Ideal::D3D12Texture::Create(std::shared_ptr<IdealRenderer> Renderer, const 
 
 	Renderer->ExecuteCommandList();
 }
+
+void Ideal::D3D12Texture::Create(ComPtr<ID3D12Resource> Resource, Ideal::D3D12DescriptorHandle Handle)
+{
+	m_resource = Resource;
+	m_srvHandle = Handle;
+}

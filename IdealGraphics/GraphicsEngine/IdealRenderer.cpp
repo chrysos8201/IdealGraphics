@@ -28,6 +28,8 @@ IdealRenderer::~IdealRenderer()
 	int a = 3;
 	//uint32 ref_count = m_device->Release();
 
+	// Release Resource Manager
+	m_resourceManager = nullptr;
 }
 
 void IdealRenderer::Init()
@@ -220,13 +222,11 @@ void IdealRenderer::Init()
 	//m_model->ReadModel(L"porsche/porsche");	// mesh 밖에 없음.
 	//m_model->ReadMaterial(L"porsche/porsche");
 
-	// Load Asset
-	//LoadAssets();
-	//LoadBox();
 
 	//------------------Resource Manager---------------------//
 	m_resourceManager = std::make_shared<Ideal::D3D12ResourceManager>();
 	m_resourceManager->Init(m_device);
+
 
 	// Test
 	m_testVB = std::make_shared<Ideal::D3D12VertexBuffer>();
@@ -236,6 +236,7 @@ void IdealRenderer::Init()
 	m_testIB = std::make_shared<Ideal::D3D12IndexBuffer>();
 	m_resourceManager->CreateIndexBufferBox(m_testIB);
 
+ 	LoadAssets();
 	LoadBox();
 }
 
@@ -254,17 +255,21 @@ void IdealRenderer::Render()
 	BeginRender();
 
 	//-------------Render Command-------------//
-	//{
-	//	ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
-	//	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	//	//DrawBox();
-	//	// Test Models Render
-	//	for (auto m : m_models)
-	//	{
-	//		m->Render(shared_from_this(), m_commandList.Get(), m_frameIndex);
-	//	}
-	//}
-	DrawBox();
+	{
+		ID3D12DescriptorHeap* heaps[] = { m_resourceManager->GetSRVHeap().Get() };
+		m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+
+		DrawBox();
+		// Test Models Render
+		for (auto m : m_models)
+		{
+			m->Render(shared_from_this(), m_commandList.Get(), m_frameIndex);
+		}
+	}/*
+	ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
+	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);*/
+
+	//DrawBox();
 	EndRender();
 
 	Present();
@@ -279,7 +284,7 @@ void IdealRenderer::Release()
 
 void IdealRenderer::LoadAssets()
 {
-	//CreateMeshObject(L"Tower/Tower");
+	CreateMeshObject(L"Tower/Tower");
 	//CreateMeshObject(L"House2/House2");
 	//LoadBox();
 	//m_commandList->Close();
@@ -338,6 +343,11 @@ void IdealRenderer::EndRender()
 	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 }
 
+std::shared_ptr<Ideal::D3D12ResourceManager> IdealRenderer::GetResourceManager()
+{
+	return m_resourceManager;
+}
+
 Microsoft::WRL::ComPtr<ID3D12Device> IdealRenderer::GetDevice()
 {
 	return m_device;
@@ -375,6 +385,7 @@ void IdealRenderer::LoadBox()
 	}
 
 	CreateBoxTexPipeline();
+	CreateBoxTexture();
 
 	// 2024.04.13 : ConstantBuffer 다시 만든다.
 		// 프레임 개수 만큼 메모리를 할당 할 것이다.
@@ -500,7 +511,6 @@ void IdealRenderer::LoadBox()
 
 		
 	}
-	CreateBoxTexture();
 
 	return;
 }
@@ -605,6 +615,11 @@ void IdealRenderer::CreateBoxTexPipeline()
 
 void IdealRenderer::CreateBoxTexture()
 {
+	m_texture = std::make_shared<Ideal::D3D12Texture>();
+	std::wstring path = L"Resources/Test/test2.png";
+	m_resourceManager->CreateTexture(m_texture, path);
+	return;
+
 	//----------------Load WIC Texture From File----------------//
 
 	std::unique_ptr<uint8_t[]> decodedData;
@@ -661,7 +676,6 @@ void IdealRenderer::CreateBoxTexture()
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	//m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
-	m_texHandle = AllocateSRV();
 	m_device->CreateShaderResourceView(m_tex.Get(), &srvDesc, m_texHandle.GetCpuHandle());
 	//m_commandList->Close();
 }
@@ -683,7 +697,8 @@ void IdealRenderer::DrawBox()
 	m_commandList->SetGraphicsRootSignature(m_texRootSignature.Get());
 
 	//ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
-	ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
+	//ID3D12DescriptorHeap* heaps[] = { m_idealSrvHeap.GetDescriptorHeap().Get() };
+	ID3D12DescriptorHeap* heaps[] = { m_resourceManager->GetSRVHeap().Get() };
 	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	//m_commandList->SetGraphicsRootDescriptorTable(0, m_srvHeap->GetGPUDescriptorHandleForHeapStart());
@@ -714,6 +729,12 @@ void IdealRenderer::CreateCommandList()
 	for (uint32 i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
+		
+		WCHAR name[50];
+		if (swprintf_s(name, L"Allocator[%d]", i) > 0)
+		{
+			m_commandAllocators[i]->SetName(name);
+		}
 	}
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[0].Get(), nullptr, IID_PPV_ARGS(m_commandList.ReleaseAndGetAddressOf())));

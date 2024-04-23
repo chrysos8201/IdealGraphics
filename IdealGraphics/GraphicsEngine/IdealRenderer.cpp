@@ -86,8 +86,40 @@ void IdealRenderer::Init()
 	ComPtr<IDXGIFactory4> factory;
 	Check(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(factory.GetAddressOf())));
 
+	D3D_FEATURE_LEVEL	featureLevels[] =
+	{
+		D3D_FEATURE_LEVEL_12_2,
+		D3D_FEATURE_LEVEL_12_1,
+		D3D_FEATURE_LEVEL_12_0,
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0
+	};
+	
+	DWORD	FeatureLevelNum = _countof(featureLevels);
+	ComPtr<IDXGIAdapter1> adapter = nullptr;
+	DXGI_ADAPTER_DESC1 adapterDesc = {};
+	for (DWORD featerLevelIndex = 0; featerLevelIndex < FeatureLevelNum; featerLevelIndex++)
+	{
+		UINT adapterIndex = 0;
+		while (DXGI_ERROR_NOT_FOUND != factory->EnumAdapters1(adapterIndex, &adapter))
+		{
+			adapter->GetDesc1(&adapterDesc);
+
+			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), featureLevels[featerLevelIndex], IID_PPV_ARGS(m_device.GetAddressOf()))))
+			{
+				DXGI_ADAPTER_DESC1 desc = {};
+				adapter->GetDesc1(&desc);
+
+				goto finishAdapter;
+				break;
+			}
+			adapter = nullptr;
+			adapterIndex++;
+		}
+	}
+finishAdapter:
 	//ComPtr<IDXGIAdapter1> hardwareAdapter;
-	Check(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.GetAddressOf())));
+	//Check(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.GetAddressOf())));
 
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -236,13 +268,13 @@ void IdealRenderer::Init()
 	m_testIB = std::make_shared<Ideal::D3D12IndexBuffer>();
 	m_resourceManager->CreateIndexBufferBox(m_testIB);
 
- 	LoadAssets();
-	LoadBox();
+	LoadAssets();
+	//LoadBox();
 }
 
 void IdealRenderer::Tick()
 {
-	BoxTick();
+	//BoxTick();
 
 	for (auto m : m_models)
 	{
@@ -259,7 +291,7 @@ void IdealRenderer::Render()
 		ID3D12DescriptorHeap* heaps[] = { m_resourceManager->GetSRVHeap().Get() };
 		m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
-		DrawBox();
+		//DrawBox();
 		// Test Models Render
 		for (auto m : m_models)
 		{
@@ -300,7 +332,7 @@ void IdealRenderer::CreateMeshObject(const std::wstring FileName)
 }
 
 void IdealRenderer::BeginRender()
-{	
+{
 	Check(m_commandAllocators[m_frameIndex]->Reset());
 	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
@@ -509,14 +541,14 @@ void IdealRenderer::LoadBox()
 		m_commandList->Close();
 		//ExecuteCommandList();
 
-		
+
 	}
 
 	return;
 }
 
 void IdealRenderer::CreateBoxTexPipeline()
-{	
+{
 	// LinearWrap
 	CD3DX12_STATIC_SAMPLER_DESC sampler(
 		0,
@@ -540,9 +572,9 @@ void IdealRenderer::CreateBoxTexPipeline()
 	CD3DX12_ROOT_PARAMETER1 rootParameter[2];
 	rootParameter[0].InitAsDescriptorTable(1, &descRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	rootParameter[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
-	
+
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc(2, rootParameter, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-	
+
 	ComPtr<ID3DBlob> signature;
 	ComPtr<ID3DBlob> error;
 	Check(D3DX12SerializeVersionedRootSignature(&rootSigDesc, featureData.HighestVersion, &signature, &error));
@@ -708,7 +740,7 @@ void IdealRenderer::DrawBox()
 	//---------------------Draw--------------------//
 	//m_commandList->DrawIndexedInstanced(m_idealIndexBuffer.GetElementCount(), 1, 0, 0, 0);
 	m_commandList->DrawIndexedInstanced(m_testIB->GetElementCount(), 1, 0, 0, 0);
-	
+
 }
 
 void IdealRenderer::BoxTick()
@@ -729,7 +761,7 @@ void IdealRenderer::CreateCommandList()
 	for (uint32 i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
-		
+
 		WCHAR name[50];
 		if (swprintf_s(name, L"Allocator[%d]", i) > 0)
 		{

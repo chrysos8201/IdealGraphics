@@ -110,6 +110,7 @@ private:
 	Matrix m_viewProj;
 	Matrix m_view;
 	Matrix m_proj;
+
 private:
 	//
 	Ideal::D3D12Viewport m_viewport;

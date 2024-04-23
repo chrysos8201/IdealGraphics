@@ -30,7 +30,7 @@ void D3D12ResourceManager::Init(ComPtr<ID3D12Device> Device)
 
 	//-----------Create Command Allocator---------//
 	Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(m_commandAllocator.GetAddressOf())));
-
+	m_commandAllocator->SetName(L"ResourceAllocator");
 	//-----------Create Command List---------//
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), nullptr, IID_PPV_ARGS(m_commandList.GetAddressOf())));
 	m_commandList->Close();

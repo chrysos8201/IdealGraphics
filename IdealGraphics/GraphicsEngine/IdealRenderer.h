@@ -33,13 +33,22 @@ public:
 	void Release();
 
 	// 다시 수정 버전
-	void DrawBox();
 	void LoadAssets();
 	void CreateMeshObject(const std::wstring FileName);
 	void BeginRender();
 	void EndRender();
 
 	std::shared_ptr<Ideal::D3D12ResourceManager> GetResourceManager();
+
+	// Command
+	void CreateCommandList();
+
+	// Fence
+	void CreateGraphicsFence();
+	uint64 GraphicsFence();
+	void WaitForGraphicsFenceValue();
+
+	void GraphicsPresent();
 
 public:
 	ComPtr<ID3D12Device> GetDevice();
@@ -52,20 +61,6 @@ public:
 	Matrix GetProj() { return m_proj; }
 	Matrix GetViewProj() { return m_viewProj; }
 
-	// Texture로딩해보는 테스트용 함수
-	void LoadBox();
-	void CreateBoxTexPipeline();
-	void CreateBoxTexture();
-
-	ComPtr<ID3D12Resource> m_tex;
-	Ideal::D3D12DescriptorHandle m_texHandle;
-	ComPtr<ID3D12RootSignature> m_texRootSignature;
-
-	std::shared_ptr<Ideal::D3D12Texture> m_texture;
-
-	// 2024.04.20 temp 
-	std::shared_ptr<Ideal::D3D12Texture> texture;
-
 	// 2024.04.21 Temp : Ideal::DescriptorHeap
 	Ideal::D3D12DescriptorHandle AllocateSRV() { return m_idealSrvHeap.Allocate(); }
 	uint32 m_srvHeapNum = 256U;
@@ -76,34 +71,36 @@ private:
 	uint32 m_height;
 	HWND m_hwnd;
 
-	ComPtr<ID3D12Device> m_device;
-	ComPtr<ID3D12CommandQueue> m_commandQueue;
-	ComPtr<IDXGISwapChain3> m_swapChain;
+	// Device
+	ComPtr<ID3D12Device> m_device = nullptr;
+	ComPtr<ID3D12CommandQueue> m_commandQueue = nullptr;
+	ComPtr<IDXGISwapChain3> m_swapChain = nullptr;
 	uint32 m_frameIndex;
-	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-	// 2024.04.14 : dsv
-	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 
-	ComPtr<ID3D12Resource> m_depthStencil;
-
+	// RTV
+	ComPtr<ID3D12DescriptorHeap> m_rtvHeap = nullptr;
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];
-	//ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
-	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
-	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
+	// DSV
+	ComPtr<ID3D12DescriptorHeap> m_dsvHeap = nullptr;
+	ComPtr<ID3D12Resource> m_depthStencil = nullptr;
 
+	// Command
+	ComPtr<ID3D12CommandAllocator> m_commandAllocator = nullptr;
+	ComPtr<ID3D12GraphicsCommandList> m_commandList = nullptr;
 
-	ComPtr<ID3D12RootSignature> m_rootSignature;
-	ComPtr<ID3D12PipelineState> m_pipelineState;
+	// Fence
+	ComPtr<ID3D12Fence> m_graphicsFence = nullptr;
+	uint64 m_graphicsFenceValue;
+	HANDLE m_graphicsFenceEvent;
 
 private:
 	float m_aspectRatio = 0.f;
-	SimpleBoxConstantBuffer m_constantBufferDataSimpleBox;
-	const float m_offsetSpeed = 0.02f;
-private:
 
 private:
+	const float m_offsetSpeed = 0.02f;
+
 	// 2024.04.14
 	// 임시용 wvp
 	Matrix m_world;
@@ -115,51 +112,34 @@ private:
 	//
 	Ideal::D3D12Viewport m_viewport;
 
-
-
 private:
 	// Temp assimp model import
 	std::vector<std::shared_ptr<Ideal::Model>> m_models;
 
+private:
+	// Resource Manager
+	std::shared_ptr<Ideal::D3D12ResourceManager> m_resourceManager = nullptr;
 
 private:
-	// BOX
+	//-----------BOX----------//
+	void LoadBox();
+	void DrawBox();
 	void BoxTick();
+
+	// box init
+	void CreateBoxTexPipeline();
+	void CreateBoxTexture();
 
 	// 2024.04.11 :
 	// VertexBuffer와 IndexBuffer를 묶어줘보겠다.
-	Ideal::D3D12VertexBuffer m_idealVertexBuffer;
-	Ideal::D3D12IndexBuffer m_idealIndexBuffer;
-	Ideal::D3D12ConstantBuffer m_idealConstantBuffer;
-	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin;
+	std::shared_ptr<Ideal::D3D12VertexBuffer> m_boxVB = nullptr;
+	std::shared_ptr<Ideal::D3D12IndexBuffer> m_boxIB = nullptr;
+	Ideal::D3D12ConstantBuffer m_boxCB;
+	std::shared_ptr<Ideal::D3D12Texture> m_boxTexture = nullptr;
+	SimpleBoxConstantBuffer* m_simpleBoxConstantBufferDataBegin = nullptr;
 
-private:
-	void CreateCommandList();
+	ComPtr<ID3D12RootSignature> m_boxRootSignature;
+	ComPtr<ID3D12PipelineState> m_boxPipeline;
 
-	// 2024.04.22 다시 fence를 만든다.
-	//void CreateFence();
-	//void Present();
-	ComPtr<ID3D12Fence> m_fence;
-	uint64 m_fenceValues[FRAME_BUFFER_COUNT];
-	HANDLE m_fenceEvent;
-
-	// 2024.04.23
-	void CreateGraphicsFence();
-	uint64 GraphicsFence();
-	void WaitForGraphicsFenceValue();
-	void GraphicsPresent();
-
-	ComPtr<ID3D12Fence> m_graphicsFence;
-	uint64 m_graphicsFenceValue;
-	HANDLE m_graphicsFenceEvent;
-
-	// Resource Manager
-	std::shared_ptr<Ideal::D3D12ResourceManager> m_resourceManager = nullptr;
-	
-	// Test
-	std::shared_ptr<Ideal::D3D12VertexBuffer> m_testVB;
-	std::shared_ptr<Ideal::D3D12IndexBuffer> m_testIB;
-
-public:
-	void ExecuteCommandList();
+	//------------------------//
 };

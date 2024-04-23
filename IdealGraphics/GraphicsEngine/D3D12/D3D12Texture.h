@@ -14,10 +14,6 @@ namespace Ideal
 		virtual ~D3D12Texture();
 
 	public:
-		void Create(
-			std::shared_ptr<IdealRenderer> Renderer, const std::wstring& Path
-			);
-
 		// ResourceManager에서 호출된다.
 		void Create(
 			ComPtr<ID3D12Resource> Resource, Ideal::D3D12DescriptorHandle Handle

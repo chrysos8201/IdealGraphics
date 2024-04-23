@@ -88,8 +88,8 @@ private:
 
 	uint32 m_rtvDescriptorSize;
 	ComPtr<ID3D12Resource> m_renderTargets[FRAME_BUFFER_COUNT];
-	ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
-	//ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+	//ComPtr<ID3D12CommandAllocator> m_commandAllocators[FRAME_BUFFER_COUNT];
+	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
 
@@ -137,15 +137,21 @@ private:
 	void CreateCommandList();
 
 	// 2024.04.22 다시 fence를 만든다.
-	void CreateFence();
-	void Present();
+	//void CreateFence();
+	//void Present();
 	ComPtr<ID3D12Fence> m_fence;
 	uint64 m_fenceValues[FRAME_BUFFER_COUNT];
 	HANDLE m_fenceEvent;
 
-	//ComPtr<ID3D12Fence> m_uploadFence;
-	//uint64 m_uploadFenceValue;
-	//HANDLE m_uploadFenceEvent;
+	// 2024.04.23
+	void CreateGraphicsFence();
+	uint64 GraphicsFence();
+	void WaitForGraphicsFenceValue();
+	void GraphicsPresent();
+
+	ComPtr<ID3D12Fence> m_graphicsFence;
+	uint64 m_graphicsFenceValue;
+	HANDLE m_graphicsFenceEvent;
 
 	// Resource Manager
 	std::shared_ptr<Ideal::D3D12ResourceManager> m_resourceManager = nullptr;
@@ -157,4 +163,3 @@ private:
 public:
 	void ExecuteCommandList();
 };
-

@@ -260,3 +260,4 @@ void Ideal::D3D12ResourceManager::CreateTexture(std::shared_ptr<Ideal::D3D12Text
 
 	OutTexture->Create(resource, srvHandle);
 }
+	

@@ -178,8 +178,10 @@ finishAdapter:
 	//------------Create Command List-------------//
 	CreateCommandList();
 
+	//------------Create Fence---------------//
 	// create Fence
-	CreateFence();
+	//CreateFence();
+	CreateGraphicsFence();
 
 	// 2024.04.14 : dsv를 만들겠다. 먼저 descriptor heap을 만든다.
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
@@ -269,12 +271,12 @@ finishAdapter:
 	m_resourceManager->CreateIndexBufferBox(m_testIB);
 
 	LoadAssets();
-	//LoadBox();
+	LoadBox();
 }
 
 void IdealRenderer::Tick()
 {
-	//BoxTick();
+	BoxTick();
 
 	for (auto m : m_models)
 	{
@@ -291,7 +293,7 @@ void IdealRenderer::Render()
 		ID3D12DescriptorHeap* heaps[] = { m_resourceManager->GetSRVHeap().Get() };
 		m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
-		//DrawBox();
+		DrawBox();
 		// Test Models Render
 		for (auto m : m_models)
 		{
@@ -304,7 +306,9 @@ void IdealRenderer::Render()
 	//DrawBox();
 	EndRender();
 
-	Present();
+	//----------------Present-------------------//
+	GraphicsPresent();
+	//Present();
 
 	return;
 }
@@ -333,11 +337,11 @@ void IdealRenderer::CreateMeshObject(const std::wstring FileName)
 
 void IdealRenderer::BeginRender()
 {
-	Check(m_commandAllocators[m_frameIndex]->Reset());
-	Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
+	//Check(m_commandAllocators[m_frameIndex]->Reset());
+	//Check(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
-	//Check(m_commandAllocator->Reset());
-	//Check(m_commandList->Reset(m_commandAllocator.Get(), nullptr));
+	Check(m_commandAllocator->Reset());
+	Check(m_commandList->Reset(m_commandAllocator.Get(), nullptr));
 	// 2024.04.15 pipeline state를 m_currentPipelineState에 있는 것으로 세팅한다.
 
 	m_commandList->RSSetViewports(1, &m_viewport.GetViewport());
@@ -758,7 +762,7 @@ void IdealRenderer::BoxTick()
 void IdealRenderer::CreateCommandList()
 {
 	// 프레임 버퍼만큼 만들어준다.
-	for (uint32 i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	/*for (uint32 i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
 
@@ -770,37 +774,81 @@ void IdealRenderer::CreateCommandList()
 	}
 
 	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[0].Get(), nullptr, IID_PPV_ARGS(m_commandList.ReleaseAndGetAddressOf())));
+	*/
+	Check(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
+	Check(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), nullptr, IID_PPV_ARGS(m_commandList.ReleaseAndGetAddressOf())));
 	m_commandList->Close();
 }
 
-void IdealRenderer::CreateFence()
-{
-	m_fenceValues[0] = 0;
-	m_fenceValues[1] = 0;
+//void IdealRenderer::CreateFence()
+//{
+//	m_fenceValues[0] = 0;
+//	m_fenceValues[1] = 0;
+//
+//	Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.ReleaseAndGetAddressOf())));
+//	m_fenceValues[m_frameIndex]++;
+//	m_fenceEvent = CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+//	m_fence->SetName(L"My Graphics Fence");
+//}
+//
+//void IdealRenderer::Present()
+//{
+//	Check(m_swapChain->Present(0, 0));
+//
+//	const uint64 currentFenceValue = m_fenceValues[m_frameIndex];
+//	Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
+//
+//	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+//
+//	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
+//	{
+//		m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent);
+//		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+//	}
+//
+//	// 다음 프레임을 위해 fence value를 1 증가시킨다.
+//	m_fenceValues[m_frameIndex]++;
+//}
 
-	Check(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.ReleaseAndGetAddressOf())));
-	m_fenceValues[m_frameIndex]++;
-	m_fenceEvent = CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
-	m_fence->SetName(L"My Graphics Fence");
+void IdealRenderer::CreateGraphicsFence()
+{
+	Check(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_graphicsFence.GetAddressOf())));
+
+	m_graphicsFenceValue = 0;
+
+	m_graphicsFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
-void IdealRenderer::Present()
+uint64 IdealRenderer::GraphicsFence()
 {
-	Check(m_swapChain->Present(1, 0));
+	m_graphicsFenceValue++;
+	m_commandQueue->Signal(m_graphicsFence.Get(), m_graphicsFenceValue);
+	return m_graphicsFenceValue;
+}
 
-	const uint64 currentFenceValue = m_fenceValues[m_frameIndex];
-	Check(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
+void IdealRenderer::WaitForGraphicsFenceValue()
+{
+	const uint64 expectedFenceValue = m_graphicsFenceValue;
+
+	if (m_graphicsFence->GetCompletedValue() < expectedFenceValue)
+	{
+		m_graphicsFence->SetEventOnCompletion(expectedFenceValue, m_graphicsFenceEvent);
+		WaitForSingleObject(m_graphicsFenceEvent, INFINITE);
+	}
+}
+
+void IdealRenderer::GraphicsPresent()
+{
+	HRESULT hr = m_swapChain->Present(1, 0);
+	if (DXGI_ERROR_DEVICE_REMOVED == hr)
+	{
+		__debugbreak();
+	}
 
 	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
-	{
-		m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent);
-		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-	}
-
-	// 다음 프레임을 위해 fence value를 1 증가시킨다.
-	m_fenceValues[m_frameIndex]++;
+	GraphicsFence();
+	WaitForGraphicsFenceValue();
 }
 
 void IdealRenderer::ExecuteCommandList()

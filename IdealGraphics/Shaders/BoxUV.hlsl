@@ -1,4 +1,13 @@
-cbuffer Transform : register(b0)
+
+cbuffer Material : register(b0)
+{
+    float4 Ambient;
+    float4 Diffuse;
+    float4 Specular;
+    float4 Emissive;
+}
+
+cbuffer Transform : register(b1)
 {
     float4x4 World;
     float4x4 View;
@@ -41,13 +50,16 @@ VSOutput VS(VSInput input)
 }
 
 Texture2D diffuseTexture : register(t0);
-//Texture2D normalTexture : register(t1);
+Texture2D specularTexture : register(t1);
+Texture2D normalTexture : register(t2);
 
 SamplerState sampler0 : register(s0);
 
 float4 PS(VSOutput input) : SV_TARGET
 {
     float4 color = diffuseTexture.Sample(sampler0, input.UV);
-    //float4 color = float4(input.UV.xy, 1, 1);
+    float4 dirLight = float4(1.f,0.f,0.f,1.f);
+    float4 value = dot(-dirLight, normalize(input.NormalW));
+    color = color * value * Diffuse;
     return color;
 }

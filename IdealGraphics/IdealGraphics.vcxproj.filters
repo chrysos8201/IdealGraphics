@@ -64,7 +64,7 @@
     <ClInclude Include="Core\Core.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Defines.h">
+    <ClInclude Include="Core\Definitions.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Types.h">
@@ -73,29 +73,18 @@
     <ClInclude Include="GraphicsEngine\D3D12\D3D12ThirdParty.h">
       <Filter>RenderTest</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\IEngine.h" />
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h">
       <Filter>Misc\Thirdparty</Filter>
     </ClInclude>
-    <ClInclude Include="Misc\AssimpLoader.h">
-      <Filter>Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="Misc\ASEParser.h">
-      <Filter>Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="Misc\Utils\PIX.h" />
-    <ClInclude Include="GraphicsEngine\IdealRenderer.h">
+    <ClInclude Include="Misc\ThirdParty\Utils\PIX.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Renderer.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h" />
     <ClInclude Include="Core\ForDebug.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Resource.h">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineState.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Misc\Assimp\AssimpConverter.h">
@@ -104,25 +93,142 @@
     <ClInclude Include="GraphicsEngine\VertexInfo.h">
       <Filter>GraphicsEngine</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resource\Material.h" />
-    <ClInclude Include="Misc\Utils\tinyxml2.h" />
-    <ClInclude Include="Misc\Utils\FileUtils.h" />
-    <ClInclude Include="GraphicsEngine\ResourceManager.h" />
-    <ClInclude Include="GraphicsEngine\Resource\Bone.h">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resource\Mesh.h">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsEngine\Resource\Model.h">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Misc\Utils\StringUtils.h">
+    <ClInclude Include="Misc\ThirdParty\Utils\tinyxml2.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\FileUtils.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\StringUtils.h">
       <Filter>Misc</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngine\Resource\ResourceBase.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12ResourceManager.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRenderer.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRendererFactory.h" />
+    <ClInclude Include="GraphicsEngine\public\ICamera.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealCamera.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\ResourceManager.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\public\IMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\ConstantBufferInfo.h" />
+    <ClInclude Include="GraphicsEngine\Resource\ModelAnimation.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealMesh.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12RootSignature.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Shader.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealBone.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealStaticMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealMaterial.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealStaticMesh.h" />
+    <ClInclude Include="GraphicsEngine\public\IRenderScene.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMesh.h" />
+    <ClInclude Include="GraphicsEngine\public\ISkinnedMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\public\IAnimation.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealAnimation.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealRenderScene.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealPointLight.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealSpotLight.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealScreenQuad.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.h" />
+    <ClInclude Include="GraphicsEngine\public\ISpotLight.h" />
+    <ClInclude Include="GraphicsEngine\public\IPointLight.h" />
+    <ClInclude Include="GraphicsEngine\public\IDirectionalLight.h" />
+    <ClInclude Include="GraphicsEngine\public\ILight.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRendererDefinitions.h" />
+    <ClInclude Include="GraphicsEngine\public\imconfig.h" />
+    <ClInclude Include="GraphicsEngine\public\imgui.h" />
+    <ClInclude Include="Editor\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="Editor\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="Editor\imgui\imgui_internal.h" />
+    <ClInclude Include="Editor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Editor\imgui\imstb_textedit.h" />
+    <ClInclude Include="Editor\imgui\imstb_truetype.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DynamicConstantBufferAllocator.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\IndexCreator.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\Utils.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12RayTracingRenderer.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\TestShader.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\D3D12RaytracingResources.h" />
+    <ClInclude Include="Shaders\Raytracing\RaytracingHlslCompat.h" />
+    <ClInclude Include="GraphicsEngine\Resource\ShaderManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12SRV.h" />
+    <ClInclude Include="..\Shaders\Raytracing\RaytracingHlslCompat.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructure.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorManager.h" />
+    <ClInclude Include="GraphicsEngine\public\IRendererResource.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12UAV.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\DeferredDeleteManager.h" />
+    <ClInclude Include="GraphicsEngine\public\IMesh.h" />
+    <ClInclude Include="GraphicsEngine\public\ITexture.h" />
+    <ClInclude Include="GraphicsEngine\public\IMaterial.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealCanvas.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealImage.h" />
+    <ClInclude Include="GraphicsEngine\public\IBone.h" />
+    <ClInclude Include="Editor\imguizmo\GraphEditor.h" />
+    <ClInclude Include="Editor\imguizmo\ImApp.h" />
+    <ClInclude Include="Editor\imguizmo\ImCurveEdit.h" />
+    <ClInclude Include="Editor\imguizmo\ImGradient.h" />
+    <ClInclude Include="Editor\imguizmo\ImGuizmo.h" />
+    <ClInclude Include="Editor\imguizmo\ImSequencer.h" />
+    <ClInclude Include="Editor\imguizmo\ImZoomSlider.h" />
+    <ClInclude Include="GraphicsEngine\public\IImage.h" />
+    <ClInclude Include="GraphicsEngine\public\ISprite.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealSprite.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\UIResourceBase.h" />
+    <ClInclude Include="GraphicsEngine\D2D\D2DTextManager.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealText.h" />
+    <ClInclude Include="GraphicsEngine\public\IText.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleSystem.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleMaterial.h" />
+    <ClInclude Include="Misc\Utils\BitUtils.h" />
+    <ClInclude Include="GraphicsEngine\public\IShader.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleSystem.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleMaterial.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleSystemManager.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleMesh.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\Graph.h" />
+    <ClInclude Include="GraphicsEngine\public\IGraph.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Audio.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\BufferHelpers.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\CommonStates.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DDSTextureLoader.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DescriptorHeap.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DirectXHelpers.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\EffectPipelineStateDescription.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Effects.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GamePad.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GeometricPrimitive.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GraphicsMemory.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Keyboard.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Model.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Mouse.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\PostProcess.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\PrimitiveBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\RenderTargetState.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\ResourceUploadBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\ScreenGrab.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SimpleMath.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SpriteBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SpriteFont.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\VertexTypes.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\WICTextureLoader.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\XboxDDSTextureLoader.h" />
+    <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugMeshManager.h" />
+    <ClInclude Include="Misc\Utils\Grid.h" />
+    <ClInclude Include="Misc\Utils\Octree\Octree.h" />
+    <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugLine.h" />
+    <ClInclude Include="Misc\Utils\RandomValue.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
+    <ClInclude Include="GraphicsEngine\IdealLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -141,25 +247,13 @@
     <ClCompile Include="Launch\LaunchWindow.cpp">
       <Filter>Launch</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\IEngine.cpp" />
-    <ClCompile Include="Misc\AssimpLoader.cpp">
-      <Filter>Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Misc\ASEParser.cpp">
-      <Filter>Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\IdealRenderer.cpp">
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Renderer.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Resource.cpp">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineState.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Misc\Assimp\AssimpConverter.cpp">
@@ -168,23 +262,85 @@
     <ClCompile Include="GraphicsEngine\VertexInfo.cpp">
       <Filter>GraphicsEngine</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resource\Material.cpp" />
-    <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
-    <ClCompile Include="Misc\Utils\FileUtils.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\tinyxml2.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\FileUtils.cpp" />
     <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
-    <ClCompile Include="GraphicsEngine\Resource\Bone.cpp">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resource\Mesh.cpp">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\Resource\Model.cpp">
-      <Filter>GraphicsEngine\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Misc\Utils\StringUtils.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\StringUtils.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12ResourceManager.cpp" />
+    <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h">
+      <Filter>GraphicsEngine\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\Resource\ModelAnimation.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12RootSignature.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Shader.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealBone.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealStaticMeshObject.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealMaterial.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealStaticMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealAnimation.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealRenderScene.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealPointLight.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealSpotLight.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealScreenQuad.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.cpp" />
+    <ClCompile Include="Editor\imgui\imgui.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DynamicConstantBufferAllocator.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\IndexCreator.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12RayTracingRenderer.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\ShaderManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12SRV.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructure.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12UAV.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\DeferredDeleteManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealCanvas.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealImage.cpp" />
+    <ClCompile Include="Editor\imguizmo\GraphEditor.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImGradient.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImSequencer.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealSprite.cpp" />
+    <ClCompile Include="GraphicsEngine\D2D\D2DTextManager.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealText.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleSystem.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleMaterial.cpp" />
+    <ClCompile Include="Misc\Utils\BitUtils.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleSystemManager.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\Graph.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\DebugMesh\DebugMeshManager.cpp" />
+    <ClCompile Include="Misc\Utils\Grid.cpp" />
+    <ClCompile Include="Misc\Utils\Octree\Octree.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\DebugMesh\DebugLine.cpp" />
+    <ClCompile Include="Misc\Utils\RandomValue.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />
+    <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
@@ -207,10 +363,38 @@
     </FxCompile>
     <FxCompile Include="Shaders\BoxUV.hlsl" />
     <FxCompile Include="Shaders\SimpleVertexShaderUV.hlsl" />
+    <FxCompile Include="Shaders\SimpleMeshShader.hlsl" />
+    <FxCompile Include="Shaders\AnimationDefaultVS.hlsl" />
+    <FxCompile Include="Shaders\BoxUV2.hlsl" />
+    <FxCompile Include="Shaders\AnimationDefault.hlsl" />
+    <FxCompile Include="Shaders\FullScreenVS.hlsl" />
+    <FxCompile Include="Shaders\LightPassPS.hlsl" />
+    <FxCompile Include="Shaders\GBufferMesh.hlsl" />
+    <FxCompile Include="Shaders\AnimationGeometry.hlsl" />
+    <FxCompile Include="Shaders\GBufferMesh2.hlsl" />
+    <FxCompile Include="Shaders\AnimationGeometry2.hlsl" />
+    <FxCompile Include="Shaders\Raytracing\Raytracing.hlsl" />
+    <FxCompile Include="..\Shaders\Raytracing\Raytracing.hlsl" />
+    <FxCompile Include="Shaders\Raytracing\CS_ComputeAnimationVertexBuffer.hlsl" />
+    <FxCompile Include="..\Shaders\Raytracing\CS_ComputeAnimationVertexBuffer.hlsl" />
+    <FxCompile Include="..\Shaders\UI.hlsl" />
+    <FxCompile Include="..\Shaders\Screen\Screen.hlsl" />
+    <FxCompile Include="..\Shaders\Particle\TestCustomParticle.hlsl" />
+    <FxCompile Include="..\Shaders\Particle\DefaultParticleVS.hlsl" />
+    <FxCompile Include="..\Shaders\Particle\SwordSlash.hlsl" />
+    <FxCompile Include="..\Shaders\DebugMesh\DebugLineShader.hlsl" />
+    <FxCompile Include="..\Shaders\ModifyVertexBuffer\CS_ModifyVertexBuffer.hlsl" />
+    <FxCompile Include="..\Shaders\Texture\CS_GenerateMips.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\Light.hlsli" />
+    <None Include="packages.config" />
+    <None Include="..\Shaders\Raytracing\RaytracingHelper.hlsli" />
+    <None Include="..\Shaders\Raytracing\DisneyBSDF.hlsli" />
+    <None Include="..\Shaders\Particle\ParticleCommon.hlsli" />
+    <None Include="ThirdParty\Include\DirectXTK12\SimpleMath.inl" />
   </ItemGroup>
 </Project>

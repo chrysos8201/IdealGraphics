@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>hair1</Name>
+        <DiffuseFile>Hair_BaseColor_Ash.tga</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0" G="0" B="0" A="6.3117909"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.7487672"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>EyesCornea1</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0.58823532" G="0.58823532" B="0.58823532" A="1"/>
+        <Diffuse R="0.58823532" G="0.58823532" B="0.58823532" A="1"/>
+        <Specular R="1.17" G="1.17" B="1.17" A="207.93658"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>Eyes1</Name>
+        <DiffuseFile>Eyes_BaseColor_01.tga</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0.55000001" G="0.55000001" B="0.55000001" A="1"/>
+        <Diffuse R="1" G="1" B="1" A="1"/>
+        <Specular R="1.143" G="1.143" B="1.143" A="388.02328"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>body1</Name>
+        <DiffuseFile>Body_BaseColor.tga</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0" G="0" B="0" A="6.3117909"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.7487672"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>face</Name>
+        <DiffuseFile>Head_BaseColor.tga</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0" G="0" B="0" A="6.3117909"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.7487672"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+</Materials>

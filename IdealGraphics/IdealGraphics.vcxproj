@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.props')" />
+  <Import Project="..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.props" Condition="Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugConsole|Win32">
       <Configuration>DebugConsole</Configuration>
@@ -48,13 +50,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -84,6 +86,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Libraries\DebugLib\GraphicsEngine\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Libraries\ReleaseLib\GraphicsEngine\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -117,15 +125,20 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories);$(SolutionDir)IdealGraphics\GraphicsEngine\public\;$(SolutionDir)IdealGraphics\Editor\imgui\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)IdealGraphics\ThirdParty\Libraries\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -134,9 +147,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Common;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories);$(SolutionDir)IdealGraphics\GraphicsEngine\public\;$(SolutionDir)IdealGraphics\Editor\imgui\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,81 +164,284 @@
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)IdealGraphics\ThirdParty\Libraries\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)IdealGraphics;$(SolutionDir)IdealGraphics\ThirdParty\Include;%(AdditionalIncludeDirectories);$(SolutionDir)IdealGraphics\GraphicsEngine\public\;$(SolutionDir)IdealGraphics\Editor\imgui\</AdditionalIncludeDirectories>
+      <ConformanceMode>false</ConformanceMode>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12ResourceManager.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
-    <ClInclude Include="GraphicsEngine\ResourceManager.h" />
-    <ClInclude Include="Misc\Utils\FileUtils.h" />
-    <ClInclude Include="GraphicsEngine\Resource\Bone.h" />
-    <ClInclude Include="GraphicsEngine\Resource\Material.h" />
-    <ClInclude Include="Misc\Assimp\AssimpConverter.h" />
-    <ClInclude Include="Core\ForDebug.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineState.h">
+    <ClInclude Include="..\Shaders\Raytracing\RaytracingHlslCompat.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
+    <ClInclude Include="GraphicsEngine\IdealLayer.h" />
+    <ClInclude Include="Misc\Utils\RandomValue.h" />
+    <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugLine.h" />
+    <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugMeshManager.h" />
+    <ClInclude Include="GraphicsEngine\public\IGraph.h" />
+    <ClInclude Include="Misc\Utils\Grid.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\Graph.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleMaterial.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleMesh.h" />
+    <ClInclude Include="GraphicsEngine\public\IParticleSystem.h" />
+    <ClInclude Include="GraphicsEngine\public\IShader.h" />
+    <ClInclude Include="Misc\Utils\BitUtils.h" />
+    <ClInclude Include="GraphicsEngine\D2D\D2DTextManager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Editor\imguizmo\GraphEditor.h" />
+    <ClInclude Include="Editor\imguizmo\ImApp.h" />
+    <ClInclude Include="Editor\imguizmo\ImCurveEdit.h" />
+    <ClInclude Include="Editor\imguizmo\ImGradient.h" />
+    <ClInclude Include="Editor\imguizmo\ImGuizmo.h" />
+    <ClInclude Include="Editor\imguizmo\ImSequencer.h" />
+    <ClInclude Include="Editor\imguizmo\ImZoomSlider.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\DeferredDeleteManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12UAV.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructure.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12SRV.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12RayTracingRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DynamicConstantBufferAllocator.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\TestShader.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\D3D12RaytracingResources.h" />
+    <ClInclude Include="GraphicsEngine\public\IBone.h" />
+    <ClInclude Include="GraphicsEngine\public\IImage.h" />
+    <ClInclude Include="GraphicsEngine\public\IMaterial.h" />
+    <ClInclude Include="GraphicsEngine\public\imconfig.h" />
+    <ClInclude Include="GraphicsEngine\public\IMesh.h" />
+    <ClInclude Include="GraphicsEngine\public\imgui.h" />
+    <ClInclude Include="Editor\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="Editor\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="Editor\imgui\imgui_internal.h" />
+    <ClInclude Include="Editor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Editor\imgui\imstb_textedit.h" />
+    <ClInclude Include="Editor\imgui\imstb_truetype.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Shader.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12RootSignature.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.h" />
+    <ClInclude Include="GraphicsEngine\ConstantBufferInfo.h" />
+    <ClInclude Include="GraphicsEngine\public\IAnimation.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRendererDefinitions.h" />
+    <ClInclude Include="GraphicsEngine\public\ILight.h" />
+    <ClInclude Include="GraphicsEngine\public\IPointLight.h" />
+    <ClInclude Include="GraphicsEngine\public\IRendererResource.h" />
+    <ClInclude Include="GraphicsEngine\public\ISkinnedMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\public\IMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\public\IRenderScene.h" />
+    <ClInclude Include="GraphicsEngine\public\ISpotLight.h" />
+    <ClInclude Include="GraphicsEngine\public\ISprite.h" />
+    <ClInclude Include="GraphicsEngine\public\IText.h" />
+    <ClInclude Include="GraphicsEngine\public\ITexture.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealCamera.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\ResourceManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
+    <ClInclude Include="GraphicsEngine\public\ICamera.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRenderer.h" />
+    <ClInclude Include="GraphicsEngine\public\IdealRendererFactory.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealMesh.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealBone.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealStaticMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealMaterial.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMesh.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealAnimation.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealRenderScene.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealPointLight.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealSpotLight.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealScreenQuad.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.h" />
+    <ClInclude Include="GraphicsEngine\public\IDirectionalLight.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealCanvas.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealImage.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealSprite.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\UIResourceBase.h" />
+    <ClInclude Include="GraphicsEngine\Resource\UI\IdealText.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Misc\ThirdParty\Utils\IndexCreator.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\FileUtils.h" />
+    <ClInclude Include="Misc\Assimp\AssimpConverter.h" />
+    <ClInclude Include="Core\ForDebug.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Resource.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h" />
-    <ClInclude Include="GraphicsEngine\IdealRenderer.h" />
-    <ClInclude Include="GraphicsEngine\Resource\Mesh.h" />
-    <ClInclude Include="Misc\Utils\PIX.h" />
-    <ClInclude Include="GraphicsEngine\Resource\Model.h" />
-    <ClInclude Include="Misc\AssimpLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Renderer.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\PIX.h" />
     <ClInclude Include="Core\Core.h" />
-    <ClInclude Include="Core\Defines.h" />
+    <ClInclude Include="Core\Definitions.h" />
     <ClInclude Include="Core\Types.h" />
-    <ClInclude Include="Misc\ASEParser.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="Engine\IEngine.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12ThirdParty.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Launch\LaunchWindow.h" />
-    <ClInclude Include="Misc\Utils\StringUtils.h" />
-    <ClInclude Include="Misc\Utils\tinyxml2.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\StringUtils.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\tinyxml2.h" />
+    <ClInclude Include="GraphicsEngine\Resource\ModelAnimation.h" />
+    <ClInclude Include="Misc\ThirdParty\Utils\Utils.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleSystem.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleMaterial.h" />
+    <ClInclude Include="GraphicsEngine\Resource\Particle\ParticleSystemManager.h" />
+    <ClInclude Include="Misc\Utils\Octree\Octree.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="GraphicsEngine\Resource\ResourceBase.h" />
+    <ClInclude Include="GraphicsEngine\Resource\IdealStaticMesh.h" />
+    <ClInclude Include="GraphicsEngine\Resource\ShaderManager.h" />
+    <ClInclude Include="Shaders\Raytracing\RaytracingHlslCompat.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="GraphicsEngine\VertexInfo.h" />
     <ClInclude Include="Misc\ThirdParty\Thirdparty.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Audio.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\BufferHelpers.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\CommonStates.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DDSTextureLoader.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DescriptorHeap.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\DirectXHelpers.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\EffectPipelineStateDescription.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Effects.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GamePad.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GeometricPrimitive.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\GraphicsMemory.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Keyboard.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Model.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\Mouse.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\PostProcess.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\PrimitiveBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\RenderTargetState.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\ResourceUploadBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\ScreenGrab.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SimpleMath.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SpriteBatch.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\SpriteFont.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\VertexTypes.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\WICTextureLoader.h" />
+    <ClInclude Include="ThirdParty\Include\DirectXTK12\XboxDDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12ResourceManager.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
-    <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
-    <ClCompile Include="Misc\Utils\FileUtils.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\Bone.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\Material.cpp" />
-    <ClCompile Include="Misc\Assimp\AssimpConverter.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineState.cpp">
+    <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />
+    <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
+    <ClCompile Include="Misc\Utils\RandomValue.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\DebugMesh\DebugLine.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\DebugMesh\DebugMeshManager.cpp" />
+    <ClCompile Include="Misc\Utils\Grid.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\Graph.cpp" />
+    <ClCompile Include="Misc\Utils\BitUtils.cpp" />
+    <ClCompile Include="GraphicsEngine\D2D\D2DTextManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Editor\imguizmo\GraphEditor.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImGradient.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="Editor\imguizmo\ImSequencer.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\DeferredDeleteManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12UAV.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructure.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12SRV.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12RayTracingRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DynamicConstantBufferAllocator.cpp" />
+    <ClCompile Include="Editor\imgui\imgui.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Editor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Shader.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12RootSignature.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
+    <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealBone.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealStaticMeshObject.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealMaterial.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealAnimation.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealRenderScene.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealPointLight.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealSpotLight.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealScreenQuad.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealCanvas.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealImage.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealSprite.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\UI\IdealText.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Misc\ThirdParty\Utils\IndexCreator.cpp" />
+    <ClCompile Include="Misc\Assimp\AssimpConvertType.h" />
+    <ClCompile Include="Misc\ThirdParty\Utils\FileUtils.cpp" />
+    <ClCompile Include="Misc\Assimp\AssimpConverter.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Definitions.h" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp" />
-    <ClCompile Include="GraphicsEngine\IdealRenderer.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\Model.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\Mesh.cpp" />
-    <ClCompile Include="Misc\AssimpLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Misc\ASEParser.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Engine\IEngine.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Renderer.cpp" />
     <ClCompile Include="Launch\LaunchWindow.cpp" />
     <ClCompile Include="GraphicsEngine\VertexInfo.cpp" />
-    <ClCompile Include="Misc\Utils\StringUtils.cpp" />
-    <ClCompile Include="Misc\Utils\tinyxml2.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\StringUtils.cpp" />
+    <ClCompile Include="Misc\ThirdParty\Utils\tinyxml2.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\ModelAnimation.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\IdealStaticMesh.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\ShaderManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleSystem.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleMaterial.cpp" />
+    <ClCompile Include="GraphicsEngine\Resource\Particle\ParticleSystemManager.cpp" />
+    <ClCompile Include="Misc\Utils\Octree\Octree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc" />
@@ -234,6 +451,75 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Shaders\DebugMesh\DebugLineShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\ModifyVertexBuffer\CS_ModifyVertexBuffer.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Particle\DefaultParticleVS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Particle\SwordSlash.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Particle\TestCustomParticle.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Raytracing\CS_ComputeAnimationVertexBuffer.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Raytracing\Raytracing.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Screen\Screen.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Texture\CS_GenerateMips.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\UI.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\AnimationDefault.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\AnimationDefaultVS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\AnimationGeometry.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\AnimationGeometry2.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\BoxPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -243,6 +529,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\BoxUV.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -251,6 +540,11 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\BoxUV2.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\BoxVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -261,20 +555,90 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\FullScreenVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\GBufferMesh.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\GBufferMesh2.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\LightPassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\Raytracing\CS_ComputeAnimationVertexBuffer.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='DebugConsole|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\Raytracing\Raytracing.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleMeshShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\SimplePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\SimplePixelShader2.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\SimpleVertexShaderUV.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -290,16 +654,56 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Common.hlsli" />
+    <None Include="..\Shaders\Particle\ParticleCommon.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\Raytracing\DisneyBSDF.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\Raytracing\RaytracingHelper.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Shaders\Common.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Shaders\Light.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="ThirdParty\Include\DirectXTK12\SimpleMath.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.targets" Condition="Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.targets')" />
+    <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.targets')" />
+    <Import Project="..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>이 프로젝트는 이 컴퓨터에 없는 NuGet 패키지를 참조합니다. 해당 패키지를 다운로드하려면 NuGet 패키지 복원을 사용하십시오. 자세한 내용은 http://go.microsoft.com/fwlink/?LinkID=322105를 참조하십시오. 누락된 파일은 {0}입니다.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.DXC.1.8.2405.17\build\native\Microsoft.Direct3D.DXC.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.614.0\build\native\Microsoft.Direct3D.D3D12.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets'))" />
+  </Target>
 </Project>

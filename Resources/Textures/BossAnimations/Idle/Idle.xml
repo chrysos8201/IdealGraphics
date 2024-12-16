@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>leg</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000746" G="0.03799244" B="0.03168514" A="1"/>
+        <Specular R="0.80000746" G="0.03799244" B="0.03168514" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>body</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0" G="0.080126137" B="0.80022764" A="1"/>
+        <Specular R="0" G="0.080126137" B="0.80022764" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>arm_009</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Specular R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>arm</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Specular R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>head</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.76761317" G="0.80112451" B="0.0062220474" A="1"/>
+        <Specular R="0.76761317" G="0.80112451" B="0.0062220474" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>cloth_001</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80003154" G="0.12516153" B="0.78020769" A="1"/>
+        <Specular R="0.80003154" G="0.12516153" B="0.78020769" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>arm_002</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Specular R="0" G="0.49991515" B="0.00066354801" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>weapon</Name>
+        <DiffuseFile>DefaultAlbedo.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.21944508" G="0.80076647" B="0.49734008" A="1"/>
+        <Specular R="0.21944508" G="0.80076647" B="0.49734008" A="1"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0"/>
+        <UseTextureInfo Diffuse="false" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+</Materials>

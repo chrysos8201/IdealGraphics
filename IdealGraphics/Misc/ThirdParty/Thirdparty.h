@@ -2,4 +2,9 @@
 
 #include "ThirdParty/Include/assimp/config.h"
 
-#pragma comment(lib, "ThirdParty/Libraries/ForDebug/assimp/assimp-vc143-mtd.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "DebugLib/assimp/assimp-vc143-mtd.lib")
+
+#else
+#pragma comment(lib, "ReleaseLib/assimp/assimp-vc143-mt.lib")
+#endif

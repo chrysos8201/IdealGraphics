@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+	<Material>
+		<Name>skirtbottom</Name>
+		<DiffuseFile>T_skirtbottom_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_skirtbottom_Normal.png</NormalFile>
+		<MetalicFile>T_skirtbottom_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_skirtbottom_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.14345634" G="0.12680869" B="0.11443701" A="1"/>
+		<Specular R="0.14345634" G="0.12680869" B="0.11443701" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>eyes</Name>
+		<DiffuseFile>T_eyes_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_eyes_Normal.png</NormalFile>
+		<MetalicFile>T_eyes_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_eyes_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+		<Specular R="0.80000001" G="0.80000001" B="0.80000001" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>face</Name>
+		<DiffuseFile>T_face_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_face_Normal.png</NormalFile>
+		<MetalicFile>T_face_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_face_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="1" G="0.63424551" B="0.52518624" A="1"/>
+		<Specular R="1" G="0.63424551" B="0.52518624" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>vest</Name>
+		<DiffuseFile>T_vest_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_vest_Normal.png</NormalFile>
+		<MetalicFile>T_vest_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_vest_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.80021214" G="0.36863956" B="0" A="1"/>
+		<Specular R="0.80021214" G="0.36863956" B="0" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>mechanicalarm</Name>
+		<DiffuseFile>T_mechanicalarm_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_mechanicalarm_Normal.png</NormalFile>
+		<MetalicFile>T_mechanicalarm_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_mechanicalarm_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.23567423" G="0.10559937" B="0.025377451" A="1"/>
+		<Specular R="0.23567423" G="0.10559937" B="0.025377451" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>hair</Name>
+		<DiffuseFile>T_hair_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_hair_Normal.png</NormalFile>
+		<MetalicFile>T_hair_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_hair_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="1" G="1" B="1" A="1"/>
+		<Specular R="1" G="1" B="1" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>shoulderarmor</Name>
+		<DiffuseFile>T_shoulderarmor_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_shoulderarmor_Normal.png</NormalFile>
+		<MetalicFile>T_shoulderarmor_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_shoulderarmor_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.23567423" G="0.10559937" B="0.025377451" A="1"/>
+		<Specular R="0.23567423" G="0.10559937" B="0.025377451" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>CPback</Name>
+		<DiffuseFile>T_CPback_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_CPback_Normal.png</NormalFile>
+		<MetalicFile>T_CPback_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_CPback_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.036379606" G="0.016668675" B="0.0081544481" A="1"/>
+		<Specular R="0.036379606" G="0.016668675" B="0.0081544481" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>top</Name>
+		<DiffuseFile>T_top_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_top_Normal.png</NormalFile>
+		<MetalicFile>T_top_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_top_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.65247595" G="0.80033875" B="0.74108517" A="1"/>
+		<Specular R="0.65247595" G="0.80033875" B="0.74108517" A="25"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0.5"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+	<Material>
+		<Name>sword</Name>
+		<DiffuseFile>T_sword_BaseMap.png</DiffuseFile>
+		<SpecularFile>DefaultAlbedo.png</SpecularFile>
+		<NormalFile>T_sword_Normal.png</NormalFile>
+		<MetalicFile>T_sword_MaskMap.png</MetalicFile>
+		<RoughnessFile>T_sword_MaskMap.png</RoughnessFile>
+		<Ambient R="0" G="0" B="0" A="1"/>
+		<Diffuse R="0.58823532" G="0.58823532" B="0.58823532" A="1"/>
+		<Specular R="0.58823532" G="0.58823532" B="0.58823532" A="100"/>
+		<Emissive R="0" G="0" B="0" A="1"/>
+		<Metallic Factor="-1.0737418e+08"/>
+		<Roughness Factor="0"/>
+		<UseTextureInfo Diffuse="true" Normal="true" Metallic="true" Roughness="true"/>
+	</Material>
+</Materials>

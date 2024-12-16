@@ -20,7 +20,8 @@ public:
 	void Write(const T& Data)
 	{
 		DWORD numOfBytes = 0;
-		assert(WriteFile(m_handle, &Data, sizeof(T), (LPDWORD)&numOfBytes, nullptr));
+		WriteFile(m_handle, &Data, sizeof(T), (LPDWORD)&numOfBytes, nullptr);
+		//assert(WriteFile(m_handle, &Data, sizeof(T), (LPDWORD)&numOfBytes, nullptr));
 	}
 
 	template<>
@@ -37,7 +38,11 @@ public:
 	void Read(OUT T& Data)
 	{
 		DWORD numOfBytes = 0;
-		assert(ReadFile(m_handle, &Data, sizeof(T), (LPDWORD)&numOfBytes, nullptr));
+		BOOL isSuccess = ReadFile(m_handle, &Data, sizeof(T), (LPDWORD)&numOfBytes, nullptr);
+		if (!isSuccess)
+		{
+			assert(false);
+		}
 	}
 
 	template<typename T>

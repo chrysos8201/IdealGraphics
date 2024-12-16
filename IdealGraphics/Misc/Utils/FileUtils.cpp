@@ -41,13 +41,19 @@ void FileUtils::Open(std::wstring FilePath, FileMode Mode)
 		);
 	}
 
+	if (m_handle == INVALID_HANDLE_VALUE)
+	{
+		MessageBox(NULL, FilePath.c_str(), L"FileUtils", MB_OK);
+	}
+
 	assert(m_handle != INVALID_HANDLE_VALUE);
 }
 
 void FileUtils::Write(void* Data, uint32 DataSize)
 {
 	uint32 numOfBytes = 0;
-	assert(WriteFile(m_handle, Data, DataSize, reinterpret_cast<LPDWORD>(&numOfBytes), nullptr));
+	WriteFile(m_handle, Data, DataSize, reinterpret_cast<LPDWORD>(&numOfBytes), nullptr);
+	//assert(WriteFile(m_handle, Data, DataSize, reinterpret_cast<LPDWORD>(&numOfBytes), nullptr));
 }
 
 void FileUtils::Write(const std::string& Data)
@@ -65,7 +71,11 @@ void FileUtils::Write(const std::string& Data)
 void FileUtils::Read(void** Data, uint32 DataSize)
 {
 	uint32 numOfBytes = 0;
-	assert(ReadFile(m_handle, *Data, DataSize, reinterpret_cast<LPDWORD>(&numOfBytes), nullptr));
+	BOOL isSuccess = ReadFile(m_handle, *Data, DataSize, reinterpret_cast<LPDWORD>(&numOfBytes), nullptr);
+	if (!isSuccess)
+	{
+		assert(false);
+	}
 }
 
 void FileUtils::Read(OUT std::string& Data)

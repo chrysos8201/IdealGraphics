@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>low001_T</Name>
+        <DiffuseFile>monster_low001_AlbedoTransparency.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0.80000001" G="0.80000001" B="0.80000001" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>low002_T</Name>
+        <DiffuseFile>monster_low002_AlbedoTransparency.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80016482" G="0.71669269" B="0" A="1"/>
+        <Specular R="0.80016482" G="0.71669269" B="0" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>low003_T</Name>
+        <DiffuseFile>monster_low003_AlbedoTransparency.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0.80000001" G="0.80000001" B="0.80000001" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>low005_T</Name>
+        <DiffuseFile>monster_low005_AlbedoTransparency.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80117345" G="0.05385676" B="0.56938183" A="1"/>
+        <Specular R="0.80117345" G="0.05385676" B="0.56938183" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>low004_T</Name>
+        <DiffuseFile>monster_low004_AlbedoTransparency.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>DefaultNormalMap.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0" G="0.80010176" B="0.0016883229" A="1"/>
+        <Specular R="0" G="0.80010176" B="0.0016883229" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="false" Metallic="false" Roughness="false"/>
+    </Material>
+</Materials>

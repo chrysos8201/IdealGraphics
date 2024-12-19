@@ -218,9 +218,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		InitCamera(camera);
 		gRenderer->SetMainCamera(camera);
 
-		gRenderer->SetDisplayResolutionOption(Ideal::Resolution::EDisplayResolutionOption::R_3440_1440);
+		//gRenderer->SetDisplayResolutionOption(Ideal::Resolution::EDisplayResolutionOption::R_3440_1440);
 		//gRenderer->SetDisplayResolutionOption(Ideal::Resolution::EDisplayResolutionOption::R_800_600);
-		//gRenderer->SetDisplayResolutionOption(Ideal::Resolution::EDisplayResolutionOption::R_1920_1080);
+		gRenderer->SetDisplayResolutionOption(Ideal::Resolution::EDisplayResolutionOption::R_1920_1080);
 		//gRenderer->ToggleFullScreenWindow();
 #pragma endregion
 
@@ -328,9 +328,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//std::shared_ptr<Ideal::IMeshObject> DebugStaticEnemy = gRenderer->CreateStaticMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
 		//DebugStaticEnemy->SetTransformMatrix(DirectX::SimpleMath::Matrix::CreateTranslation(3, 0, 0));
 
-		std::shared_ptr<Ideal::ISkinnedMeshObject> DebugEnemy = gRenderer->CreateSkinnedMeshObject(L"BossAnimations/Idle/Idle");
-		std::shared_ptr<Ideal::IAnimation> DebugPlayerAnim = gRenderer->CreateAnimation(L"BossAnimations/Idle/BossEntranceRoot");
-		DebugEnemy->AddAnimation("Debug", DebugPlayerAnim);
+		//std::shared_ptr<Ideal::ISkinnedMeshObject> DebugEnemy = gRenderer->CreateSkinnedMeshObject(L"BossAnimations/Idle/Idle");
+		//std::shared_ptr<Ideal::IAnimation> DebugPlayerAnim = gRenderer->CreateAnimation(L"BossAnimations/Idle/BossEntranceRoot");
+		//DebugEnemy->AddAnimation("Debug", DebugPlayerAnim);
 		// 
 
 		Matrix floorMat = Matrix::CreateRotationY(3.14);
@@ -2418,38 +2418,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 					* Matrix::CreateRotationZ(DirectX::XMConvertToRadians(angleZ))
 					* Matrix::CreateTranslation(Vector3(0.f, 0.f, 0.f));
 
-
-
-				if (GetAsyncKeyState('N') & 0x8000)
-				{
-					gRenderer->DeleteMeshObject(DebugEnemy);
-					DebugEnemy = gRenderer->CreateSkinnedMeshObject(L"BossAnimations/Idle/Idle");
-				}
-
-				if (GetAsyncKeyState('M') * 0x8000)
-				{
-					//gRenderer->DeleteMeshObject(DebugPlayer0);
-					//DebugPlayer0.reset();
-					gRenderer->DeleteMeshObject(DebugEnemy);
-					gRenderer->DeleteMeshObject(DebugEnemy);
-					DebugEnemy.reset();
-
-					//DebugPlayer0 = gRenderer->CreateSkinnedMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
-					//gRenderer->DeleteMeshObject(DebugPlayer0);
-
-					//DebugPlayer0 = gRenderer->CreateSkinnedMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
-					//DebugPlayerAnim0 = nullptr;
-					//DebugPlayerAnim0 = gRenderer->CreateAnimation(L"PlayerAnimations/Idle/idle");
-					//DebugPlayer0->AddAnimation("Debug", DebugPlayerAnim0);
-
-					//DebugStaticEnemy = gRenderer->CreateStaticMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
-
-					DebugEnemy = gRenderer->CreateSkinnedMeshObject(L"BossAnimations/Idle/Idle");
-					//DebugPlayerAnim = nullptr;
-					//DebugPlayerAnim = gRenderer->CreateAnimation(L"BossAnimations/Idle/BossEntranceRoot");
-					DebugEnemy->AddAnimation("Debug", DebugPlayerAnim);
-				}
-
 #ifdef MAKE_PARTICLE
 				if (GetAsyncKeyState('F') & 0x8000)
 				{
@@ -2659,7 +2627,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				//player3->AnimationDeltaTime(0.002f);
 				//playerRe->AnimationDeltaTime(0.002f);
 				//DebugEnemy->AnimationDeltaTime(0.003f);
-				DebugEnemy->AnimationDeltaTime(0.003f);
+				//DebugEnemy->AnimationDeltaTime(0.003f);
 				//DebugPlayer->AnimationDeltaTime(1.003f);
 
 				if (GetAsyncKeyState(VK_END) * 0x8000)
@@ -2730,9 +2698,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 							SpotLightInspector(spotLight);
 						}
 					}
-					// MAIN LOOP
-					gRenderer->Render();
 				}
+				// MAIN LOOP
+				gRenderer->Render();
 			}
 
 
@@ -2780,8 +2748,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		//gRenderer->DeleteMeshObject(DebugStaticEnemy);
 		//DebugStaticEnemy.reset();
-		gRenderer->DeleteMeshObject(DebugEnemy);
-		DebugEnemy.reset();
+		//gRenderer->DeleteMeshObject(DebugEnemy);
+		//DebugEnemy.reset();
 		//gRenderer->DeleteTexture(faceTexture);
 		//faceTexture.reset();
 		////gRenderer->DeleteTexture(normalTexture);

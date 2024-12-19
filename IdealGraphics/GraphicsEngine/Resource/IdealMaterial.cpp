@@ -156,7 +156,7 @@ void Ideal::IdealMaterial::BindToShader(std::shared_ptr<Ideal::IdealRenderer> Re
 	}
 
 	// 2024.05.07
-	CB_Material* materialData = (CB_Material*)cb->SystemMemAddr;
+	CB_Material* materialData = (CB_Material*)cb->SystemMemoryAddress;
 	materialData->Ambient = m_ambient;
 	materialData->Diffuse = m_diffuse;
 	materialData->Specular = m_specular;
@@ -169,7 +169,7 @@ void Ideal::IdealMaterial::BindToShader(std::shared_ptr<Ideal::IdealRenderer> Re
 	// TODO : 1번째로 하드코딩 되어 있음
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), STATIC_MESH_DESCRIPTOR_INDEX_CBV_MATERIAL, incrementSize);
 	// Root Table Index 1 : 개별 매쉬가 스왑할 root table의 인덱스
-	device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
 	// 2024.05.08
 	// TEST : 루트시그니쳐에 맞게 두번째로 바꿔준다.

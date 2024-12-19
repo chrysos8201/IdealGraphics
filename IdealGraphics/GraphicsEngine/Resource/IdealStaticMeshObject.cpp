@@ -95,19 +95,19 @@ void Ideal::IdealStaticMeshObject::DebugDraw(ComPtr<ID3D12Device> Device, ComPtr
 {
 	// Transform Data 
 	auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
-	CB_Transform* cbTransform = (CB_Transform*)cb1->SystemMemAddr;
+	CB_Transform* cbTransform = (CB_Transform*)cb1->SystemMemoryAddress;
 	cbTransform->World = m_transform.Transpose();
 	cbTransform->WorldInvTranspose = m_transform.Transpose().Invert();
-	memcpy(cb1->SystemMemAddr, cbTransform, sizeof(CB_Transform));
+	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
 	auto handle0 = DescriptorHeap->Allocate();
-	Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb1->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Transform, handle0.GetGpuHandle());
 
 	// Color Data
 	auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_Color));
-	memcpy(cb2->SystemMemAddr, &m_cbDebugColor, sizeof(CB_Color));
+	memcpy(cb2->SystemMemoryAddress, &m_cbDebugColor, sizeof(CB_Color));
 	auto handle1 = DescriptorHeap->Allocate();
-	Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb2->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Color, handle1.GetGpuHandle());
 
 	m_staticMesh->DebugDraw(Device, CommandList);

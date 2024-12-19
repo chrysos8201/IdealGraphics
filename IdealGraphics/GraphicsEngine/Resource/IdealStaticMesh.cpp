@@ -36,7 +36,7 @@ void Ideal::IdealStaticMesh::Draw(std::shared_ptr<Ideal::IdealRenderer> Renderer
 
 		Matrix finalTM = mesh->GetLocalTM() * WorldTM;
 
-		CB_Transform* cbTransform = (CB_Transform*)cb->SystemMemAddr;
+		CB_Transform* cbTransform = (CB_Transform*)cb->SystemMemoryAddress;
 		cbTransform->World = finalTM.Transpose();
 		cbTransform->WorldInvTranspose = finalTM.Transpose().Invert();
 
@@ -46,7 +46,7 @@ void Ideal::IdealStaticMesh::Draw(std::shared_ptr<Ideal::IdealRenderer> Renderer
 
 		// Copy To Main Descriptor
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), STATIC_MESH_DESCRIPTOR_INDEX_CBV_TRANSFORM, incrementSize);
-		device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		// 공용으로 쓰는 Root Parameter인 Transform은 Root Paramter Index가 0번임.
 		commandList->SetGraphicsRootDescriptorTable(STATIC_MESH_DESCRIPTOR_TABLE_INDEX_OBJ, handle.GetGpuHandle());
 

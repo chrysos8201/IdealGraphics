@@ -179,9 +179,9 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		// Global Data 
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
-		memcpy(cb0->SystemMemAddr, CB_GlobalData, sizeof(CB_Global));
+		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
 		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
 
 		for (auto& m : m_meshes)
@@ -196,9 +196,9 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		// Global Data
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
-		memcpy(cb0->SystemMemAddr, CB_GlobalData, sizeof(CB_Global));
+		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
 		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
 
 		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_lineVB->GetView();
@@ -213,9 +213,9 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 			cbDebugLine.endPos = l.endPos;
 			cbDebugLine.color = l.color;
 			auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_DebugLine));
-			memcpy(cb1->SystemMemAddr, &cbDebugLine, sizeof(CB_DebugLine));
+			memcpy(cb1->SystemMemoryAddress, &cbDebugLine, sizeof(CB_DebugLine));
 			auto handle1 = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_LineInfo, handle1.GetGpuHandle());
 		
 			CommandList->DrawInstanced(2, 1, 0, 0);

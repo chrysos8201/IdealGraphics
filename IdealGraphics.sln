@@ -8,6 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GraphicsEngine", "GraphicsEngine", "{0B8CA9AA-79EB-49AC-9868-7D3A800B7DED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IdealGraphicsDemo", "IdealGraphicsDemo\IdealGraphicsDemo.vcxproj", "{414079E5-6FED-49EC-A782-0E9559EA81B2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{248F9F51-DE94-401D-BF4F-E2F5DF3DEB5C} = {248F9F51-DE94-401D-BF4F-E2F5DF3DEB5C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -128,9 +128,9 @@ void Ideal::RaytracingManager::DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr
 
 	// Parameter 2
 	auto cb = CBPool->Allocate(Device.Get(), sizeof(SceneConstantBuffer));
-	memcpy(cb->SystemMemAddr, &SceneCB, sizeof(SceneCB));
+	memcpy(cb->SystemMemoryAddress, &SceneCB, sizeof(SceneCB));
 	auto handle2 = DescriptorManager->Allocate(CurrentFrameIndex);
-	Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetComputeRootDescriptorTable(Ideal::GlobalRootSignature::Slot::CBV_Global, handle2.GetGpuHandle());
 
 	// Parameter 3
@@ -143,9 +143,9 @@ void Ideal::RaytracingManager::DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr
 
 	// Parameter 4
 	auto lightListHandle = CBPool->Allocate(Device.Get(), sizeof(CB_LightList));
-	memcpy(lightListHandle->SystemMemAddr, LightCB, sizeof(CB_LightList));
+	memcpy(lightListHandle->SystemMemoryAddress, LightCB, sizeof(CB_LightList));
 	auto handle4 = DescriptorManager->Allocate(CurrentFrameIndex);
-	Device->CopyDescriptorsSimple(1, handle4.GetCpuHandle(), lightListHandle->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	Device->CopyDescriptorsSimple(1, handle4.GetCpuHandle(), lightListHandle->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetComputeRootDescriptorTable(Ideal::GlobalRootSignature::Slot::CBV_LightList, handle4.GetGpuHandle());
 
 	// Parameter 5 GBufferPosition
@@ -847,16 +847,16 @@ void Ideal::RaytracingManager::DispatchAnimationComputeShader(ComPtr<ID3D12Devic
 	// Parameter1 : CBV_BoneData
 	auto handle1 = DescriptorManager->Allocate(CurrentContextIndex);
 	auto cb = CBPool->Allocate(Device.Get(), sizeof(CB_Bone));
-	memcpy(cb->SystemMemAddr, BoneData, sizeof(CB_Bone));
-	Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	memcpy(cb->SystemMemoryAddress, BoneData, sizeof(CB_Bone));
+	Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetComputeRootDescriptorTable(AnimationRootSignature::Slot::CBV_BoneData, handle1.GetGpuHandle());
 
 	// Parameter2 : CBV_VertexCount
 	auto handle2 = DescriptorManager->Allocate(CurrentContextIndex);
 	auto cb2 = CBPool->Allocate(Device.Get(), sizeof(uint32));
 	uint32 vertexCount = VertexBuffer->GetElementCount();
-	memcpy(cb2->SystemMemAddr, &vertexCount, sizeof(uint32));
-	Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	memcpy(cb2->SystemMemoryAddress, &vertexCount, sizeof(uint32));
+	Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CommandList->SetComputeRootDescriptorTable(AnimationRootSignature::Slot::CBV_VertexCount, handle2.GetGpuHandle());
 
 	// Parameter3 : UAV_OutputVertices

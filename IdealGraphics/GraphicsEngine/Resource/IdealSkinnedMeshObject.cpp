@@ -96,13 +96,13 @@ void Ideal::IdealSkinnedMeshObject::Draw(std::shared_ptr<Ideal::IdealRenderer> R
 			__debugbreak();
 		}
 
-		CB_Transform* t = (CB_Transform*)cb->SystemMemAddr;
+		CB_Transform* t = (CB_Transform*)cb->SystemMemoryAddress;
 		t->World = m_transform.Transpose();
 		t->WorldInvTranspose = m_transform.Transpose().Invert();
 
 		// Copy To Main Descriptor Table
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), SKINNED_MESH_DESCRIPTOR_INDEX_CBV_TRANSFORM, incrementSize);
-		device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
 	// Bind Bone
@@ -113,12 +113,12 @@ void Ideal::IdealSkinnedMeshObject::Draw(std::shared_ptr<Ideal::IdealRenderer> R
 			__debugbreak();
 		}
 
-		CB_Bone* b = (CB_Bone*)cb->SystemMemAddr;
+		CB_Bone* b = (CB_Bone*)cb->SystemMemoryAddress;
 		*b = m_cbBoneData;
 
 		// Copy To Main Descriptor Table
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), SKINNED_MESH_DESCRIPTOR_INDEX_CBV_BONE, incrementSize);
-		device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
 	m_skinnedMesh->Draw(Renderer);

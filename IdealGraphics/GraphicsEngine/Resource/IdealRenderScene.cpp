@@ -614,7 +614,7 @@ void Ideal::IdealRenderScene::UpdateGlobalCBData(std::shared_ptr<IdealRenderer> 
 		__debugbreak();
 	}
 
-	CB_Global* cbGlobal = (CB_Global*)cb->SystemMemAddr;
+	CB_Global* cbGlobal = (CB_Global*)cb->SystemMemoryAddress;
 	//*cbGlobal = *(m_cbGlobal.get());
 	*cbGlobal = *m_cbGlobal;
 
@@ -622,7 +622,7 @@ void Ideal::IdealRenderScene::UpdateGlobalCBData(std::shared_ptr<IdealRenderer> 
 
 	// Copy To Main Descriptor
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(m_cbGlobalHandle.GetCpuHandle(), GLOBAL_DESCRIPTOR_INDEX_CBV_GLOBAL, incrementSize);
-	device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 void Ideal::IdealRenderScene::BindDescriptorTable(std::shared_ptr<IdealRenderer> Renderer)
@@ -690,12 +690,12 @@ void Ideal::IdealRenderScene::UpdateLightCBData(std::shared_ptr<IdealRenderer> R
 		__debugbreak();
 	}
 
-	CB_LightList* cbLightList = (CB_LightList*)cb->SystemMemAddr;
+	CB_LightList* cbLightList = (CB_LightList*)cb->SystemMemoryAddress;
 	*cbLightList = *m_cbLightList;
 	uint32 incrementSize = d3d12Renderer->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(m_cbGlobalHandle.GetCpuHandle(), GLOBAL_DESCRIPTOR_INDEX_CBV_LIGHTLIST, incrementSize);
-	device->CopyDescriptorsSimple(1, cbvDest, cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 void Ideal::IdealRenderScene::CreateGBuffer(std::shared_ptr<IdealRenderer> Renderer)

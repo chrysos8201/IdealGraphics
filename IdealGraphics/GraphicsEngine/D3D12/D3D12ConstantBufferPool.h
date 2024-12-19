@@ -9,9 +9,9 @@ namespace Ideal
 {
 	struct ConstantBufferContainer
 	{
-		D3D12_CPU_DESCRIPTOR_HANDLE CBVHandle;
-		D3D12_GPU_VIRTUAL_ADDRESS GpuMemAddr;
-		uint8* SystemMemAddr;
+		D3D12_CPU_DESCRIPTOR_HANDLE CpuHandle;
+		D3D12_GPU_VIRTUAL_ADDRESS GpuMemoryAddress;
+		uint8* SystemMemoryAddress;
 	};
 
 	//-------------------------------------------------//

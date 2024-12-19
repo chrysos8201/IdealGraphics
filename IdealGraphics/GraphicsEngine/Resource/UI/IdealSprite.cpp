@@ -56,9 +56,9 @@ void Ideal::IdealSprite::DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12Gr
 		// Sprite Constant Buffer
 		{
 			auto cb = CBPool->Allocate(Device.Get(), sizeof(CB_Sprite));
-			memcpy(cb->SystemMemAddr, &m_cbSprite, sizeof(CB_Sprite));
+			memcpy(cb->SystemMemoryAddress, &m_cbSprite, sizeof(CB_Sprite));
 			auto handle = UIDescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			CommandList->SetGraphicsRootDescriptorTable(Ideal::RectRootSignature::Slot::CBV_RectInfo, handle.GetGpuHandle());
 		}
 	}

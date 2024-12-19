@@ -188,9 +188,9 @@ void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, Co
 	{
 		// Global Data 
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
-		memcpy(cb0->SystemMemAddr, CB_GlobalData, sizeof(CB_Global));
+		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
 		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
 	}
 	for (auto& p : m_particlesNoTransparency)

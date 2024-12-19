@@ -693,7 +693,7 @@ bool Ideal::D3D12Renderer::SetImGuiWin32WndProcHandler(HWND hWnd, UINT msg, WPAR
 
 void Ideal::D3D12Renderer::ClearImGui()
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	if (m_isEditor)
 	{
 		ImGui_ImplDX12_NewFrame();
@@ -701,7 +701,7 @@ void Ideal::D3D12Renderer::ClearImGui()
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport();
 	}
-#endif
+//#endif
 }
 
 DirectX::SimpleMath::Vector2 Ideal::D3D12Renderer::GetTopLeftEditorPos()

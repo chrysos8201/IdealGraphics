@@ -798,9 +798,9 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 		m_cbTransform.WorldInvTranspose = m_cbTransform.World.Invert();
 
 		auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
-		memcpy(cb1->SystemMemAddr, &m_cbTransform, sizeof(CB_Transform));
+		memcpy(cb1->SystemMemoryAddress, &m_cbTransform, sizeof(CB_Transform));
 		auto handle1 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
 	}
 
@@ -820,9 +820,9 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 		m_cbParticleSystem.Time = m_currentTime;
 		m_cbParticleSystem.Time = m_currentDurationTime;
 		auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
-		memcpy(cb2->SystemMemAddr, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
+		memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
 		auto handle2 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGpuHandle());
 	}
 	// SRV
@@ -887,9 +887,9 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 		m_cbTransform.World = m_transform.Transpose();
 		m_cbTransform.WorldInvTranspose = m_cbTransform.World.Invert();
 		auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
-		memcpy(cb1->SystemMemAddr, &m_cbTransform, sizeof(CB_Transform));
+		memcpy(cb1->SystemMemoryAddress, &m_cbTransform, sizeof(CB_Transform));
 		auto handle1 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
 
 		// CustomData
@@ -902,9 +902,9 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 		m_cbParticleSystem.Time = m_currentTime;
 		m_cbParticleSystem.DeltaTime = m_deltaTime;
 		auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
-		memcpy(cb2->SystemMemAddr, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
+		memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
 		auto handle2 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGpuHandle());
 	}
 	// SRV
@@ -975,9 +975,9 @@ void Ideal::ParticleSystem::ComputeRenderBillboard(ComPtr<ID3D12Device> Device, 
 			m_cbParticleSystem.Time = m_currentDurationTime;
 			m_cbParticleSystem.DeltaTime = m_deltaTime;
 			auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
-			memcpy(cb2->SystemMemAddr, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
+			memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
 			auto handle = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb2->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			CommandList->SetComputeRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle.GetGpuHandle());
 		}
 

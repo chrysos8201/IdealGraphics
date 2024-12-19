@@ -108,15 +108,13 @@ float3 NormalMap(in float3 normal, in float2 texCoord, in PositionNormalUVTangen
         tangent = CalculateTangent(v0, v1, v2, uv0, uv1, uv2);
     }
 
-
     float3 texSample = l_texNormal.SampleLevel(LinearWrapSampler, texCoord, lod).xyz;
     float3 newNormal;
     float3 bumpNormal = normalize(texSample * 2.f - 1.f);
-    //Ideal_NormalStrength_float(bumpNormal, 0.2, newNormal); // 다르게
-    Ideal_NormalStrength_float(bumpNormal, 1, newNormal); // 다르게
-    float3 worldNormal = BumpMapNormalToWorldSpaceNormal(newNormal, normal, tangent);
+    float3 worldNormal = BumpMapNormalToWorldSpaceNormal(bumpNormal, normal, tangent);
     return worldNormal;
 }
+
 RayPayload TraceRadianceRay(in Ray ray, in UINT currentRayRecursionDepth, float tMin = 0.001f, float tMax = 10000.f, bool cullNonOpaque = false)
 {
     RayPayload payload;
@@ -159,23 +157,16 @@ RayPayload TraceRadianceRay(in Ray ray, in UINT currentRayRecursionDepth, float 
     return payload;
 }
 
-float3 TraceReflectedGBufferRay(in float3 hitPosition, in float3 wi, inout RayPayload rayPayload, in float TMax = 3000)
+float3 TraceReflectedRay(in float3 hitPosition, in float3 wi, inout RayPayload rayPayload, in float TMax = 3000)
 {
-    // offset 과는 관계없이 똑같은 노말값 오류 현상
+
     float tOffset = 0.001f;
-    float3 offsetAlongRay = tOffset * wi;
+    float3 offsetAlongRay = tOffset * wi; // 자기 교차 방지!
     float3 adjustedHitPosition = hitPosition + offsetAlongRay;
-   
-    
+
     Ray ray;
     ray.origin = adjustedHitPosition;
     ray.direction = wi;
-
-    //if(dot(ray.direction, N) <= 0)
-    //{
-    //    ray.origin += N * 0.001f;
-    //}
-
     float tMin = 0;
     float tMax = TMax;
 
@@ -188,7 +179,7 @@ float3 TraceReflectedGBufferRay(in float3 hitPosition, in float3 wi, inout RayPa
     return rayPayload.radiance;
 }
 
-float3 TraceRefractedGBufferRay(in float3 hitPosition, in float3 wt, in float3 N, in float3 objectNormal, inout RayPayload rayPayload, in float TMax = 10000)
+float3 TraceRefractedRay(in float3 hitPosition, in float3 wt, in float3 N, in float3 objectNormal, inout RayPayload rayPayload, in float TMax = 10000)
 {
     float tOffset = 0.001f;
     float3 offsetAlongRay = tOffset * wt;
@@ -214,10 +205,9 @@ float3 TraceRefractedGBufferRay(in float3 hitPosition, in float3 wt, in float3 N
 // 그림자 레이를 쏘고 geometry에 맞으면 true 반환
 bool TraceShadowRayAndReportIfHit(out float tHit, in Ray ray, in UINT currentRayRecursionDepth, in bool retrieveTHit = true, in float TMax = 10000)
 {
-    tHit = 0; // 임시로 0으로 초기화
+    tHit = 0;
     if (currentRayRecursionDepth >= g_sceneCB.maxShadowRayRecursionDepth)
     {
-        //return false;
         return true;
     }
     
@@ -230,23 +220,10 @@ bool TraceShadowRayAndReportIfHit(out float tHit, in Ray ray, in UINT currentRay
     
     ShadowRayPayload shadowPayload = { TMax };
     
-    //UINT rayFlags = RAY_FLAG_CULL_NON_OPAQUE; // 투명 오브젝트 스킵
-    UINT rayFlags = 0; // RAY_FLAG_CULL_NON_OPAQUE; // 투명 오브젝트 스킵
-    bool acceptFirstHit = !retrieveTHit;
-    if (acceptFirstHit)
-    {
-        // 성능 팁: 실제 적중이 필요하지 않거나 
-        // 영향이 미미하거나 전혀 없는 경우 첫 번째 적중을 수락하세요.
-        // 성능 향상 효과가 상당할 수 있습니다.
-    
-        rayFlags |= RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH;
-    }
-    
-    // Skip closest hit shaders of tHit time is not needed.
-    if (!retrieveTHit)
-    {
-        rayFlags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    }
+    UINT rayFlags = 0; 
+    rayFlags |= RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH;
+    rayFlags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+ 
     
     TraceRay(
         g_scene,
@@ -265,7 +242,6 @@ bool TraceShadowRayAndReportIfHit(out float tHit, in Ray ray, in UINT currentRay
 bool TraceShadowRayAndReportIfHit(out float tHit, in Ray ray, in float3 N, in UINT currentRayRecursionDepth, in bool retrieveTHit = true, in float TMax = 10000)
 {
     tHit = 0;
-    // Only trace if the surface is facing the target.
     if (dot(ray.direction, N) > 0)
     {
         return TraceShadowRayAndReportIfHit(tHit, ray, currentRayRecursionDepth, retrieveTHit, TMax);
@@ -281,7 +257,7 @@ bool TraceShadowRayAndReportIfHit(in float3 hitPosition, in float3 direction, in
     return TraceShadowRayAndReportIfHit(dummyTHit, visibilityRay, N, rayPayload.rayRecursionDepth, false, TMax);
 }
 
-void CalculateSpecularAndReflectionCoefficients(
+void CalculateSpecular(
     in float3 Albedo,
     in float metallic,
     in float roughness,
@@ -305,44 +281,6 @@ void CalculateSpecularAndReflectionCoefficients(
     Ks = reflectance;
     Kr = reflectance;
     return;
-
-
-    // float3 Kr; // 반사율
-    // float3 Ks; // 스펙큘러 반사 계수
-
-    // Kr 계산
-    Kr = metallic * Albedo; // 금속성일 경우 색상을 그대로 사용
-    Kr = metallic > 0.001 ? Kr : float3(0.04, 0.04, 0.04); // 비금속일 경우 기본 값 사용
-
-    // Ks 계산
-    if (metallic > 0.0)
-    {
-        Ks = Albedo; // 금속 표면인 경우 Albedo 색상 사용
-    }
-    else
-    {
-        Ks = float3(1,1,1) - roughness; // 비금속 표면인 경우 Roughness에 따라 조정
-    }
-    
-    //// 기본 반사율 (비금속성 반사율)
-    //const float3 F0_non_metallic = float3(0.04, 0.04, 0.04);
-    //
-    //// 금속성 반사율
-    //float3 F0 = lerp(F0_non_metallic, Albedo, metallic);
-    //
-    //// Fresnel-Schlick 근사식
-    //float3 F = F0 + (1.0 - F0) * pow(1.0 - saturate(dot(N, V)), 5.0);
-    //if (metallic > 0.f)
-    //{
-    //    Ks = F;
-    //}
-    //else
-    //{
-    //    Ks = F0_non_metallic;
-    //}
-    //
-    //float roughnessFactor = pow(1.0 - roughness, 2.0); // Roughness가 높을수록 반사율을 줄임
-    //Kr = F * roughnessFactor;
 }
 
 float3 Shade(
@@ -367,8 +305,6 @@ float3 Shade(
     float3 Ks;
     float3 Kr;
     const float3 Kt = float3(1,1,1);
-    //const float3 Kt = float3(0.7,0.7,0.7);
-    //const float3 Kt = float3(0.1,0.1,0.1);
     float metallic;
     float roughness;
 
@@ -378,7 +314,7 @@ float3 Shade(
     roughness = 1 - maskSample.a;
     float ao = maskSample.g;
     
-    CalculateSpecularAndReflectionCoefficients(Kd, metallic, roughness, V, N, Ks, Kr);
+    CalculateSpecular(Kd, metallic, roughness, V, N, Ks, Kr);
     
 
     if (!BxDF::IsBlack(Kd) || !BxDF::IsBlack(Ks))
@@ -396,7 +332,6 @@ float3 Shade(
                 float3 radiance = g_lightList.DirLights[i].DiffuseColor.rgb;
                 float intensity = g_lightList.DirLights[i].Intensity;
                 bool isInShadow = TraceShadowRayAndReportIfHit(hitPosition, LightVector, N, rayPayload);
-                //L = DirectionalLight(isInShadow, V, LightVector, N, radiance, albedo, roughness, metallic, ao);
                 L = DirectionalLight(isInShadow, V, LightVector, N, radiance, albedo, roughness, metallic, intensity);
             }
         }
@@ -450,12 +385,9 @@ float3 Shade(
     }
 
     L += g_sceneCB.AmbientIntensity * albedo;// * ao;
-    //if(any(ao))
     L *= ao;
 
     bool isReflective = !BxDF::IsBlack(Kr);
-    //bool isReflective = Ideal::CheckReflect(Kr);
-    //bool isTransmissive = !BxDF::IsBlack(Kt); // 일단 굴절은 뺄까?
     bool isTransmissive = l_materialInfo.bIsTransmissive;
     
     float smallValue = 1e-6f;
@@ -463,28 +395,24 @@ float3 Shade(
     if (isReflective || isTransmissive)
     {
         float range = 3000.f * pow(maskSample.a * 0.9f + 0.1f, 4.0f);
-        if (isReflective && (BxDF::Specular::Reflection::IsTotalInternalReflection(V, N)))
-        {
-            RayPayload reflectedPayLoad = rayPayload;
-            float3 wi = reflect(-V, N);
-            
-            //L += Kr * TraceReflectedGBufferRay(hitPosition, wi, N, objectNormal, reflectedPayLoad, spawnParameters);
-            L += Kr * TraceReflectedGBufferRay(hitPosition, wi, reflectedPayLoad, range);
-        }
-        else // No total internal reflection
+        //if (isReflective && (BxDF::Specular::Reflection::IsTotalInternalReflection(V, N)))
+        //{
+        //    RayPayload reflectedPayLoad = rayPayload;
+        //    float3 wi = reflect(-V, N);
+        //    
+        //    L += Kr * TraceReflectedRay(hitPosition, wi, reflectedPayLoad, range);
+        //}
+        //else // No total internal reflection
         {
             float3 Fo = Ks;
             if (isReflective)
             {
-                // Radiance contribution from reflection.
+                // 반사 벡터
                 float3 wi;
-                //float3 Fr = Kr * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, Fo);    // Calculates wi
+                // 뷰 방향 벡터로부터 스펙큘러 반사를 위한 방향 벡터를 계산하고, 이를 기반으로 프레넬 반사도를 반환
                 float3 Fr = Kr * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, Fo); // Calculates wi
                 RayPayload reflectedRayPayLoad = rayPayload;
-                // Ref: eq 24.4, [Ray-tracing from the Ground Up]
-                L += Fr * TraceReflectedGBufferRay(hitPosition, wi, reflectedRayPayLoad, range);
-                //float3 result = Fr * TraceReflectedGBufferRay(hitPosition, wi, N, objectNormal, reflectedRayPayLoad);
-                //L += result;
+                L += Fr * TraceReflectedRay(hitPosition, wi, reflectedRayPayLoad, range);
                 
             }
             if(isTransmissive)
@@ -494,7 +422,7 @@ float3 Shade(
                     float3 wt;
                     float3 Ft = Kt * BxDF::Specular::Transmission::Sample_Ft(V, wt, N, Fo);
                     RayPayload refractedRayPayLoad = rayPayload;
-                    L += Ft * TraceRefractedGBufferRay(hitPosition, wt, N, objectNormal, refractedRayPayLoad);
+                    L += Ft * TraceRefractedRay(hitPosition, wt, N, objectNormal, refractedRayPayLoad);
                 }
             }
         }
@@ -502,21 +430,21 @@ float3 Shade(
     return L;
 }
 
-// Generate a ray in world space for a camera pixel corresponding to an index from the dispatched 2D grid.
 inline Ray GenerateCameraRay(uint2 index, out float3 origin, out float3 direction)
 {
-    float2 xy = index + 0.5f; // center in the middle of the pixel.
+    float2 xy = index + 0.5f; // 픽셀의 중간으로 이동
     float2 screenPos = xy / DispatchRaysDimensions().xy * 2.0 - 1.0;
 
-    // Invert Y for DirectX-style coordinates.
+    // DirectX 좌표계를 위해 Y를 반전시킨다.
     screenPos.y = -screenPos.y;
 
     // Unproject the pixel coordinate into a ray.
+    // 투영행렬의 역행렬을 곱하여 Ray가 향하게 될 좌표값에 따른 Near Plane의 좌표를 구한다.
     float4 world = mul(float4(screenPos, 0, 1), g_sceneCB.projectionToWorld);
-    //float4 world = mul(g_sceneCB.projectionToWorld, float4(screenPos, 0, 1));
-    
     world.xyz /= world.w;
+    
     origin = g_sceneCB.cameraPosition.xyz;
+    // 최종 방향 결정
     direction = normalize(world.xyz - origin);
 
     Ray ray;
@@ -533,7 +461,7 @@ void MyRaygenShader()
     float3 origin;
     
     uint2 dispatchRayIndex = DispatchRaysIndex().xy;
-    // Generate a ray for a camera pixel corresponding to an index from the dispatched 2D grid.
+    // 카메라에서 화면으로 향하는 Ray를 생성한다.
     Ray ray = GenerateCameraRay(dispatchRayIndex, origin, rayDir);
     
     UINT currentRayRecursionDepth = 0;
@@ -564,7 +492,7 @@ void MyRaygenShader()
 }
 
 [shader("closesthit")]
-void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
+void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
     uint baseIndex = PrimitiveIndex() * 3;
@@ -612,10 +540,8 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
     Ideal_TilingAndOffset_float(uv, tiling, offset, uv);
 
     // Normal
-    float3 normal;
-    float3 tangent;
-    float3 objectNormal;
-    float3 objectTangent;
+    float3 normal;  // 최종 노말
+    float3 objectNormal; // 삼각형이 향하는 노말
     {
         float3 vertexNormals[3] =
         {
@@ -627,16 +553,8 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
         float orientation = HitKind() == HIT_KIND_TRIANGLE_FRONT_FACE ? 1 : -1;
         objectNormal *= orientation;
 
-        // 여기부터 임시
-        //normal = NormalMap(objectNormal, uv, vertexInfo, attr);
-        //normal = normalize(mul((float3x3)ObjectToWorld3x4(), normal));
-        // 여기까지
-
         normal = normalize(mul((float3x3)ObjectToWorld3x4(), objectNormal));
-        //normal = objectNormal;
-        //normal = normalize(mul(objectNormal, (float3x3) ObjectToWorld3x4()));
     }
-   
     
     float lod;
     {

@@ -64,9 +64,9 @@ void D3D12ConstantBufferPool::Init(ID3D12Device* Device, uint32 SizePerCBV, uint
 		Device->CreateConstantBufferView(&cbvDesc, heapHandle);
 		
 		m_cbContainer[i] = std::make_shared<ConstantBufferContainer>();
-		m_cbContainer[i]->CBVHandle = heapHandle;
-		m_cbContainer[i]->GpuMemAddr = cbvDesc.BufferLocation;
-		m_cbContainer[i]->SystemMemAddr = systemMemPtr;
+		m_cbContainer[i]->CpuHandle = heapHandle;
+		m_cbContainer[i]->GpuMemoryAddress = cbvDesc.BufferLocation;
+		m_cbContainer[i]->SystemMemoryAddress = systemMemPtr;
 		
 		heapHandle.Offset(1, DescriptorSize);
 		cbvDesc.BufferLocation += m_sizePerCBV;

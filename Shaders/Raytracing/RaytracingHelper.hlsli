@@ -85,7 +85,6 @@ namespace BxDF
         
         namespace Transmission
         {
-
             // Calculates transmitted ray wt and return BRDF value for that direction.
             // Assumptions: V and N are in the same hemisphere.
             // Note: to avoid unnecessary precision issues and for the sake of performance the function doesn't divide by the cos term

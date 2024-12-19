@@ -281,7 +281,7 @@ bool TraceShadowRayAndReportIfHit(in float3 hitPosition, in float3 direction, in
     return TraceShadowRayAndReportIfHit(dummyTHit, visibilityRay, N, rayPayload.rayRecursionDepth, false, TMax);
 }
 
-void CalculateSpecularAndReflectionCoefficients(
+void CalculateSpecularAndReflection(
     in float3 Albedo,
     in float metallic,
     in float roughness,
@@ -290,8 +290,6 @@ void CalculateSpecularAndReflectionCoefficients(
     out float3 Ks,
     out float3 Kr)
 {
-   
-  // F0 계산
     float3 F0 = lerp(float3(0.04, 0.04, 0.04), Albedo.rgb, metallic);
     
     // Fresnel-Schlick 근사 반사율 계산
@@ -305,44 +303,6 @@ void CalculateSpecularAndReflectionCoefficients(
     Ks = reflectance;
     Kr = reflectance;
     return;
-
-
-    // float3 Kr; // 반사율
-    // float3 Ks; // 스펙큘러 반사 계수
-
-    // Kr 계산
-    Kr = metallic * Albedo; // 금속성일 경우 색상을 그대로 사용
-    Kr = metallic > 0.001 ? Kr : float3(0.04, 0.04, 0.04); // 비금속일 경우 기본 값 사용
-
-    // Ks 계산
-    if (metallic > 0.0)
-    {
-        Ks = Albedo; // 금속 표면인 경우 Albedo 색상 사용
-    }
-    else
-    {
-        Ks = float3(1,1,1) - roughness; // 비금속 표면인 경우 Roughness에 따라 조정
-    }
-    
-    //// 기본 반사율 (비금속성 반사율)
-    //const float3 F0_non_metallic = float3(0.04, 0.04, 0.04);
-    //
-    //// 금속성 반사율
-    //float3 F0 = lerp(F0_non_metallic, Albedo, metallic);
-    //
-    //// Fresnel-Schlick 근사식
-    //float3 F = F0 + (1.0 - F0) * pow(1.0 - saturate(dot(N, V)), 5.0);
-    //if (metallic > 0.f)
-    //{
-    //    Ks = F;
-    //}
-    //else
-    //{
-    //    Ks = F0_non_metallic;
-    //}
-    //
-    //float roughnessFactor = pow(1.0 - roughness, 2.0); // Roughness가 높을수록 반사율을 줄임
-    //Kr = F * roughnessFactor;
 }
 
 float3 Shade(
@@ -363,25 +323,21 @@ float3 Shade(
     float4 baseTex = l_texDiffuse.SampleLevel(LinearWrapSampler, uv, lod);
     float3 albedo = baseTex.xyz;
 
-    float3 Kd = baseTex.xyz;
     float3 Ks;
     float3 Kr;
     const float3 Kt = float3(1,1,1);
-    //const float3 Kt = float3(0.7,0.7,0.7);
-    //const float3 Kt = float3(0.1,0.1,0.1);
     float metallic;
     float roughness;
 
+    // r : metallic, g : ao, a : smoothness
     float4 maskSample = l_texMask.SampleLevel(LinearWrapSampler, uv, lod);
 
-    metallic = maskSample.x;
+    metallic = maskSample.r;
     roughness = 1 - maskSample.a;
     float ao = maskSample.g;
     
-    CalculateSpecularAndReflectionCoefficients(Kd, metallic, roughness, V, N, Ks, Kr);
+    CalculateSpecularAndReflection(baseTex.xyz, metallic, roughness, V, N, Ks, Kr);
     
-
-    if (!BxDF::IsBlack(Kd) || !BxDF::IsBlack(Ks))
     {
         int dirLightNum = g_lightList.DirLightNum;
         int pointLightNum = g_lightList.PointLightNum;
@@ -449,13 +405,10 @@ float3 Shade(
         }
     }
 
-    L += g_sceneCB.AmbientIntensity * albedo;// * ao;
-    //if(any(ao))
+    L += g_sceneCB.AmbientIntensity * albedo;
     L *= ao;
 
     bool isReflective = !BxDF::IsBlack(Kr);
-    //bool isReflective = Ideal::CheckReflect(Kr);
-    //bool isTransmissive = !BxDF::IsBlack(Kt); // 일단 굴절은 뺄까?
     bool isTransmissive = l_materialInfo.bIsTransmissive;
     
     float smallValue = 1e-6f;
@@ -463,29 +416,22 @@ float3 Shade(
     if (isReflective || isTransmissive)
     {
         float range = 3000.f * pow(maskSample.a * 0.9f + 0.1f, 4.0f);
-        if (isReflective && (BxDF::Specular::Reflection::IsTotalInternalReflection(V, N)))
-        {
-            RayPayload reflectedPayLoad = rayPayload;
-            float3 wi = reflect(-V, N);
-            
-            //L += Kr * TraceReflectedGBufferRay(hitPosition, wi, N, objectNormal, reflectedPayLoad, spawnParameters);
-            L += Kr * TraceReflectedGBufferRay(hitPosition, wi, reflectedPayLoad, range);
-        }
-        else // No total internal reflection
+        //if (isReflective && (BxDF::Specular::Reflection::IsTotalInternalReflection(V, N)))
+        //{
+        //    RayPayload reflectedPayLoad = rayPayload;
+        //    float3 wi = reflect(-V, N);
+        //    
+        //    L += Kr * TraceReflectedGBufferRay(hitPosition, wi, reflectedPayLoad, range);
+        //}
+        //else // No total internal reflection
         {
             float3 Fo = Ks;
             if (isReflective)
             {
-                // Radiance contribution from reflection.
                 float3 wi;
-                //float3 Fr = Kr * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, Fo);    // Calculates wi
                 float3 Fr = Kr * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, Fo); // Calculates wi
                 RayPayload reflectedRayPayLoad = rayPayload;
-                // Ref: eq 24.4, [Ray-tracing from the Ground Up]
                 L += Fr * TraceReflectedGBufferRay(hitPosition, wi, reflectedRayPayLoad, range);
-                //float3 result = Fr * TraceReflectedGBufferRay(hitPosition, wi, N, objectNormal, reflectedRayPayLoad);
-                //L += result;
-                
             }
             if(isTransmissive)
             {

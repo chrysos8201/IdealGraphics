@@ -5,7 +5,7 @@ using namespace Ideal;
 D3D12ConstantBufferPool::D3D12ConstantBufferPool()
 	: m_resource(nullptr),
 	m_cbvHeap(nullptr),
-	m_systemMemAddr(nullptr),
+	m_systemMemoryAddress(nullptr),
 	m_maxCBVNum(0),
 	m_sizePerCBV(0),
 	m_allocatedCBVNum(0)
@@ -38,7 +38,7 @@ void D3D12ConstantBufferPool::Init(ID3D12Device* Device, uint32 SizePerCBV, uint
 	
 	// Get Address
 	CD3DX12_RANGE writeRange(0, 0);
-	m_resource->Map(0, &writeRange, reinterpret_cast<void**>(&m_systemMemAddr));
+	m_resource->Map(0, &writeRange, reinterpret_cast<void**>(&m_systemMemoryAddress));
 
 	// Create Descriptor Heap
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
@@ -53,7 +53,7 @@ void D3D12ConstantBufferPool::Init(ID3D12Device* Device, uint32 SizePerCBV, uint
 	cbvDesc.BufferLocation = m_resource->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = m_sizePerCBV;
 
-	uint8* systemMemPtr = m_systemMemAddr;
+	uint8* systemMemPtr = m_systemMemoryAddress;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE heapHandle(m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
 
 	uint32 DescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

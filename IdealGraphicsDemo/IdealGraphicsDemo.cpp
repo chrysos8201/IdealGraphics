@@ -253,6 +253,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//// Bind Material
 		//SampleCart->GetMeshByIndex(1).lock()->SetMaterialObject(SampleCartMaterial1);
 		//SampleCart->GetMeshByIndex(2).lock()->SetMaterialObject(SampleCartMaterial1);
+
+		std::shared_ptr<Ideal::IMeshObject> SampleSphere = gRenderer->CreateStaticMeshObject(L"UVSphere/UVSphere");
+
 #pragma endregion
 
 #pragma region FBXConvert

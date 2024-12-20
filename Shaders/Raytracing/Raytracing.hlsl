@@ -329,8 +329,15 @@ float3 Shade(
     metallic = maskSample.r;
     roughness = 1 - maskSample.a;
     float ao = maskSample.g;
+
     
-    CalculateReflection(baseTex.xyz, metallic, roughness, V, N, F0);
+    ////test
+    //albedo = float3(1,1,1);
+    //metallic = 0;
+    //roughness = 0;
+    //ao = 1;
+
+    CalculateReflection(albedo, metallic, roughness, V, N, F0);
     
     {
         int dirLightNum = g_lightList.DirLightNum;
@@ -407,11 +414,12 @@ float3 Shade(
     isReflective = dot(V, N) > smallValue ? isReflective : false; // 특정 반사 아티팩트 제거
     if (isReflective || isTransmissive)
     {
-        float range = 3000.f * pow(maskSample.a * 0.9f + 0.1f, 4.0f);
+        float range = 3000.f * pow((1 - roughness) * 0.9f + 0.1f, 4.0f);
         {
             if (isReflective)
             {
                 float3 wi;
+                // 뷰 방향 벡터로부터 스펙큘러 반사를 위한 방향 벡터를 계산하고, 이를 기반으로 프레넬 반사율을 반환
                 float3 Fr = F0 * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, F0);
                 RayPayload reflectedRayPayLoad = rayPayload;
                 L += Fr * TraceReflectedGBufferRay(hitPosition, wi, reflectedRayPayLoad, range);
@@ -462,7 +470,7 @@ void MyRaygenShader()
     float3 origin;
     
     uint2 dispatchRayIndex = DispatchRaysIndex().xy;
-    // Generate a ray for a camera pixel corresponding to an index from the dispatched 2D grid.
+    // 카메라에서 화면으로 향하는 Ray를 생성한다.
     Ray ray = GenerateCameraRay(dispatchRayIndex, origin, rayDir);
     
     UINT currentRayRecursionDepth = 0;

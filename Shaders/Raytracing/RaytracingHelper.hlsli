@@ -641,12 +641,12 @@ float3 DirectionalLight(bool isInShadow, float3 V, float3 L, float3 N, float3 Li
     float3 kS = F;
     float3 kD = float3(1.f, 1.f, 1.f) - kS;
     kD *= 1.0 - metallic;
-    float3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+    float3 numerator = NDF * G * F; //분자
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);    //분모
     float3 specular = numerator / max(denominator, 0.001);
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-        
+    
     float3 ambient = float3(0.03, 0.03, 0.03) * albedo;
     float3 color = ambient + Lo;
     Lo = color;

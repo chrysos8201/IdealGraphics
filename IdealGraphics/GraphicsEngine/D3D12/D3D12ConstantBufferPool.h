@@ -34,7 +34,7 @@ namespace Ideal
 		ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
 
 		// 시스템 메모리의 주소
-		uint8* m_systemMemAddr;
+		uint8* m_systemMemoryAddress;
 		// 최대 할당할 수 있는 개수
 		uint32 m_maxCBVNum;
 		uint32 m_sizePerCBV;

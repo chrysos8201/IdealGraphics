@@ -649,7 +649,6 @@ float3 DirectionalLight(bool isInShadow, float3 V, float3 L, float3 N, float3 Li
         
     float3 ambient = float3(0.03, 0.03, 0.03) * albedo;
     float3 color = ambient + Lo;
-    //color += 0.2 * albedo;
     Lo = color;
     
     return Lo;

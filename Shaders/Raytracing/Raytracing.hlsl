@@ -161,7 +161,6 @@ RayPayload TraceRadianceRay(in Ray ray, in UINT currentRayRecursionDepth, float 
 
 float3 TraceReflectedGBufferRay(in float3 hitPosition, in float3 wi, inout RayPayload rayPayload, in float TMax = 3000)
 {
-    // offset 과는 관계없이 똑같은 노말값 오류 현상
     float tOffset = 0.001f;
     float3 offsetAlongRay = tOffset * wi;
     float3 adjustedHitPosition = hitPosition + offsetAlongRay;
@@ -170,11 +169,6 @@ float3 TraceReflectedGBufferRay(in float3 hitPosition, in float3 wi, inout RayPa
     Ray ray;
     ray.origin = adjustedHitPosition;
     ray.direction = wi;
-
-    //if(dot(ray.direction, N) <= 0)
-    //{
-    //    ray.origin += N * 0.001f;
-    //}
 
     float tMin = 0;
     float tMax = TMax;
@@ -281,28 +275,30 @@ bool TraceShadowRayAndReportIfHit(in float3 hitPosition, in float3 direction, in
     return TraceShadowRayAndReportIfHit(dummyTHit, visibilityRay, N, rayPayload.rayRecursionDepth, false, TMax);
 }
 
-void CalculateSpecularAndReflection(
+void CalculateReflection(
     in float3 Albedo,
     in float metallic,
     in float roughness,
     in float3 V,
     in float3 N,
-    out float3 Ks,
     out float3 Kr)
 {
     float3 F0 = lerp(float3(0.04, 0.04, 0.04), Albedo.rgb, metallic);
-    
-    // Fresnel-Schlick 근사 반사율 계산
-    float dotNV = saturate(dot(N, V));
-    float3 reflectance = F0 + (1.0 - F0) * pow(1.0 - dotNV, 5.0);
-    
-    // Smoothness를 기반으로 반사율 조정
-    reflectance *= 1 - roughness;//smoothness;
-    
-    // 최종 반사율 사용
-    Ks = reflectance;
-    Kr = reflectance;
+    Kr = F0;
     return;
+
+
+    // 아래 코드는 반사율을 좀 늘림.
+    //// Fresnel-Schlick 근사 반사율 계산
+    //float dotNV = saturate(dot(N, V));
+    //float3 reflectance = F0 + (1.0 - F0) * pow(1.0 - dotNV, 5.0);
+    //
+    //// Smoothness를 기반으로 반사율 조정
+    //reflectance *= 1 - roughness;//smoothness;
+    //
+    //// 최종 반사율 사용
+    //Kr = reflectance;
+    //return;
 }
 
 float3 Shade(
@@ -319,12 +315,10 @@ float3 Shade(
 
     float distance = length(g_sceneCB.cameraPosition.xyz - hitPosition);
 
-    // 거리와 법선 각도를 기반으로 LOD 값 계산
     float4 baseTex = l_texDiffuse.SampleLevel(LinearWrapSampler, uv, lod);
     float3 albedo = baseTex.xyz;
 
-    float3 Ks;
-    float3 Kr;
+    float3 F0;
     const float3 Kt = float3(1,1,1);
     float metallic;
     float roughness;
@@ -336,7 +330,7 @@ float3 Shade(
     roughness = 1 - maskSample.a;
     float ao = maskSample.g;
     
-    CalculateSpecularAndReflection(baseTex.xyz, metallic, roughness, V, N, Ks, Kr);
+    CalculateReflection(baseTex.xyz, metallic, roughness, V, N, F0);
     
     {
         int dirLightNum = g_lightList.DirLightNum;
@@ -352,7 +346,6 @@ float3 Shade(
                 float3 radiance = g_lightList.DirLights[i].DiffuseColor.rgb;
                 float intensity = g_lightList.DirLights[i].Intensity;
                 bool isInShadow = TraceShadowRayAndReportIfHit(hitPosition, LightVector, N, rayPayload);
-                //L = DirectionalLight(isInShadow, V, LightVector, N, radiance, albedo, roughness, metallic, ao);
                 L = DirectionalLight(isInShadow, V, LightVector, N, radiance, albedo, roughness, metallic, intensity);
             }
         }
@@ -376,7 +369,6 @@ float3 Shade(
                 if(distance <= range)
                 {
                     isInShadow = TraceShadowRayAndReportIfHit(hitPosition, direction, N, rayPayload, distance);
-                    //isInShadow *= g_lightList.PointLights[i].IsNoShadowCasting;
                     uint shadowCast = (uint)isInShadow;
                     shadowCast *= g_lightList.PointLights[i].IsShadowCasting;
                     L += PointLight((bool)shadowCast, V, direction, N, distance, color, albedo, roughness, metallic, intensity);
@@ -408,28 +400,19 @@ float3 Shade(
     L += g_sceneCB.AmbientIntensity * albedo;
     L *= ao;
 
-    bool isReflective = !BxDF::IsBlack(Kr);
+    bool isReflective = !BxDF::IsBlack(F0);
     bool isTransmissive = l_materialInfo.bIsTransmissive;
     
     float smallValue = 1e-6f;
-    isReflective = dot(V, N) > smallValue ? isReflective : false;
+    isReflective = dot(V, N) > smallValue ? isReflective : false; // 특정 반사 아티팩트 제거
     if (isReflective || isTransmissive)
     {
         float range = 3000.f * pow(maskSample.a * 0.9f + 0.1f, 4.0f);
-        //if (isReflective && (BxDF::Specular::Reflection::IsTotalInternalReflection(V, N)))
-        //{
-        //    RayPayload reflectedPayLoad = rayPayload;
-        //    float3 wi = reflect(-V, N);
-        //    
-        //    L += Kr * TraceReflectedGBufferRay(hitPosition, wi, reflectedPayLoad, range);
-        //}
-        //else // No total internal reflection
         {
-            float3 Fo = Ks;
             if (isReflective)
             {
                 float3 wi;
-                float3 Fr = Kr * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, Fo); // Calculates wi
+                float3 Fr = F0 * BxDF::Specular::Reflection::Sample_Fr(V, wi, N, F0);
                 RayPayload reflectedRayPayLoad = rayPayload;
                 L += Fr * TraceReflectedGBufferRay(hitPosition, wi, reflectedRayPayLoad, range);
             }
@@ -438,7 +421,7 @@ float3 Shade(
                 if(baseTex.a < 0.5f)
                 {
                     float3 wt;
-                    float3 Ft = Kt * BxDF::Specular::Transmission::Sample_Ft(V, wt, N, Fo);
+                    float3 Ft = Kt * BxDF::Specular::Transmission::Sample_Ft(V, wt, N, F0);
                     RayPayload refractedRayPayLoad = rayPayload;
                     L += Ft * TraceRefractedGBufferRay(hitPosition, wt, N, objectNormal, refractedRayPayLoad);
                 }

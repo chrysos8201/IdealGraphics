@@ -693,17 +693,6 @@ void Ideal::RaytracingManager::BuildShaderTables(ComPtr<ID3D12Device5> Device, s
 			std::vector<BLASGeometry> blasGeometries = blas->GetGeometries();
 			for (BLASGeometry& blasGeometry : blasGeometries)
 			{
-				Ideal::LocalRootSignature::RootArgument rootArguments;
-				rootArguments.SRV_Vertices = blasGeometry.SRV_VertexBuffer.GetGpuHandle();
-				rootArguments.SRV_Indices = blasGeometry.SRV_IndexBuffer.GetGpuHandle();
-				//rootArguments.SRV_DiffuseTexture = blasGeometry.SRV_Diffuse.GetGpuHandle();
-				//rootArguments.SRV_NormalTexture = blasGeometry.SRV_Normal.GetGpuHandle();
-				//rootArguments.SRV_MetalicTexture = blasGeometry.SRV_Metallic.GetGpuHandle();
-				//rootArguments.SRV_RoughnessTexture = blasGeometry.SRV_Roughness.GetGpuHandle();
-				////rootArguments.CBV_MaterialInfo = blasGeometry.CBV_MaterialInfo.GetGpuHandle();
-				//rootArguments.SRV_MaskTexture = blasGeometry.SRV_Mask.GetGpuHandle();
-				//rootArguments.CBV_MaterialInfo = blasGeometry.C_MaterialInfo;
-
 				if (blasGeometry.BasicMesh != nullptr)
 				{
 					blasGeometry.Material = blasGeometry.BasicMesh->GetMaterial();
@@ -713,7 +702,10 @@ void Ideal::RaytracingManager::BuildShaderTables(ComPtr<ID3D12Device5> Device, s
 					blasGeometry.Material = blasGeometry.SkinnedMesh->GetMaterial();
 				}
 
-				rootArguments.SRV_DiffuseTexture = blasGeometry.Material.lock()->GetDiffuseTextureHandleInRayTracing().GetGpuHandle();
+				Ideal::LocalRootSignature::RootArgument rootArguments;
+				rootArguments.SRV_Vertices = blasGeometry.SRV_VertexBuffer.GetGpuHandle();
+				rootArguments.SRV_Indices = blasGeometry.SRV_IndexBuffer.GetGpuHandle();
+				rootArguments.SRV_BaseTexture = blasGeometry.Material.lock()->GetBaseTextureHandleInRayTracing().GetGpuHandle();
 				rootArguments.SRV_NormalTexture = blasGeometry.Material.lock()->GetNormalTextureHandleInRayTracing().GetGpuHandle();
 				rootArguments.SRV_MaskTexture = blasGeometry.Material.lock()->GetMaskTextureHandleInRayTracing().GetGpuHandle();
 				rootArguments.CBV_MaterialInfo = blasGeometry.Material.lock()->GetMaterialInfo();

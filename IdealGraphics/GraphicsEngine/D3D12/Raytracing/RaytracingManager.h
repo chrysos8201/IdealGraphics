@@ -102,7 +102,7 @@ namespace Ideal
 			// Vertex
 			D3D12_GPU_DESCRIPTOR_HANDLE SRV_Vertices;
 			// Diffuse Texture
-			D3D12_GPU_DESCRIPTOR_HANDLE SRV_DiffuseTexture;
+			D3D12_GPU_DESCRIPTOR_HANDLE SRV_BaseTexture;
 			// Normal Textures
 			D3D12_GPU_DESCRIPTOR_HANDLE SRV_NormalTexture;
 			// Mask Texture

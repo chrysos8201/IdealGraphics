@@ -114,7 +114,7 @@ namespace Ideal
 		//--- Ray Tracing Info ---//
 		void FreeInRayTracing();
 		void CopyHandleToRayTracingDescriptorTable(ComPtr<ID3D12Device> Device);
-		Ideal::D3D12DescriptorHandle GetDiffuseTextureHandleInRayTracing() { return m_diffuseTextureInRayTracing; }
+		Ideal::D3D12DescriptorHandle GetBaseTextureHandleInRayTracing() { return m_diffuseTextureInRayTracing; }
 		Ideal::D3D12DescriptorHandle GetNormalTextureHandleInRayTracing() { return m_normalTextureInRayTracing; }
 		Ideal::D3D12DescriptorHandle GetMaskTextureHandleInRayTracing() { return m_maskTextureInRayTracing; }
 		void SetDiffuseTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle handle) { m_diffuseTextureInRayTracing = handle; }

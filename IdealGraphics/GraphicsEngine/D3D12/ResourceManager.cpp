@@ -53,10 +53,6 @@ ResourceManager::~ResourceManager()
 	m_defaultNormal.reset();
 	m_defaultMask.reset();
 	m_textures.clear();
-
-	//m_deferredDeleteManager->AddTextureToDeferredDelete(m_defaultAlbedo);
-	//m_deferredDeleteManager->AddTextureToDeferredDelete(m_defaultNormal);
-	//m_deferredDeleteManager->AddTextureToDeferredDelete(m_defaultMask);
 }
 
 void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
@@ -118,121 +114,16 @@ void ResourceManager::Fence()
 {
 	m_fenceValue++;
 	m_commandQueue->Signal(m_fence.Get(), m_fenceValue);
-
-	//uint64 fenceValue = m_fence->GetCompletedValue();
-	//std::string result = "Current Fence :" + std::to_string(fenceValue) + "\n";
-	//std::string result2 = "Current Fence Value : " + std::to_string(m_fenceValue) + "\n";
-	//OutputDebugStringA(result.c_str());
-	//OutputDebugStringA(result2.c_str());
 }
 
 void ResourceManager::WaitForFenceValue()
 {
 	const uint64 expectedFenceValue = m_fenceValue;
-	//std::string count = std::to_string(m_fence->GetCompletedValue());
-	//std::string count2 = std::to_string(expectedFenceValue);
-	//std::string result = "resource manager" + count + " : " + count2 + "\n";
-	//OutputDebugStringA(result.c_str());
-
 	if (m_fence->GetCompletedValue() < expectedFenceValue)
 	{
 		m_fence->SetEventOnCompletion(expectedFenceValue, m_fenceEvent);
 		WaitForSingleObject(m_fenceEvent, INFINITE);
 	}
-}
-
-void ResourceManager::CreateVertexBufferBox(std::shared_ptr<Ideal::D3D12VertexBuffer>& VertexBuffer)
-{
-	m_commandAllocator->Reset();
-	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-
-	ComPtr<ID3D12Resource> vertexBufferUpload = nullptr;	// 업로드 용으로 버퍼 하나를 만드는 것 같다.
-	const VertexTest2 cubeVertices[] = {
-		{ { -0.5f, 0.5f, -0.5f},	Vector2(0.0f, 1.0f) },    // Back Top Left
-		{ {  0.5f, 0.5f, -0.5f},	Vector2(0.0f, 0.0f) },    // Back Top Right
-		{ {  0.5f, 0.5f,  0.5f},	Vector2(1.0f, 0.0f) },    // Front Top Right
-		{ { -0.5f, 0.5f,  0.5f},	Vector2(1.0f, 1.0f)	},    // Front Top Left
-
-		{ { -0.5f, -0.5f,-0.5f},	Vector2(0.0f, 1.0f)	},    // Back Bottom Left
-		{ {  0.5f, -0.5f,-0.5f},	Vector2(0.0f, 0.0f) },    // Back Bottom Right
-		{ {  0.5f, -0.5f, 0.5f},	Vector2(1.0f, 0.0f) },    // Front Bottom Right
-		{ { -0.5f, -0.5f, 0.5f},	Vector2(1.0f, 1.0f) },    // Front Bottom Left
-	};
-	const uint32 vertexBufferSize = sizeof(cubeVertices);
-
-	// UploadBuffer를 만든다.
-	Ideal::D3D12UploadBuffer uploadBuffer;
-	uploadBuffer.Create(m_device.Get(), vertexBufferSize);
-
-	void* mappedUploadHeap = uploadBuffer.Map();
-	memcpy(mappedUploadHeap, cubeVertices, sizeof(cubeVertices));
-	uploadBuffer.UnMap();
-
-	uint32 vertexTypeSize = sizeof(VertexTest2);
-	uint32 vertexCount = _countof(cubeVertices);
-	VertexBuffer->Create(m_device.Get(), m_commandList.Get(), vertexTypeSize, vertexCount, uploadBuffer);
-
-	// close
-	m_commandList->Close();
-
-	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-	VertexBuffer->SetName(L"TestBoxVB");
-
-	Fence();
-	WaitForFenceValue();
-}
-
-void ResourceManager::CreateIndexBufferBox(std::shared_ptr<Ideal::D3D12IndexBuffer>& IndexBuffer)
-{
-	m_commandAllocator->Reset();
-	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-
-	uint32 indices[] = {
-			0, 1, 3,
-			1, 2, 3,
-
-			3, 2, 7,
-			6, 7, 2,
-
-			2, 1, 6,
-			5, 6, 1,
-
-			1, 0, 5,
-			4, 5, 0,
-
-			0, 3, 4,
-			7, 4, 3,
-
-			7, 6, 4,
-			5, 4, 6, };
-	const uint32 indexBufferSize = sizeof(indices);
-
-	Ideal::D3D12UploadBuffer uploadBuffer;
-	uploadBuffer.Create(m_device.Get(), indexBufferSize);
-
-
-	// 업로드버퍼에 먼저 복사
-	void* mappedUploadBuffer = uploadBuffer.Map();
-	memcpy(mappedUploadBuffer, indices, indexBufferSize);
-	uploadBuffer.UnMap();
-
-	uint32 indexTypeSize = sizeof(uint32);
-	uint32 indexCount = _countof(indices);
-
-	IndexBuffer->Create(m_device.Get(), m_commandList.Get(), indexTypeSize, indexCount, uploadBuffer);
-
-	//-----------Execute-----------//
-	m_commandList->Close();
-
-	ID3D12CommandList* commandLists[] = { m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-	IndexBuffer->SetName(L"TestBoxIB");
-
-	Fence();
-	WaitForFenceValue();
 }
 
 void ResourceManager::CreateIndexBuffer(std::shared_ptr<Ideal::D3D12IndexBuffer> OutIndexBuffer, std::vector<uint32>& Indices)
@@ -1013,192 +904,6 @@ void Ideal::ResourceManager::CreateStaticMeshObject(std::shared_ptr<Ideal::Ideal
 		}
 	}
 
-	// Material
-// 	{
-// 		std::wstring fullPath = m_texturePath + filename + L".xml";
-// 
-// 		std::filesystem::path parentPath = std::filesystem::path(fullPath).parent_path();
-// 
-// 		//tinyxml2::XMLDocument* document = new tinyxml2::XMLDocument();
-// 		std::shared_ptr<tinyxml2::XMLDocument> document = std::make_shared<tinyxml2::XMLDocument>();
-// 		tinyxml2::XMLError error = document->LoadFile(StringUtils::ConvertWStringToString(fullPath).c_str());
-// 		assert(error == tinyxml2::XML_SUCCESS);
-// 		if (error != tinyxml2::XML_SUCCESS)
-// 		{
-// 			MessageBox(NULL, fullPath.c_str(), L"read material", MB_OK);
-// 		}
-// 
-// 		tinyxml2::XMLElement* root = document->FirstChildElement();
-// 		tinyxml2::XMLElement* materialNode = root->FirstChildElement();
-// 
-// 		while (materialNode)
-// 		{
-// 			std::shared_ptr<Ideal::IdealMaterial> material = std::make_shared<Ideal::IdealMaterial>();
-// 
-// 			tinyxml2::XMLElement* node = nullptr;
-// 
-// 			node = materialNode->FirstChildElement();
-// 			material->SetName((node->GetText()));
-// 
-// 			// DiffuseTexture
-// 			node = node->NextSiblingElement();
-// 			if (node->GetText())
-// 			{
-// 				std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
-// 				if (textureStr.length() > 0)
-// 				{
-// 					// Temp 2024.04.20
-// 					std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
-// 
-// 					material->SetDiffuseTextureFile(finalTextureStr);
-// 				}
-// 			}
-// 
-// 			// Specular Texture
-// 			node = node->NextSiblingElement();
-// 			if (node->GetText())
-// 			{
-// 				std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
-// 				if (textureStr.length() > 0)
-// 				{
-// 					std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
-// 					material->SetSpecularTextureFile(finalTextureStr);
-// 					// TODO : Texture만들기
-// 					//auto texture
-// 				}
-// 			}
-// 
-// 			// Normal Texture
-// 			node = node->NextSiblingElement();
-// 			if (node->GetText())
-// 			{
-// 				std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
-// 				if (textureStr.length() > 0)
-// 				{
-// 					std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
-// 					material->SetNormalTextureFile(finalTextureStr);
-// 					// TODO : Texture만들기
-// 					//auto texture
-// 				}
-// 			}
-// 
-// 			// Metalic Texture
-// 			node = node->NextSiblingElement();
-// 			if (node->GetText())
-// 			{
-// 				std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
-// 				if (textureStr.length() > 0)
-// 				{
-// 					std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
-// 					material->SetMetallicTextureFile(finalTextureStr);
-// 				}
-// 			}
-// 
-// 			// Roughness Texture
-// 			node = node->NextSiblingElement();
-// 			if (node->GetText())
-// 			{
-// 				std::wstring textureStr = StringUtils::ConvertStringToWString(node->GetText());
-// 				if (textureStr.length() > 0)
-// 				{
-// 					std::wstring finalTextureStr = parentPath.wstring() + L"/" + textureStr;
-// 					material->SetRoughnessTextureFile(finalTextureStr);
-// 				}
-// 			}
-// 
-// 			// Ambient
-// 			{
-// 				node = node->NextSiblingElement();
-// 
-// 				Color color;
-// 				color.x = node->FloatAttribute("R");
-// 				color.y = node->FloatAttribute("G");
-// 				color.z = node->FloatAttribute("B");
-// 				color.w = node->FloatAttribute("A");
-// 				material->SetAmbient(color);
-// 			}
-// 
-// 			// Diffuse
-// 			{
-// 				node = node->NextSiblingElement();
-// 
-// 				Color color;
-// 				color.x = node->FloatAttribute("R");
-// 				color.y = node->FloatAttribute("G");
-// 				color.z = node->FloatAttribute("B");
-// 				color.w = node->FloatAttribute("A");
-// 				material->SetDiffuse(color);
-// 			}
-// 
-// 			// Specular
-// 			{
-// 				node = node->NextSiblingElement();
-// 
-// 				Color color;
-// 				color.x = node->FloatAttribute("R");
-// 				color.y = node->FloatAttribute("G");
-// 				color.z = node->FloatAttribute("B");
-// 				color.w = node->FloatAttribute("A");
-// 				material->SetSpecular(color);
-// 			}
-// 
-// 			// Emissive
-// 			{
-// 				node = node->NextSiblingElement();
-// 
-// 				Color color;
-// 				color.x = node->FloatAttribute("R");
-// 				color.y = node->FloatAttribute("G");
-// 				color.z = node->FloatAttribute("B");
-// 				color.w = node->FloatAttribute("A");
-// 				material->SetEmissive(color);
-// 			}
-// 
-// 			// Metallic
-// 			{
-// 				node = node->NextSiblingElement();
-// 				float MetallicFactor = node->FloatAttribute("Factor");
-// 				material->SetMetallicFactor(MetallicFactor);
-// 			}
-// 
-// 			// Roughness
-// 			{
-// 				node = node->NextSiblingElement();
-// 				float RoughnessFactor = node->FloatAttribute("Factor");
-// 				material->SetRoughnessFactor(RoughnessFactor);
-// 			}
-// 
-// 			// UseTextureInfo
-// 			{
-// 				node = node->NextSiblingElement();
-// 				bool diffuse = node->BoolAttribute("Diffuse");
-// 				bool normal = node->BoolAttribute("Normal");
-// 				bool metallic = node->BoolAttribute("Metallic");
-// 				bool roughness = node->BoolAttribute("Roughness");
-// 				material->SetIsUseDiffuse(diffuse);
-// 				material->SetIsUseNormal(normal);
-// 				material->SetIsUseMetallic(metallic);
-// 				material->SetIsUseRoughness(roughness);
-// 				//material->SetIsUseDiffuse(true);
-// 				//material->SetIsUseNormal(true);
-// 				//material->SetIsUseMetallic(true);
-// 				//material->SetIsUseRoughness(true);
-// 			}
-// 
-// 			{
-// 				// Material Id Allocate
-// 				//material->SetID(AllocateMaterialID());
-// 				//
-// 				//material->SetBaseMap(m_defaultAlbedo);
-// 				//material->SetNormalMap(m_defaultNormal);
-// 				//material->SetMaskMap(m_defaultMask);
-// 
-// 				//staticMesh->AddMaterial(m_defaultMaterial);
-// 			}
-// 			materialNode = materialNode->NextSiblingElement();
-// 		}
-// 	}
-
 	// Binding info
 	staticMesh->FinalCreate(shared_from_this());
 	OutMesh->SetStaticMesh(staticMesh);
@@ -1445,26 +1150,12 @@ void Ideal::ResourceManager::CreateSkinnedMeshObject(std::shared_ptr<Ideal::Idea
 				bool normal = node->BoolAttribute("Normal");
 				bool metallic = node->BoolAttribute("Metallic");
 				bool roughness = node->BoolAttribute("Roughness");
-				//material->SetIsUseDiffuse(diffuse);
-				//material->SetIsUseNormal(normal);
-				//material->SetIsUseMetallic(metallic);
-				//material->SetIsUseRoughness(roughness);
 				material->SetIsUseDiffuse(true);
 				material->SetIsUseNormal(true);
 				material->SetIsUseMetallic(true);
 				material->SetIsUseRoughness(true);
 			}
 
-			{
-				// Material Id Allocate
-				//material->SetID(AllocateMaterialID());
-				//
-				//material->SetBaseMap(m_defaultAlbedo);
-				//material->SetNormalMap(m_defaultNormal);
-				//material->SetMaskMap(m_defaultMask);
-
-				//skinnedMesh->AddMaterial(m_defaultMaterial);
-			}
 			materialNode = materialNode->NextSiblingElement();
 		}
 	}
@@ -1807,14 +1498,6 @@ void ResourceManager::CreateParticleVertexBuffer()
 	}
 	m_particleVertexBuffer = std::make_shared<Ideal::D3D12VertexBuffer>();
 	CreateVertexBuffer<ParticleVertex>(m_particleVertexBuffer, vertices);
-}
-
-void ResourceManager::CreateParticleBuffers()
-{
-	// 프레임카운트만큼 만들 필요 없다. 어차피 복사해서 쓰기 때문에..
-	// 업로드 버퍼를 만들고
-	// 위치 버퍼를 밀어 넣고
-	// GPU에 업로드하는 버퍼를 만든다.
 }
 
 std::shared_ptr<Ideal::D3D12VertexBuffer> ResourceManager::GetParticleVertexBuffer()

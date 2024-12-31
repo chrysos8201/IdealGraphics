@@ -83,9 +83,6 @@ namespace Ideal
 		ComPtr<ID3D12DescriptorHeap> GetSRVHeap() { return m_cbv_srv_uavHeap->GetDescriptorHeap(); }
 		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> GetSRVPool() { return m_cbv_srv_uavHeap; }
 
-		void CreateVertexBufferBox(std::shared_ptr<Ideal::D3D12VertexBuffer>& VertexBuffer);
-		void CreateIndexBufferBox(std::shared_ptr<Ideal::D3D12IndexBuffer>& IndexBuffer);
-
 		template <typename TType>
 		void CreateStructuredBuffer(std::shared_ptr<Ideal::D3D12StructuredBuffer> OutStructuredBuffer, std::vector<TType>& Vertices)
 		{
@@ -333,11 +330,9 @@ namespace Ideal
 	public:
 		// Particle
 		void CreateParticleVertexBuffer();
-		void CreateParticleBuffers();
 		std::shared_ptr<Ideal::D3D12VertexBuffer> GetParticleVertexBuffer();
 
 	private:
-		// ±×³É 10000°³ ¸¸µé¾îº­·È~
 		const uint32 ParticleCount = 1000;
 
 		std::shared_ptr<Ideal::D3D12VertexBuffer> m_particleVertexBuffer;

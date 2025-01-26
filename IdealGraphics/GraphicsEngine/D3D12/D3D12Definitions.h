@@ -119,6 +119,19 @@ namespace Ideal
 		}
 	}
 
+	namespace TerrainRootSignature
+	{
+		namespace Slot
+		{
+			enum Enum
+			{
+				CBV_Global = 0,
+				CBV_Transform,
+				Count
+			};
+		}
+	}
+
 	namespace DebugMeshRootSignature
 	{
 		namespace Slot

@@ -63,6 +63,7 @@
 
 #define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
 
+#include<d3dx12.h>
 
 #include <string>
 #include <iostream>
@@ -82,21 +83,21 @@ inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
 	if (desc->Type == D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE) wstr << L"Raytracing Pipeline\n";
 
 	auto ExportTree = [](UINT depth, UINT numExports, const D3D12_EXPORT_DESC* exports)
+	{
+		std::wostringstream woss;
+		for (UINT i = 0; i < numExports; i++)
 		{
-			std::wostringstream woss;
-			for (UINT i = 0; i < numExports; i++)
+			woss << L"|";
+			if (depth > 0)
 			{
-				woss << L"|";
-				if (depth > 0)
-				{
-					for (UINT j = 0; j < 2 * depth - 1; j++) woss << L" ";
-				}
-				woss << L" [" << i << L"]: ";
-				if (exports[i].ExportToRename) woss << exports[i].ExportToRename << L" --> ";
-				woss << exports[i].Name << L"\n";
+				for (UINT j = 0; j < 2 * depth - 1; j++) woss << L" ";
 			}
-			return woss.str();
-		};
+			woss << L" [" << i << L"]: ";
+			if (exports[i].ExportToRename) woss << exports[i].ExportToRename << L" --> ";
+			woss << exports[i].Name << L"\n";
+		}
+		return woss.str();
+	};
 
 	for (UINT i = 0; i < desc->NumSubobjects; i++)
 	{
@@ -458,6 +459,8 @@ finishAdapter:
 
 	// load image
 
+	InitTerrain();
+
 	// create resource
 	//CreateDeviceDependentResources();
 
@@ -466,6 +469,9 @@ finishAdapter:
 
 
 	SetRendererAmbientIntensity(0.4f);
+
+
+	AddTerrainToRaytracing();
 }
 
 void Ideal::D3D12RayTracingRenderer::Tick()
@@ -553,6 +559,9 @@ void Ideal::D3D12RayTracingRenderer::Render()
 #endif
 	//---------Particle---------//
 	DrawParticle();
+
+	//--------Terrain--------//
+	RenderTerrain();
 
 	//----Debug Mesh Draw----//
 	if (m_isEditor)
@@ -1232,7 +1241,7 @@ std::shared_ptr<Ideal::ITexture> Ideal::D3D12RayTracingRenderer::CreateTexture(c
 	{
 		generateMips = 0;
 	}
-	m_resourceManager->CreateTexture(texture, FileName, IngoreSRGB, generateMips,IsNormalMap);
+	m_resourceManager->CreateTexture(texture, FileName, IngoreSRGB, generateMips, IsNormalMap);
 
 	//if (IsGenerateMips)
 	//{
@@ -2470,4 +2479,424 @@ void Ideal::D3D12RayTracingRenderer::CreateEditorRTV(uint32 Width, uint32 Height
 			m_editorTexture->GetResource()->SetName(L"Editor Texture");
 		}
 	}
+}
+
+
+void Ideal::D3D12RayTracingRenderer::InitTerrain()
+{
+	LoadRawHeightMap();
+	SetTerrainCoordinates();
+
+	LoadColorMap();
+
+
+	m_terrainTransform = Matrix::CreateTranslation(Vector3(0, 1, 0));
+	uint32 vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 8;
+
+	uint32 indexCount = vertexCount;
+
+	std::vector<BasicVertex> vertices(vertexCount);
+	std::vector<uint32> indices(indexCount);
+
+	int index = 0;
+
+	for (int j = 0; j < (m_terrainHeight - 1); j++)
+	{
+		for (int i = 0; i < (m_terrainWidth - 1); i++)
+		{
+			int index1 = (m_terrainWidth * j) + i;
+			int index2 = (m_terrainWidth * j) + (i + 1);
+			int index3 = (m_terrainWidth * (j + 1)) + i;
+			int index4 = (m_terrainWidth * (j + 1)) + (i + 1);
+
+			/// 삼각형 1
+			// 왼쪽 위
+			vertices[index].Position = m_heightMap[index1].Position;
+			vertices[index].Color = m_heightMap[index1].Color;
+			vertices[index].UV.x = 0.f;
+			vertices[index].UV.y = 0.f;
+
+			indices[index] = index;
+			index++;
+
+			// 오른쪽 위
+			vertices[index].Position = m_heightMap[index2].Position;
+			vertices[index].Color = m_heightMap[index2].Color;
+			vertices[index].UV.x = 1.f;
+			vertices[index].UV.y = 0.f;
+
+			indices[index] = index;
+			index++;
+
+			// 왼쪽 아래
+			vertices[index].Position = m_heightMap[index3].Position;
+			vertices[index].Color = m_heightMap[index3].Color;
+			vertices[index].UV.x = 0.f;
+			vertices[index].UV.y = 1.f;
+
+			indices[index] = index;
+			index++;
+
+			/// 삼각형 2
+			// 왼쪽 아래
+			vertices[index].Position = m_heightMap[index3].Position;
+			vertices[index].Color = m_heightMap[index3].Color;
+			vertices[index].UV.x = 0.f;
+			vertices[index].UV.y = 1.f;
+
+			indices[index] = index;
+			index++;
+
+			// 오른쪽 위
+			vertices[index].Position = m_heightMap[index2].Position;
+			vertices[index].Color = m_heightMap[index2].Color;
+			vertices[index].UV.x = 1.f;
+			vertices[index].UV.y = 0.f;
+
+			indices[index] = index;
+			index++;
+
+			// 오른쪽 아래
+			vertices[index].Position = m_heightMap[index4].Position;
+			vertices[index].Color = m_heightMap[index4].Color;
+			vertices[index].UV.x = 1.f;
+			vertices[index].UV.y = 1.f;
+
+			indices[index] = index;
+			index++;
+		}
+	}
+	m_terrainVB = std::make_shared<Ideal::D3D12VertexBuffer>();
+	m_terrainIB = std::make_shared<Ideal::D3D12IndexBuffer>();
+	m_resourceManager->CreateVertexBuffer<BasicVertex>(m_terrainVB, vertices);
+	m_resourceManager->CreateIndexBuffer(m_terrainIB, indices);
+
+	// Shader
+	CompileShader(L"../Shaders/DebugMesh/DebugMeshShader.hlsl", L"../Shaders/DebugMesh/", L"DebugMeshShaderVS", L"vs_6_3", L"VSMain");
+	CompileShader(L"../Shaders/Terrain/Terrain.hlsl", L"../Shaders/Terrain/", L"TerrainVS", L"vs_6_3", L"VSMain");
+	m_terrainVS = CreateAndLoadShader(L"../Shaders/Terrain/TerrainVS.shader");
+
+	CompileShader(L"../Shaders/Terrain/Terrain.hlsl", L"../Shaders/Terrain/", L"TerrainPS", L"ps_6_3", L"PSMain");
+	m_terrainPS = CreateAndLoadShader(L"../Shaders/Terrain/TerrainPS.shader");
+
+	// Root Signature
+	CD3DX12_DESCRIPTOR_RANGE1 ranges[Ideal::TerrainRootSignature::Slot::Count];
+	ranges[Ideal::TerrainRootSignature::Slot::CBV_Global].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	ranges[Ideal::TerrainRootSignature::Slot::CBV_Transform].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+
+	CD3DX12_ROOT_PARAMETER1 rootParameters[Ideal::TerrainRootSignature::Slot::Count];
+	rootParameters[Ideal::TerrainRootSignature::Slot::CBV_Global].InitAsDescriptorTable(1, &ranges[Ideal::TerrainRootSignature::Slot::CBV_Global]);
+	rootParameters[Ideal::TerrainRootSignature::Slot::CBV_Transform].InitAsDescriptorTable(1, &ranges[Ideal::TerrainRootSignature::Slot::CBV_Transform]);
+
+	CD3DX12_STATIC_SAMPLER_DESC staticSamplers[] =
+	{
+		CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_ANISOTROPIC),
+	};
+
+	ComPtr<ID3DBlob> blob;
+	ComPtr<ID3DBlob> error;
+	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, staticSamplers, rootSignatureFlags);
+
+	HRESULT hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
+	Check(hr, L"Failed to serialize root signature in Debug Mesh Manager");
+
+	hr = m_device->CreateRootSignature(1, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(m_terrainRootSignature.GetAddressOf()));
+	Check(hr, L"Failed to create RootSignature in Debug Mesh Manager");
+
+	// Pipeline State Object
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+	psoDesc.InputLayout = { BasicVertex::InputElements, BasicVertex::InputElementCount };
+	psoDesc.pRootSignature = m_terrainRootSignature.Get();
+	psoDesc.VS = m_terrainVS->GetShaderByteCode();
+	psoDesc.PS = m_terrainPS->GetShaderByteCode();
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoDesc.DepthStencilState.StencilEnable = FALSE;
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+	//psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	psoDesc.SampleMask = UINT_MAX;
+	//psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	psoDesc.SampleDesc.Count = 1;
+
+	hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(m_terrainPipelineState.GetAddressOf()));
+	Check(hr, L"Faild to Create Pipeline State Terrain");
+
+}
+
+void Ideal::D3D12RayTracingRenderer::LoadRawHeightMap()
+{
+	m_heightMap.resize(m_terrainHeight * m_terrainWidth);
+
+	FILE* filePtr = nullptr;
+	if (fopen_s(&filePtr, "../Resources/Textures/Terrain/heightmap.r16", "rb") != 0)
+	{
+		return;
+	}
+
+	int imageSize = m_terrainHeight * m_terrainWidth;
+
+	uint16* rawImage = new uint16[imageSize];
+
+	if (fread(rawImage, sizeof(uint16), imageSize, filePtr) != imageSize)
+	{
+		MyMessageBoxW(L"FAILED!!Terrain!!");
+		return;
+	}
+
+	if (fclose(filePtr) != 0)
+	{
+		MyMessageBoxW(L"FAILED!!Terrain!!");
+		return;
+	}
+
+	// 이미지 데이터를 높이 맵 배열에 복사
+	for (int j = 0; j < m_terrainHeight; j++)
+	{
+		for (int i = 0; i < m_terrainHeight; i++)
+		{
+			int index = (m_terrainWidth * j) + i;
+
+			m_heightMap[index].Position.y = (float)rawImage[index];
+		}
+	}
+
+	delete[] rawImage;
+	rawImage = NULL;
+}
+
+void Ideal::D3D12RayTracingRenderer::SetTerrainCoordinates()
+{
+	for (int j = 0; j < m_terrainHeight; j++)
+	{
+		for (int i = 0; i < m_terrainWidth; i++)
+		{
+			int index = (m_terrainWidth * j) + i;
+
+			// x 및 z 좌표 설정
+			m_heightMap[index].Position.x = (float)i;
+			m_heightMap[index].Position.z = -(float)j;
+
+			// 지형 깊이를 양의 범위로 이동. 예를 들어 (0, -256)에서 (256, 0)까지
+			m_heightMap[index].Position.z += (float)(m_terrainHeight - 1);
+
+			// 높이 조절
+			m_heightMap[index].Position.y /= 300;
+		}
+	}
+}
+
+void Ideal::D3D12RayTracingRenderer::CalculateNormals()
+{
+	int index1 = 0;
+	int index2 = 0;
+	int index3 = 0;
+	int index = 0;
+	int count = 0;
+	float vertex1[3] = { 0.f,0.f,0.f };
+	float vertex2[3] = { 0.f,0.f,0.f };
+	float vertex3[3] = { 0.f,0.f,0.f };
+	float vector1[3] = { 0.f,0.f,0.f };
+	float vector2[3] = { 0.f,0.f,0.f };
+	float sum[3] = { 0.f,0.f,0.f };
+	float length = 0.f;
+
+	// 정규화되지 않은 법선 벡터를 저장할 배열
+	std::vector<Vector3> normals((m_terrainHeight - 1)* (m_terrainWidth - 1));
+
+	// 매쉬의 모든 면을 살펴보고 법선 계산
+	for (int j = 0; j < (m_terrainHeight - 1); j++)
+	{
+		for (int i = 0; i < (m_terrainWidth - 1); i++)
+		{
+			index1 = ((j + 1) * m_terrainWidth) + i; // 왼쪽 아래 꼭지점
+			index2 = ((j + 1) * m_terrainWidth) + (i+1); // 오른쪽 하단 정점
+			index3 = (j * m_terrainWidth) + i; // 좌상단 정점
+
+			// 표면에서 세 개의 꼭지점을 가져온다.
+			//vertex1[0] = m_heightMap[index1].x;	
+			//vertex1[1] = m_heightMap[index1].y;	
+			//vertex1[2] = m_heightMap[index1].z;	
+			//
+			//vertex2[0] = m_heightMap[index2].x;
+			//vertex2[1] = m_heightMap[index2].y;
+			//vertex2[2] = m_heightMap[index2].z;
+			//
+			//vertex3[0] = m_heightMap[index3].x;
+			//vertex3[1] = m_heightMap[index3].y;
+			//vertex3[2] = m_heightMap[index3].z;
+
+			// 표면의 두 벡터를 계산
+			vector1[0] = vertex1[0] - vertex3[0];
+			vector1[1] = vertex1[1] - vertex3[1];
+			vector1[2] = vertex1[2] - vertex3[2];
+
+			vector2[0] = vertex3[0] - vertex2[0];
+			vector2[1] = vertex3[1] - vertex2[1];
+			vector2[2] = vertex3[2] - vertex2[2];
+
+			index = (j * (m_terrainWidth - 1)) + i;
+
+			// 이 두 법선에 대한 정규화되지 않은 값을 얻기 위해 두 벡터의 외적을 계산
+			normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+			normals[index].y = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+			normals[index].z = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+
+			// 길이를 계산
+			length = (float)sqrt((normals[index].x * normals[index].x)
+				+ (normals[index].y * normals[index].y)
+				+ (normals[index].z * normals[index].z));
+
+			// 길이를 사용하여 최종 값을 표준화. 노멀라이즈
+			normals[index].x = (normals[index].x / length);
+			normals[index].y = (normals[index].y / length);
+			normals[index].z = (normals[index].z / length);
+		}
+	}
+
+	// 이제 모든 정점을 살펴보고 각 면의 평균을 취한다.
+	// 일단 넘어감
+}
+
+void Ideal::D3D12RayTracingRenderer::LoadColorMap()
+{
+	FILE* filePtr = nullptr;
+	if (fopen_s(&filePtr, "../Resources/Textures/Terrain/colormap.bmp", "rb") != 0)
+	{
+		MyMessageBoxW(L"FAILED Terrain Color Map!");
+		return;
+	}
+	BITMAPFILEHEADER bitmapFileHeader;
+	if (fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr) != 1)
+	{
+		MyMessageBoxW(L"FAILED Terrain Color Map!");
+		return;
+	}
+
+	BITMAPINFOHEADER bitmapInfoHeader;
+	if (fread(&bitmapInfoHeader, sizeof(BITMAPFILEHEADER), 1, filePtr) != 1)
+	{
+		MyMessageBoxW(L"FAILED Terrain Color Map!");
+		return;
+	}
+
+	// 컬러 맵 치수 1: 1 인지 확인
+	if ((bitmapInfoHeader.biWidth != m_terrainWidth) || (bitmapInfoHeader.biHeight != m_terrainHeight))
+	{
+		return ;
+	}
+
+	// 비트 맵 이미지 데이터의 크기 계산
+	// 2차원으로 나눌수 없으므로 (예 257x257) 각 행의 여분의 바이트 추가
+	int imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+
+	// 비트 맵 이미지 데이터에 메모리를 할당
+	uint8* bitmapImage = new uint8[imageSize];
+	
+	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+	if (fread(bitmapImage, 1, imageSize, filePtr) != imageSize)
+	{
+		return;
+	}
+	if (fclose(filePtr) != 0)
+	{
+		return;
+	}
+
+	int k = 0;
+	for (int j = 0; j < m_terrainHeight; j++)
+	{
+		for (int i = 0; i < m_terrainWidth; i++)
+		{
+			int index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
+
+			m_heightMap[index].Color.x = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].Color.y = (float)bitmapImage[k + 1] / 255.0f;
+			m_heightMap[index].Color.z = (float)bitmapImage[k + 2] / 255.0f;
+			m_heightMap[index].Color.w = 1;
+			k += 3;
+		}
+
+		k++;
+	}
+	delete[] bitmapImage;
+}
+
+void Ideal::D3D12RayTracingRenderer::RenderTerrain()
+{
+	//return;
+	m_commandLists[m_currentContextIndex]->RSSetViewports(1, &m_viewport->GetViewport());
+	m_commandLists[m_currentContextIndex]->RSSetScissorRects(1, &m_viewport->GetScissorRect());
+
+	auto depthBuffer = m_raytracingManager->GetDepthBuffer();
+	m_commandLists[m_currentContextIndex]->OMSetRenderTargets(1, &m_raytracingManager->GetRaytracingOutputRTVHandle().GetCpuHandle(), FALSE, &depthBuffer->GetDSV().GetCpuHandle());
+
+
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootSignature(m_terrainRootSignature.Get());
+	m_commandLists[m_currentContextIndex]->SetPipelineState(m_terrainPipelineState.Get());
+	//m_commandLists[m_currentContextIndex]->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+	m_commandLists[m_currentContextIndex]->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_terrainVB->GetView();
+	const D3D12_INDEX_BUFFER_VIEW& indexBufferView = m_terrainIB->GetView();
+
+	m_commandLists[m_currentContextIndex]->IASetVertexBuffers(0, 1, &vertexBufferView);
+	m_commandLists[m_currentContextIndex]->IASetIndexBuffer(&indexBufferView);
+
+	// Global Data 
+	auto cb0 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Global));
+	memcpy(cb0->SystemMemoryAddress, &m_globalCB, sizeof(CB_Global));
+	auto handle0 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
+	m_device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::TerrainRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
+
+	// Transform Data 
+	auto cb1 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Transform));
+	CB_Transform* cbTransform = (CB_Transform*)cb1->SystemMemoryAddress;
+	cbTransform->World = m_terrainTransform.Transpose();
+	cbTransform->WorldInvTranspose = m_terrainTransform.Transpose().Invert();
+	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
+	auto handle1 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
+	m_device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::TerrainRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
+
+
+	// Draw
+	m_commandLists[m_currentContextIndex]->DrawIndexedInstanced(m_terrainVB->GetElementCount(), 1, 0, 0, 0);
+}
+
+void Ideal::D3D12RayTracingRenderer::AddTerrainToRaytracing()
+{
+	return;
+	std::shared_ptr<Ideal::IdealStaticMesh> staticMesh = std::make_shared<Ideal::IdealStaticMesh>();
+
+	std::shared_ptr <Ideal::IdealMesh<BasicVertex>> mesh = std::make_shared<Ideal::IdealMesh<BasicVertex>>();
+	mesh->SetVertexBuffer(m_terrainVB);
+	mesh->SetIndexBuffer(m_terrainIB);
+	mesh->SetMaterial(m_resourceManager->GetDefaultMaterial());
+
+	staticMesh->AddMesh(mesh);
+
+	m_terrainMesh = std::make_shared<Ideal::IdealStaticMeshObject>();
+	m_terrainMesh->SetStaticMesh(staticMesh);
+
+
+
+	// temp
+	//auto mesh = std::static_pointer_cast<Ideal::IdealStaticMeshObject>(staticMesh);
+
+	RaytracingManagerAddObject(m_terrainMesh);
+
+	m_staticMeshObject.push_back(m_terrainMesh);
+	
 }

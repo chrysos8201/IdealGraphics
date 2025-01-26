@@ -10,7 +10,7 @@
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 
 #include "Misc/Utils/Octree/Octree.h"
- 
+
 // Test
 #include "GraphicsEngine/ConstantBufferInfo.h"
 #include "GraphicsEngine/VertexInfo.h"
@@ -289,11 +289,11 @@ namespace Ideal
 		std::vector<std::shared_ptr<Ideal::IdealSpotLight>> m_spotLights;
 		std::vector<std::shared_ptr<Ideal::IdealPointLight>> m_pointLights;
 
-	// InitShaders
+		// InitShaders
 	public:
 		void CompileDefaultShader();
 
-	// Shaders
+		// Shaders
 	private:
 		std::shared_ptr<Ideal::D3D12Shader> m_raytracingShader;
 		std::shared_ptr<Ideal::D3D12Shader> m_animationShader;
@@ -376,5 +376,30 @@ namespace Ideal
 		Vector2 m_mainCameraEditorTopLeft;
 		Vector2 m_mainCameraEditorBottomRight;
 		Vector2 m_mainCameraEditorWindowSize;
+
+		// Simple Terrain
+	private:
+		void InitTerrain();
+		void LoadRawHeightMap();
+		void SetTerrainCoordinates();
+		void CalculateNormals();
+		void LoadColorMap();
+		void RenderTerrain();
+
+		// build to ray tracing
+		void AddTerrainToRaytracing();
+
+		std::shared_ptr<Ideal::D3D12VertexBuffer> m_terrainVB;
+		std::shared_ptr<Ideal::D3D12IndexBuffer> m_terrainIB;
+		uint32 m_terrainWidth = 1025;
+		uint32 m_terrainHeight = 1025;
+		ComPtr<ID3D12RootSignature> m_terrainRootSignature;
+		ComPtr<ID3D12PipelineState> m_terrainPipelineState;
+		std::shared_ptr<Ideal::D3D12Shader> m_terrainVS;
+		std::shared_ptr<Ideal::D3D12Shader> m_terrainPS;
+		Matrix m_terrainTransform;
+		std::vector<BasicVertex> m_heightMap;
+
+		std::shared_ptr<Ideal::IdealStaticMeshObject> m_terrainMesh;
 	};
 }

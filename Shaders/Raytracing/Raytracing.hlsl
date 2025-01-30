@@ -97,15 +97,17 @@ float3 NormalMap(in float3 normal, in float2 texCoord, in PositionNormalUVTangen
         vertices[2].tangent
     };
     tangent = HitAttribute(vertexTangents, attr);
+    // 여기도 마찬가지. 균등 행렬이라 가정하고 만들었다.
+    tangent = normalize(mul((float3x3) ObjectToWorld3x4(), tangent));
     {
         ////
-        float3 v0 = vertices[0].position;
-        float3 v1 = vertices[1].position;
-        float3 v2 = vertices[2].position;
-        float2 uv0 = float2(vertices[0].uv[0], vertices[0].uv[1]);
-        float2 uv1 = float2(vertices[1].uv[0], vertices[1].uv[1]);
-        float2 uv2 = float2(vertices[2].uv[0], vertices[2].uv[1]);
-        tangent = CalculateTangent(v0, v1, v2, uv0, uv1, uv2);
+        //float3 v0 = vertices[0].position;
+        //float3 v1 = vertices[1].position;
+        //float3 v2 = vertices[2].position;
+        //float2 uv0 = float2(vertices[0].uv[0], vertices[0].uv[1]);
+        //float2 uv1 = float2(vertices[1].uv[0], vertices[1].uv[1]);
+        //float2 uv2 = float2(vertices[2].uv[0], vertices[2].uv[1]);
+        //tangent = CalculateTangent(v0, v1, v2, uv0, uv1, uv2);
     }
 
 
@@ -113,8 +115,8 @@ float3 NormalMap(in float3 normal, in float2 texCoord, in PositionNormalUVTangen
     float3 newNormal;
     float3 bumpNormal = normalize(texSample * 2.f - 1.f);
     //Ideal_NormalStrength_float(bumpNormal, 0.2, newNormal); // 다르게
-    Ideal_NormalStrength_float(bumpNormal, 1, newNormal); // 다르게
-    float3 worldNormal = BumpMapNormalToWorldSpaceNormal(newNormal, normal, tangent);
+    //Ideal_NormalStrength_float(bumpNormal, 1, newNormal); // 다르게
+    float3 worldNormal = BumpMapNormalToWorldSpaceNormal(bumpNormal, normal, tangent);
     return worldNormal;
 }
 RayPayload TraceRadianceRay(in Ray ray, in UINT currentRayRecursionDepth, float tMin = 0.001f, float tMax = 10000.f, bool cullNonOpaque = false)
@@ -182,7 +184,7 @@ float3 TraceReflectedGBufferRay(in float3 hitPosition, in float3 wi, inout RayPa
     return rayPayload.radiance;
 }
 
-float3 TraceRefractedGBufferRay(in float3 hitPosition, in float3 wt, in float3 N, in float3 objectNormal, inout RayPayload rayPayload, in float TMax = 10000)
+float3 TraceRefractedGBufferRay(in float3 hitPosition, in float3 wt, in float3 N, inout RayPayload rayPayload, in float TMax = 10000)
 {
     float tOffset = 0.001f;
     float3 offsetAlongRay = tOffset * wt;
@@ -431,7 +433,7 @@ float3 Shade(
                     float3 wt;
                     float3 Ft = Kt * BxDF::Specular::Transmission::Sample_Ft(V, wt, N, F0);
                     RayPayload refractedRayPayLoad = rayPayload;
-                    L += Ft * TraceRefractedGBufferRay(hitPosition, wt, N, objectNormal, refractedRayPayLoad);
+                    L += Ft * TraceRefractedGBufferRay(hitPosition, wt, N, refractedRayPayLoad);
                 }
             }
         }
@@ -563,12 +565,10 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
         objectNormal = normalize(HitAttribute(vertexNormals, attr));
         float orientation = HitKind() == HIT_KIND_TRIANGLE_FRONT_FACE ? 1 : -1;
         objectNormal *= orientation;
-
-        // 여기부터 임시
-        //normal = NormalMap(objectNormal, uv, vertexInfo, attr);
-        //normal = normalize(mul((float3x3)ObjectToWorld3x4(), normal));
-        // 여기까지
-
+        
+        // 일단 우리 게임은 다 균등 변환인 것으로 간주함.
+        // world inv transpose 안한다. 다 균등 변환이라고 생각함
+        
         normal = normalize(mul((float3x3)ObjectToWorld3x4(), objectNormal));
         //normal = objectNormal;
         //normal = normalize(mul(objectNormal, (float3x3) ObjectToWorld3x4()));

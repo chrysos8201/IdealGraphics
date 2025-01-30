@@ -460,6 +460,7 @@ finishAdapter:
 	// load image
 
 	InitTerrain();
+	InitTessellation();
 
 	// create resource
 	//CreateDeviceDependentResources();
@@ -561,7 +562,10 @@ void Ideal::D3D12RayTracingRenderer::Render()
 	DrawParticle();
 
 	//--------Terrain--------//
-	RenderTerrain();
+	DrawTerrain();
+
+	//--------SimpleTessellation--------//
+	DrawTessellation();
 
 	//----Debug Mesh Draw----//
 	if (m_isEditor)
@@ -2572,7 +2576,6 @@ void Ideal::D3D12RayTracingRenderer::InitTerrain()
 	m_resourceManager->CreateIndexBuffer(m_terrainIB, indices);
 
 	// Shader
-	CompileShader(L"../Shaders/DebugMesh/DebugMeshShader.hlsl", L"../Shaders/DebugMesh/", L"DebugMeshShaderVS", L"vs_6_3", L"VSMain");
 	CompileShader(L"../Shaders/Terrain/Terrain.hlsl", L"../Shaders/Terrain/", L"TerrainVS", L"vs_6_3", L"VSMain");
 	m_terrainVS = CreateAndLoadShader(L"../Shaders/Terrain/TerrainVS.shader");
 
@@ -2580,13 +2583,13 @@ void Ideal::D3D12RayTracingRenderer::InitTerrain()
 	m_terrainPS = CreateAndLoadShader(L"../Shaders/Terrain/TerrainPS.shader");
 
 	// Root Signature
-	CD3DX12_DESCRIPTOR_RANGE1 ranges[Ideal::TerrainRootSignature::Slot::Count];
-	ranges[Ideal::TerrainRootSignature::Slot::CBV_Global].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-	ranges[Ideal::TerrainRootSignature::Slot::CBV_Transform].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+	CD3DX12_DESCRIPTOR_RANGE1 ranges[Ideal::BasicRootSignature::Slot::Count];
+	ranges[Ideal::BasicRootSignature::Slot::CBV_Global].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	ranges[Ideal::BasicRootSignature::Slot::CBV_Transform].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
 
-	CD3DX12_ROOT_PARAMETER1 rootParameters[Ideal::TerrainRootSignature::Slot::Count];
-	rootParameters[Ideal::TerrainRootSignature::Slot::CBV_Global].InitAsDescriptorTable(1, &ranges[Ideal::TerrainRootSignature::Slot::CBV_Global]);
-	rootParameters[Ideal::TerrainRootSignature::Slot::CBV_Transform].InitAsDescriptorTable(1, &ranges[Ideal::TerrainRootSignature::Slot::CBV_Transform]);
+	CD3DX12_ROOT_PARAMETER1 rootParameters[Ideal::BasicRootSignature::Slot::Count];
+	rootParameters[Ideal::BasicRootSignature::Slot::CBV_Global].InitAsDescriptorTable(1, &ranges[Ideal::BasicRootSignature::Slot::CBV_Global]);
+	rootParameters[Ideal::BasicRootSignature::Slot::CBV_Transform].InitAsDescriptorTable(1, &ranges[Ideal::BasicRootSignature::Slot::CBV_Transform]);
 
 	CD3DX12_STATIC_SAMPLER_DESC staticSamplers[] =
 	{
@@ -2820,9 +2823,9 @@ void Ideal::D3D12RayTracingRenderer::LoadColorMap()
 		{
 			int index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
 
-			m_heightMap[index].Color.x = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].Color.z = (float)bitmapImage[k] / 255.0f;
 			m_heightMap[index].Color.y = (float)bitmapImage[k + 1] / 255.0f;
-			m_heightMap[index].Color.z = (float)bitmapImage[k + 2] / 255.0f;
+			m_heightMap[index].Color.x = (float)bitmapImage[k + 2] / 255.0f;
 			m_heightMap[index].Color.w = 1;
 			k += 3;
 		}
@@ -2832,7 +2835,7 @@ void Ideal::D3D12RayTracingRenderer::LoadColorMap()
 	delete[] bitmapImage;
 }
 
-void Ideal::D3D12RayTracingRenderer::RenderTerrain()
+void Ideal::D3D12RayTracingRenderer::DrawTerrain()
 {
 	//return;
 	m_commandLists[m_currentContextIndex]->RSSetViewports(1, &m_viewport->GetViewport());
@@ -2858,7 +2861,7 @@ void Ideal::D3D12RayTracingRenderer::RenderTerrain()
 	memcpy(cb0->SystemMemoryAddress, &m_globalCB, sizeof(CB_Global));
 	auto handle0 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
 	m_device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::TerrainRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
 
 	// Transform Data 
 	auto cb1 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Transform));
@@ -2868,7 +2871,7 @@ void Ideal::D3D12RayTracingRenderer::RenderTerrain()
 	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
 	auto handle1 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
 	m_device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::TerrainRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
 
 
 	// Draw
@@ -2899,4 +2902,136 @@ void Ideal::D3D12RayTracingRenderer::AddTerrainToRaytracing()
 
 	m_staticMeshObject.push_back(m_terrainMesh);
 	
+}
+
+void Ideal::D3D12RayTracingRenderer::InitTessellation()
+{
+	m_simpleTessellationTransform = Matrix::Identity;
+	CompileShaderTessellation();
+
+	// patch buffer
+	BasicVertex v0, v1, v2, v3;
+	v0.Position = Vector3(-10.f, 0.f, 10.f);
+	v1.Position = Vector3(10.f, 0.f, 10.f);
+	v2.Position = Vector3(-10.f, 0.f, -10.f);
+	v3.Position = Vector3(10.f, 0.f, -10.f);
+	std::vector<BasicVertex> vertices = { v0,v1,v2,v3 };
+	
+	m_simpleTessellationVB = std::make_shared<Ideal::D3D12VertexBuffer>();
+	m_resourceManager->CreateVertexBuffer<BasicVertex>(m_simpleTessellationVB, vertices);
+
+
+	// Create Root Signature
+	// Root Signature
+	CD3DX12_DESCRIPTOR_RANGE1 ranges[Ideal::BasicRootSignature::Slot::Count];
+	ranges[Ideal::BasicRootSignature::Slot::CBV_Global].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	ranges[Ideal::BasicRootSignature::Slot::CBV_Transform].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+
+	CD3DX12_ROOT_PARAMETER1 rootParameters[Ideal::BasicRootSignature::Slot::Count];
+	rootParameters[Ideal::BasicRootSignature::Slot::CBV_Global].InitAsDescriptorTable(1, &ranges[Ideal::BasicRootSignature::Slot::CBV_Global]);
+	rootParameters[Ideal::BasicRootSignature::Slot::CBV_Transform].InitAsDescriptorTable(1, &ranges[Ideal::BasicRootSignature::Slot::CBV_Transform]);
+
+	CD3DX12_STATIC_SAMPLER_DESC staticSamplers[] =
+	{
+		CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_ANISOTROPIC),
+	};
+
+	ComPtr<ID3DBlob> blob;
+	ComPtr<ID3DBlob> error;
+	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, staticSamplers, rootSignatureFlags);
+
+	HRESULT hr = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
+	Check(hr, L"Failed to serialize root signature simple tessellation");
+
+	hr = m_device->CreateRootSignature(1, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(m_simpleTessellationRootSignature.GetAddressOf()));
+	Check(hr, L"Failed to create RootSignature simple tessellation");
+
+
+	// Pipeline State object
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+	psoDesc.InputLayout = { BasicVertex::InputElements, BasicVertex::InputElementCount };
+	psoDesc.pRootSignature = m_simpleTessellationRootSignature.Get();
+	psoDesc.VS = m_simpleTessellationVS->GetShaderByteCode();
+	psoDesc.HS = m_simpleTessellationHS->GetShaderByteCode();
+	psoDesc.PS = m_simpleTessellationPS->GetShaderByteCode();
+	psoDesc.DS = m_simpleTessellationDS->GetShaderByteCode();
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoDesc.DepthStencilState.StencilEnable = FALSE;
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+	psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	psoDesc.SampleMask = UINT_MAX;
+	//psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	psoDesc.SampleDesc.Count = 1;
+
+	hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(m_simpleTessellationPipelineState.GetAddressOf()));
+	Check(hr, L"Faild to Create Pipeline State simple tessellation");
+}
+
+void Ideal::D3D12RayTracingRenderer::CompileShaderTessellation()
+{
+	// Shader
+	CompileShader(L"../Shaders/SimpleTessellation/SimpleTessellation.hlsl", L"../Shaders/SimpleTessellation/", L"SimpleTessellationVS", L"vs_6_3", L"VSMain");
+	m_simpleTessellationVS = CreateAndLoadShader(L"../Shaders/SimpleTessellation/SimpleTessellationVS.shader");
+
+	// Shader
+	CompileShader(L"../Shaders/SimpleTessellation/SimpleTessellation.hlsl", L"../Shaders/SimpleTessellation/", L"SimpleTessellationHS", L"hs_6_3", L"HSMain");
+	m_simpleTessellationHS = CreateAndLoadShader(L"../Shaders/SimpleTessellation/SimpleTessellationHS.shader");
+
+	// Shader
+	CompileShader(L"../Shaders/SimpleTessellation/SimpleTessellation.hlsl", L"../Shaders/SimpleTessellation/", L"SimpleTessellationDS", L"ds_6_3", L"DSMain");
+	m_simpleTessellationDS = CreateAndLoadShader(L"../Shaders/SimpleTessellation/SimpleTessellationDS.shader");
+
+	// Shader
+	CompileShader(L"../Shaders/SimpleTessellation/SimpleTessellation.hlsl", L"../Shaders/SimpleTessellation/", L"SimpleTessellationPS", L"ps_6_3", L"PSMain");
+	m_simpleTessellationPS = CreateAndLoadShader(L"../Shaders/SimpleTessellation/SimpleTessellationPS.shader");
+
+}
+
+void Ideal::D3D12RayTracingRenderer::DrawTessellation()
+{
+	m_commandLists[m_currentContextIndex]->RSSetViewports(1, &m_viewport->GetViewport());
+	m_commandLists[m_currentContextIndex]->RSSetScissorRects(1, &m_viewport->GetScissorRect());
+
+	auto depthBuffer = m_raytracingManager->GetDepthBuffer();
+	m_commandLists[m_currentContextIndex]->OMSetRenderTargets(1, &m_raytracingManager->GetRaytracingOutputRTVHandle().GetCpuHandle(), FALSE, &depthBuffer->GetDSV().GetCpuHandle());
+
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootSignature(m_simpleTessellationRootSignature.Get());
+	m_commandLists[m_currentContextIndex]->SetPipelineState(m_simpleTessellationPipelineState.Get());
+
+	m_commandLists[m_currentContextIndex]->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_commandLists[m_currentContextIndex]->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+
+	const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_simpleTessellationVB->GetView();
+	m_commandLists[m_currentContextIndex]->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+
+	// Global Data 
+	auto cb0 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Global));
+	memcpy(cb0->SystemMemoryAddress, &m_globalCB, sizeof(CB_Global));
+	auto handle0 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
+	m_device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
+
+	// Transform Data 
+	auto cb1 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Transform));
+	CB_Transform* cbTransform = (CB_Transform*)cb1->SystemMemoryAddress;
+	cbTransform->World = m_simpleTessellationTransform.Transpose();
+	cbTransform->WorldInvTranspose = m_simpleTessellationTransform.Transpose().Invert();
+	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
+	auto handle1 = m_mainDescriptorHeaps[m_currentContextIndex]->Allocate();
+	m_device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
+
+	m_commandLists[m_currentContextIndex]->DrawInstanced(4, 1, 0, 0);
 }

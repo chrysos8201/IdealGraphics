@@ -384,7 +384,7 @@ namespace Ideal
 		void SetTerrainCoordinates();
 		void CalculateNormals();
 		void LoadColorMap();
-		void RenderTerrain();
+		void DrawTerrain();
 
 		// build to ray tracing
 		void AddTerrainToRaytracing();
@@ -401,5 +401,22 @@ namespace Ideal
 		std::vector<BasicVertex> m_heightMap;
 
 		std::shared_ptr<Ideal::IdealStaticMeshObject> m_terrainMesh;
+
+		// Simple Tessellation
+	private:
+		void InitTessellation();
+		void CompileShaderTessellation();
+		void DrawTessellation();
+
+		ComPtr<ID3D12RootSignature> m_simpleTessellationRootSignature;
+		ComPtr<ID3D12PipelineState> m_simpleTessellationPipelineState;
+
+		std::shared_ptr<Ideal::D3D12VertexBuffer> m_simpleTessellationVB;
+		std::shared_ptr<Ideal::D3D12Shader> m_simpleTessellationVS;
+		std::shared_ptr<Ideal::D3D12Shader> m_simpleTessellationHS;
+		std::shared_ptr<Ideal::D3D12Shader> m_simpleTessellationPS;
+		std::shared_ptr<Ideal::D3D12Shader> m_simpleTessellationDS;
+
+		Matrix m_simpleTessellationTransform;
 	};
 }

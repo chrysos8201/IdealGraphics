@@ -119,7 +119,7 @@ namespace Ideal
 		}
 	}
 
-	namespace TerrainRootSignature
+	namespace BasicRootSignature
 	{
 		namespace Slot
 		{

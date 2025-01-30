@@ -225,34 +225,36 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 #pragma endregion
 
 #pragma region Sample
-		//// Create Static Mesh
-		//std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
-		//SampleCart->SetTransformMatrix(Matrix::CreateTranslation(Vector3(5, 2, 0)));
-		//
-		//// Create Material
-		//std::shared_ptr<Ideal::IMaterial> SampleCartMaterial0 = gRenderer->CreateMaterial();
-		//std::shared_ptr<Ideal::IMaterial> SampleCartMaterial1 = gRenderer->CreateMaterial();
-		//
+		// Create Static Mesh
+		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
+		SampleCart->SetTransformMatrix(
+			Matrix::CreateRotationY(1.f) 
+			* Matrix::CreateTranslation(Vector3(5, 2, 5)));
+		
+		// Create Material
+		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial0 = gRenderer->CreateMaterial();
+		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial1 = gRenderer->CreateMaterial();
+		
+		// Create Texture
+		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_BaseMap.png", true, false, false);
+		SampleCartMaterial0->SetBaseMap(SampleCartBaseTexture0);
+		std::shared_ptr<Ideal::ITexture> SampleCartNormalTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_Normal.png", true, true, true);
+		SampleCartMaterial0->SetNormalMap(SampleCartNormalTexture0);
+		std::shared_ptr<Ideal::ITexture> SampleCartMaskTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_MaskMap.png", true, true, true);
+		SampleCartMaterial0->SetMaskMap(SampleCartMaskTexture0);
+		// Bind Material
+		SampleCart->GetMeshByIndex(0).lock()->SetMaterialObject(SampleCartMaterial0);
+		
 		//// Create Texture
-		//std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_BaseMap.png", true, false, false);
-		//SampleCartMaterial0->SetBaseMap(SampleCartBaseTexture0);
-		//std::shared_ptr<Ideal::ITexture> SampleCartNormalTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_Normal.png", true, true, true);
-		//SampleCartMaterial0->SetNormalMap(SampleCartNormalTexture0);
-		//std::shared_ptr<Ideal::ITexture> SampleCartMaskTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_MaskMap.png", true, true, true);
-		//SampleCartMaterial0->SetMaskMap(SampleCartMaskTexture0);
-		//// Bind Material
-		//SampleCart->GetMeshByIndex(0).lock()->SetMaterialObject(SampleCartMaterial0);
-		//
-		//// Create Texture
-		//std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_BaseMap.png", true, false, false);
-		//SampleCartMaterial1->SetBaseMap(SampleCartBaseTexture1);
-		//std::shared_ptr<Ideal::ITexture> SampleCartNormalTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_Normal.png", true, true, true);
-		//SampleCartMaterial1->SetNormalMap(SampleCartNormalTexture1);
-		//std::shared_ptr<Ideal::ITexture> SampleCartMaskTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_MaskMap.png", true, true, true);
-		//SampleCartMaterial1->SetMaskMap(SampleCartMaskTexture1);
-		//// Bind Material
-		//SampleCart->GetMeshByIndex(1).lock()->SetMaterialObject(SampleCartMaterial1);
-		//SampleCart->GetMeshByIndex(2).lock()->SetMaterialObject(SampleCartMaterial1);
+		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_BaseMap.png", true, false, false);
+		SampleCartMaterial1->SetBaseMap(SampleCartBaseTexture1);
+		std::shared_ptr<Ideal::ITexture> SampleCartNormalTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_Normal.png", true, true, true);
+		SampleCartMaterial1->SetNormalMap(SampleCartNormalTexture1);
+		std::shared_ptr<Ideal::ITexture> SampleCartMaskTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_MaskMap.png", true, true, true);
+		SampleCartMaterial1->SetMaskMap(SampleCartMaskTexture1);
+		// Bind Material
+		SampleCart->GetMeshByIndex(1).lock()->SetMaterialObject(SampleCartMaterial1);
+		SampleCart->GetMeshByIndex(2).lock()->SetMaterialObject(SampleCartMaterial1);
 
 		std::shared_ptr<Ideal::IMeshObject> SampleSphere = gRenderer->CreateStaticMeshObject(L"UVSphere/UVSphere");
 

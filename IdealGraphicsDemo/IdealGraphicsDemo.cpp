@@ -325,9 +325,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		std::vector < std::shared_ptr<Ideal::IMeshObject>> staticMeshes;
 		for (int i = 0; i < 30; i++)
 		{
-			std::shared_ptr<Ideal::IMeshObject> testObj = gRenderer->CreateStaticMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
-			testObj->SetTransformMatrix(Matrix::CreateTranslation(Vector3(i, 0, 0)));
-			staticMeshes.push_back(testObj);
+			//std::shared_ptr<Ideal::IMeshObject> testObj = gRenderer->CreateStaticMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");
+			//testObj->SetTransformMatrix(Matrix::CreateTranslation(Vector3(i, 0, 0)));
+			//staticMeshes.push_back(testObj);
 		}
 
 		//std::shared_ptr<Ideal::IMeshObject> DebugStaticEnemy = gRenderer->CreateStaticMeshObject(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1");

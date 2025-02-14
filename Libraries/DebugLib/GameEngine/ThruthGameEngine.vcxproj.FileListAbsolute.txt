@@ -4,7 +4,4 @@ E:\FQPro\5_Project\IAT\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
 E:\Projects\ITEngine\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
 E:\Projects\IGraphics-TGame\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
 C:\Users\user\Desktop\MadScience\Chronos\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
-D:\IAT\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
 E:\Projects\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
-C:\Chronos\IdealAndTruth\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib
-C:\Study\IGraphics-TGame\src\Libraries\Debuglib\GameEngine\ThruthGameEngine.lib

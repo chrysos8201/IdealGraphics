@@ -57,9 +57,6 @@ namespace Ideal
 
 	class ResourceManager : public std::enable_shared_from_this<ResourceManager>
 	{
-		static const uint32 MAX_DSV_HEAP_COUNT = 5;
-		static const uint32 MAX_RTV_HEAP_COUNT = 32;
-
 	private:
 		//--resource id--//
 		uint64 AllocateMaterialID();
@@ -277,9 +274,6 @@ namespace Ideal
 	private:
 		// Descriptor heaps
 		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_cbv_srv_uavHeap;
-		// const uint32 m_srvHeapCount = 16384;
-		const uint32 m_srvHeapCount = 16384 * 4;
-
 		// 2024.05.14 Multi Render Target
 		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_rtvHeap;
 		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_dsvHeap;

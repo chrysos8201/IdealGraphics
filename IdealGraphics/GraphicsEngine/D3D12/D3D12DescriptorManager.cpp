@@ -38,6 +38,8 @@ void Ideal::D3D12DescriptorManager::Create(ComPtr<ID3D12Device> Device, uint32 N
 		L"Failed to create Descriptor Manager"
 	);
 	m_descriptorSize = Device->GetDescriptorHandleIncrementSize(heapDesc.Type);
+
+	m_descriptorHeap->SetName(L"D3D12DescriptorManager");
 }
 
 void Ideal::D3D12DescriptorManager::ResetPool(uint32 PoolIndex)

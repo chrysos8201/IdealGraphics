@@ -80,19 +80,22 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	m_fence->SetName(L"ResourceManager Fence");
 
-	//------------SRV Heap-----------//
+	//------------CBV_SRV_UAV Heap-----------//
 	m_cbv_srv_uavHeap = std::make_shared<D3D12DynamicDescriptorHeap>();
-	m_cbv_srv_uavHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_srvHeapCount);
+	m_cbv_srv_uavHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_CBV_SRV_UAV);
 	//m_srvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, m_srvHeapCount);
+	m_cbv_srv_uavHeap->GetDescriptorHeap()->SetName(L"D3D12CBVSRVUAVDescriptorHeap");
 
 	//------------RTV Heap-----------//
 	m_rtvHeap = std::make_shared<Ideal::D3D12DynamicDescriptorHeap>();
 	//m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
-	m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, MAX_RTV_HEAP_COUNT);
+	m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_RTV);
+	m_rtvHeap->GetDescriptorHeap()->SetName(L"D3D12RTVDescriptorHeap");
 
 	//-----------DSV Heap------------//
 	m_dsvHeap = std::make_shared<Ideal::D3D12DynamicDescriptorHeap>();
-	m_dsvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, MAX_DSV_HEAP_COUNT);
+	m_dsvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_DSV);
+	m_dsvHeap->GetDescriptorHeap()->SetName(L"D3D12DSVDescriptorHeap");
 
 	//--------Manager--------//
 	m_uploadCommandListPoolManager = std::make_shared<Ideal::UploadCommandListPool>();

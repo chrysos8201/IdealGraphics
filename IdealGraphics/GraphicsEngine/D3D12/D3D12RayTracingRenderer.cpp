@@ -350,11 +350,21 @@ void Ideal::D3D12RayTracingRenderer::Init()
 finishAdapter:
 
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 caps = {};
-	Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &caps, sizeof(caps)), L"Device dose not support ray tracing!");
+	Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &caps, sizeof(caps)), L"Device does not support ray tracing!");
 	if (caps.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
 	{
-		MyMessageBoxW(L"Device dose not support ray tracing!");
+		MyMessageBoxW(L"Device does not support ray tracing!");
 	}
+
+
+	D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
+	//Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)), L"Device does not support options16!");
+	HRESULT hr = m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16));
+	if (options16.GPUUploadHeapSupported == false)
+	{
+		MyMessageBoxW(L"Device does not supprot GPU upload heap!");
+	}
+
 
 	//D3D12_FEATURE_DATA_D3D12_OPTIONS17 option17 = {};
 	//bool ManualWriteTrackingResourceSupported = false;
@@ -2179,7 +2189,7 @@ void Ideal::D3D12RayTracingRenderer::CreateUIDescriptorHeap()
 	for (uint32 i = 0; i < MAX_PENDING_FRAME_COUNT; ++i)
 	{
 		m_mainDescriptorHeaps[i] = std::make_shared<Ideal::D3D12DescriptorHeap>();
-		m_mainDescriptorHeaps[i]->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, MAX_DESCRIPTOR_COUNT);
+		m_mainDescriptorHeaps[i]->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, NUM_ONLINE_DESCRIPTOR_HEAP);
 	}
 }
 

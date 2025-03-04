@@ -18,7 +18,7 @@
 #include <dxgi1_6.h>
 
 #include <dxcapi.h>
-#include <atlbase.h>
+//#include <atlbase.h>
 
 struct ID3D12Device;
 struct ID3D12CommandQueue;

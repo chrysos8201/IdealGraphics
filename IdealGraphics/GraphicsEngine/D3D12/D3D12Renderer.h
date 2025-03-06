@@ -75,6 +75,7 @@ namespace Ideal
 		//---------------------Ideal Renderer Interface-----------------------//
 		virtual void Init() override;
 		virtual void Tick() override;
+		virtual void ShutDown() override;
 		virtual void Render() override;
 		virtual void Resize(UINT Width, UINT Height) override;
 		virtual void ToggleFullScreenWindow() override;

@@ -2778,6 +2778,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		planeNormalTexture.reset();
 		gRenderer->DeleteTexture(skybox);
 		skybox.reset();
+
+		gRenderer->ShutDown();
 		gRenderer.reset();
 	}
 

@@ -17,6 +17,7 @@
 #include "GraphicsEngine/D3D12/D3D12PipelineStateObject.h"
 #include "GraphicsEngine/D3D12/D3D12RootSignature.h"
 #include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12Viewport.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
@@ -28,6 +29,7 @@
 #include "GraphicsEngine/D3D12/Raytracing/RaytracingManager.h"
 #include "GraphicsEngine/D3D12/D3D12DescriptorManager.h"
 #include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
+#include "GraphicsEngine/D3D12/D3D12Util.h"
 
 #include "GraphicsEngine/Resource/Light/IdealDirectionalLight.h"
 #include "GraphicsEngine/Resource/Light/IdealSpotLight.h"
@@ -83,21 +85,21 @@ inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
 	if (desc->Type == D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE) wstr << L"Raytracing Pipeline\n";
 
 	auto ExportTree = [](UINT depth, UINT numExports, const D3D12_EXPORT_DESC* exports)
-	{
-		std::wostringstream woss;
-		for (UINT i = 0; i < numExports; i++)
 		{
-			woss << L"|";
-			if (depth > 0)
+			std::wostringstream woss;
+			for (UINT i = 0; i < numExports; i++)
 			{
-				for (UINT j = 0; j < 2 * depth - 1; j++) woss << L" ";
+				woss << L"|";
+				if (depth > 0)
+				{
+					for (UINT j = 0; j < 2 * depth - 1; j++) woss << L" ";
+				}
+				woss << L" [" << i << L"]: ";
+				if (exports[i].ExportToRename) woss << exports[i].ExportToRename << L" --> ";
+				woss << exports[i].Name << L"\n";
 			}
-			woss << L" [" << i << L"]: ";
-			if (exports[i].ExportToRename) woss << exports[i].ExportToRename << L" --> ";
-			woss << exports[i].Name << L"\n";
-		}
-		return woss.str();
-	};
+			return woss.str();
+		};
 
 	for (UINT i = 0; i < desc->NumSubobjects; i++)
 	{
@@ -249,12 +251,12 @@ Ideal::D3D12RayTracingRenderer::D3D12RayTracingRenderer(HWND hwnd, uint32 Width,
 
 Ideal::D3D12RayTracingRenderer::~D3D12RayTracingRenderer()
 {
-	Fence();
-	for (uint32 i = 0; i < MAX_PENDING_FRAME_COUNT; ++i)
-	{
-		WaitForFenceValue(m_lastFenceValues[i]);
-		m_deferredDeleteManager->DeleteDeferredResources(i);
-	}
+// 	Fence();
+// 	for (uint32 i = 0; i < MAX_PENDING_FRAME_COUNT; ++i)
+// 	{
+// 		WaitForFenceValue(m_lastFenceValues[i]);
+// 		m_deferredDeleteManager->DeleteDeferredResources(i);
+// 	}
 
 	if (m_tearingSupport)
 	{
@@ -378,6 +380,9 @@ finishAdapter:
 	Check(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_commandQueue.GetAddressOf())));
 
 	//---------------Create rendering resource---------------//
+
+	CreateDescriptorHeaps(); // 2025.03.06. 새로운 버전의 DescriptorHeap 추가
+
 	CreateCommandlists();
 	CreateSwapChains(factory);
 	CreateRTV();
@@ -490,6 +495,25 @@ void Ideal::D3D12RayTracingRenderer::Tick()
 	// 테스트 용으로 쓰는 곳
 	__debugbreak();
 	return;
+}
+
+void Ideal::D3D12RayTracingRenderer::ShutDown()
+{
+	Fence();
+	for (uint32 i = 0; i < MAX_PENDING_FRAME_COUNT; ++i)
+	{
+		WaitForFenceValue(m_lastFenceValues[i]);
+		m_deferredDeleteManager->DeleteDeferredResources(i);
+	}
+
+	// Release SwapChain
+	for (uint32 i = 0; i < SWAP_CHAIN_FRAME_COUNT; ++i)
+	{
+		m_renderTargets[i]->FreeHandle();
+	}
+	// Destroy RTVHeap
+	m_rtvHeap2->Destroy();
+
 }
 
 void Ideal::D3D12RayTracingRenderer::Render()
@@ -688,13 +712,21 @@ void Ideal::D3D12RayTracingRenderer::Resize(UINT Width, UINT Height)
 
 	for (uint32 i = 0; i < SWAP_CHAIN_FRAME_COUNT; ++i)
 	{
-		auto handle = m_renderTargets[i]->GetRTV();
-		ComPtr<ID3D12Resource> resource = m_renderTargets[i]->GetResource();
-		m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource));
-		m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCpuHandle());
+		//auto handle = m_renderTargets[i]->GetRTV();
+		//ComPtr<ID3D12Resource> resource = m_renderTargets[i]->GetResource();
+		//m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource));
+		//m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCpuHandle());
+		//
+		//m_renderTargets[i]->Create(resource, m_deferredDeleteManager);
+		//m_renderTargets[i]->EmplaceRTV(handle);
 
+		Ideal::D3D12DescriptorHandle2 handle = m_renderTargets[i]->GetRTV2();
+		ComPtr<ID3D12Resource> resource;
+		//VERIFYD3D12RESULT(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource)));
+		m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource));
+		m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCPUDescriptorHandleByIndex(0));
 		m_renderTargets[i]->Create(resource, m_deferredDeleteManager);
-		m_renderTargets[i]->EmplaceRTV(handle);
+		m_renderTargets[i]->EmplaceRTV2(handle);
 	}
 
 	// CreateDepthStencil
@@ -1496,7 +1528,6 @@ void Ideal::D3D12RayTracingRenderer::CreateRTV()
 {
 	m_rtvHeap = std::make_shared<Ideal::D3D12DescriptorHeap>();
 	m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, SWAP_CHAIN_FRAME_COUNT);
-	//m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, SWAP_CHAIN_FRAME_COUNT);
 
 	float c[4] = { 0.f,0.f,0.f,1.f };
 	D3D12_CLEAR_VALUE clearValue = {};
@@ -1516,12 +1547,22 @@ void Ideal::D3D12RayTracingRenderer::CreateRTV()
 
 		for (uint32 i = 0; i < SWAP_CHAIN_FRAME_COUNT; ++i)
 		{
-			auto handle = m_rtvHeap->Allocate();
+			//auto handle = m_rtvHeap->Allocate();
+			//ComPtr<ID3D12Resource> resource;
+			//Check(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource)));
+			//m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCpuHandle());
+			//m_renderTargets[i]->Create(resource, m_deferredDeleteManager);
+			//m_renderTargets[i]->EmplaceRTV(handle);
+
+			// 2025.03.06 
+			// 새로운 버전의 DescriptorHeap으로 변경
+			Ideal::D3D12DescriptorHandle2 handle = m_rtvHeap2->Allocate(1);
 			ComPtr<ID3D12Resource> resource;
-			Check(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource)));
-			m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCpuHandle());
+			//VERIFYD3D12RESULT(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource)));
+			m_swapChain->GetBuffer(i, IID_PPV_ARGS(&resource));
+			m_device->CreateRenderTargetView(resource.Get(), nullptr, handle.GetCPUDescriptorHandleByIndex(0));
 			m_renderTargets[i]->Create(resource, m_deferredDeleteManager);
-			m_renderTargets[i]->EmplaceRTV(handle);
+			m_renderTargets[i]->EmplaceRTV2(handle);
 		}
 	}
 }
@@ -1696,17 +1737,17 @@ void Ideal::D3D12RayTracingRenderer::BeginRender()
 	commandList->ResourceBarrier(1, &backBufferBarrier);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
-	auto rtvHandle = m_renderTargets[m_frameIndex]->GetRTV();
+	//auto rtvHandle = m_renderTargets[m_frameIndex]->GetRTV();
+	Ideal::D3D12DescriptorHandle2 rtvHandle = m_renderTargets[m_frameIndex]->GetRTV2();
 
-
-	commandList->ClearRenderTargetView(rtvHandle.GetCpuHandle(), DirectX::Colors::Black, 0, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle.GetCPUDescriptorHandleByIndex(0), DirectX::Colors::Black, 0, nullptr);
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	commandList->RSSetViewports(1, &m_viewport->GetViewport());
 	commandList->RSSetScissorRects(1, &m_viewport->GetScissorRect());
 
 	//commandList->OMSetRenderTargets(1, &rtvHandle.GetCpuHandle(), FALSE, &dsvHandle);
-	commandList->OMSetRenderTargets(1, &rtvHandle.GetCpuHandle(), FALSE, nullptr);
+	commandList->OMSetRenderTargets(1, &rtvHandle.GetCPUDescriptorHandleByIndex(0), FALSE, nullptr);
 }
 
 void Ideal::D3D12RayTracingRenderer::EndRender()
@@ -1867,7 +1908,7 @@ void Ideal::D3D12RayTracingRenderer::DrawPostScreen()
 	std::shared_ptr<Ideal::D3D12Texture> renderTarget = m_renderTargets[m_frameIndex];
 	m_commandLists[m_currentContextIndex]->RSSetViewports(1, &m_postViewport->GetViewport());
 	m_commandLists[m_currentContextIndex]->RSSetScissorRects(1, &m_postViewport->GetScissorRect());
-	m_commandLists[m_currentContextIndex]->OMSetRenderTargets(1, &renderTarget->GetRTV().GetCpuHandle(), FALSE, nullptr);
+	m_commandLists[m_currentContextIndex]->OMSetRenderTargets(1, &renderTarget->GetRTV2().GetCPUDescriptorHandleByIndex(0), FALSE, nullptr);
 
 	m_commandLists[m_currentContextIndex]->SetPipelineState(m_postScreenPipelineState.Get());
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootSignature(m_postScreenRootSignature.Get());
@@ -2724,7 +2765,7 @@ void Ideal::D3D12RayTracingRenderer::CalculateNormals()
 	float length = 0.f;
 
 	// 정규화되지 않은 법선 벡터를 저장할 배열
-	std::vector<Vector3> normals((m_terrainHeight - 1)* (m_terrainWidth - 1));
+	std::vector<Vector3> normals((m_terrainHeight - 1) * (m_terrainWidth - 1));
 
 	// 매쉬의 모든 면을 살펴보고 법선 계산
 	for (int j = 0; j < (m_terrainHeight - 1); j++)
@@ -2732,7 +2773,7 @@ void Ideal::D3D12RayTracingRenderer::CalculateNormals()
 		for (int i = 0; i < (m_terrainWidth - 1); i++)
 		{
 			index1 = ((j + 1) * m_terrainWidth) + i; // 왼쪽 아래 꼭지점
-			index2 = ((j + 1) * m_terrainWidth) + (i+1); // 오른쪽 하단 정점
+			index2 = ((j + 1) * m_terrainWidth) + (i + 1); // 오른쪽 하단 정점
 			index3 = (j * m_terrainWidth) + i; // 좌상단 정점
 
 			// 표면에서 세 개의 꼭지점을 가져온다.
@@ -2805,7 +2846,7 @@ void Ideal::D3D12RayTracingRenderer::LoadColorMap()
 	// 컬러 맵 치수 1: 1 인지 확인
 	if ((bitmapInfoHeader.biWidth != m_terrainWidth) || (bitmapInfoHeader.biHeight != m_terrainHeight))
 	{
-		return ;
+		return;
 	}
 
 	// 비트 맵 이미지 데이터의 크기 계산
@@ -2814,7 +2855,7 @@ void Ideal::D3D12RayTracingRenderer::LoadColorMap()
 
 	// 비트 맵 이미지 데이터에 메모리를 할당
 	uint8* bitmapImage = new uint8[imageSize];
-	
+
 	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
 
 	if (fread(bitmapImage, 1, imageSize, filePtr) != imageSize)
@@ -2911,7 +2952,7 @@ void Ideal::D3D12RayTracingRenderer::AddTerrainToRaytracing()
 	RaytracingManagerAddObject(m_terrainMesh);
 
 	m_staticMeshObject.push_back(m_terrainMesh);
-	
+
 }
 
 void Ideal::D3D12RayTracingRenderer::InitTessellation()
@@ -2926,7 +2967,7 @@ void Ideal::D3D12RayTracingRenderer::InitTessellation()
 	v2.Position = Vector3(-10.f, 0.f, -10.f);
 	v3.Position = Vector3(10.f, 0.f, -10.f);
 	std::vector<BasicVertex> vertices = { v0,v1,v2,v3 };
-	
+
 	m_simpleTessellationVB = std::make_shared<Ideal::D3D12VertexBuffer>();
 	m_resourceManager->CreateVertexBuffer<BasicVertex>(m_simpleTessellationVB, vertices);
 
@@ -3044,4 +3085,17 @@ void Ideal::D3D12RayTracingRenderer::DrawTessellation()
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
 
 	m_commandLists[m_currentContextIndex]->DrawInstanced(4, 1, 0, 0);
+}
+
+void Ideal::D3D12RayTracingRenderer::CreateDescriptorHeaps()
+{
+	m_maxNumStandardDescriptor = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1;
+	m_maxNumSamplerDescriptor = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+
+	m_rtvHeap2 = std::make_shared<Ideal::D3D12DescriptorHeap2>(
+		m_device
+		, D3D12_DESCRIPTOR_HEAP_TYPE_RTV
+		, D3D12_DESCRIPTOR_HEAP_FLAG_NONE
+		, 128
+	);
 }

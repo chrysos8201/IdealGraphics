@@ -1,6 +1,8 @@
 #include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12Util.h"
 
+using namespace Ideal;
+
 D3D12DescriptorHandle2::D3D12DescriptorHandle2(CD3DX12_CPU_DESCRIPTOR_HANDLE InCPUHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE InGPUHandle, uint32 InIndex, uint32 InNumDescriptors, uint32 InDescriptorHandleSize, bool ShaderVisible, std::shared_ptr<D3D12DescriptorHeap2> InOwnerHeap)
 	: CPUHandle(InCPUHandle)
 	, GPUHandle(InGPUHandle)
@@ -67,7 +69,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3D12DescriptorHandle2::GetGPUDescriptorHandleByInde
 void D3D12DescriptorHandle2::Free()
 {
 	//OwnerHeap.lock()->Free(*this);
-	if (!bValid)
+	if (bValid)
 	{
 		OwnerHeap.lock()->Free(Slot, NumDescriptors);
 		bValid = false;
@@ -101,8 +103,8 @@ D3D12DescriptorHeap2::D3D12DescriptorHeap2(ComPtr<ID3D12Device> Device, D3D12_DE
 	heapDesc.NumDescriptors = MaxNumDescriptors;
 	heapDesc.Type = InHeapType;
 	heapDesc.Flags = InFlags;
-	VERIFYD3D12RESULT(Device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(DescriptorHeap.GetAddressOf())));
-	//Device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(DescriptorHeap.GetAddressOf()));
+	//VERIFYD3D12RESULT(Device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(DescriptorHeap.GetAddressOf())));
+	Device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(DescriptorHeap.GetAddressOf()));
 
 	DescriptorHandleSize = Device->GetDescriptorHandleIncrementSize(heapDesc.Type);
 }
@@ -314,4 +316,15 @@ void D3D12DescriptorHeap2::Free(uint32 Slot, uint32 NumDescriptors)
 			__debugbreak();
 		}
 	}
+}
+
+void D3D12DescriptorHeap2::Destroy()
+{
+	// 모두 해제했는지 확인할까?
+	if (Ranges.size() != 1)
+	{
+		__debugbreak();
+	}
+
+	DescriptorHeap.Reset();
 }

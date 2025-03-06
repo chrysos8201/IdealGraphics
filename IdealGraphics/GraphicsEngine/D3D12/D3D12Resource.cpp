@@ -27,7 +27,7 @@ void D3D12Resource::Release()
 {
 	//m_resource->Release();
 	//m_resource = nullptr;
-	//m_resource.Reset();
+	m_resource.Reset();
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> D3D12Resource::GetResourceComPtr()
@@ -75,6 +75,45 @@ Ideal::D3D12DescriptorHandle D3D12Resource::GetUAV() const
 		__debugbreak();
 	}
 	return m_uavHandle;
+}
+
+void D3D12Resource::EmplaceSRV2(const D3D12DescriptorHandle2& InSRVHandle)
+{
+	m_srvHandle2 = InSRVHandle;
+}
+
+void D3D12Resource::EmplaceRTV2(const D3D12DescriptorHandle2& InRTVHandle)
+{
+	m_rtvHandle2 = InRTVHandle;
+}
+
+void D3D12Resource::EmplaceUAV2(const D3D12DescriptorHandle2& InUAVHandle)
+{
+	m_uavHandle2 = InUAVHandle;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetSRV2() const
+{
+	return m_srvHandle2;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetRTV2() const
+{
+	return m_rtvHandle2;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetUAV2() const
+{
+	return m_uavHandle2;
+}
+
+void D3D12Resource::FreeHandle()
+{
+	m_srvHandle2.Free();
+	m_rtvHandle2.Free();
+	m_uavHandle2.Free();
+
+	m_resource.Reset();
 }
 
 //------------------------UploadBuffer------------------------//

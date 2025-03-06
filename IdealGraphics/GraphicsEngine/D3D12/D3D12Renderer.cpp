@@ -308,6 +308,11 @@ void Ideal::D3D12Renderer::Tick()
 	return;
 }
 
+void Ideal::D3D12Renderer::ShutDown()
+{
+
+}
+
 void Ideal::D3D12Renderer::Render()
 {
 	ResetCommandList();

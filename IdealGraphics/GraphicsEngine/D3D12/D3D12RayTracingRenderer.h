@@ -35,6 +35,7 @@ namespace Ideal
 	class ShaderManager;
 
 	class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
 	class D3D12DynamicDescriptorHeap;
 	class D3D12Texture;
 	class D3D12PipelineStateObject;
@@ -119,6 +120,7 @@ namespace Ideal
 	public:
 		void Init() override;
 		void Tick() override;
+		void ShutDown() override;
 		void Render() override;
 		void Resize(UINT Width, UINT Height) override;
 		void ToggleFullScreenWindow() override;
@@ -418,5 +420,16 @@ namespace Ideal
 		std::shared_ptr<Ideal::D3D12Shader> m_simpleTessellationDS;
 
 		Matrix m_simpleTessellationTransform;
+
+	private:
+		// 2025.03.06
+		// Descriptor Heap을 바꾸겠다.
+		// 일단 RTV부터
+		void CreateDescriptorHeaps();
+
+		uint32 m_maxNumStandardDescriptor;
+		uint32 m_maxNumSamplerDescriptor;
+		uint32 m_maxNumRTVDescriptor;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_rtvHeap2;
 	};
 }

@@ -196,7 +196,6 @@ namespace Ideal
 		void CreatePools();
 		void CreateSwapChains(ComPtr<IDXGIFactory6> Factory);
 		void CreateRTV();
-		void CreateDSVHeap();
 		void CreateDSV(uint32 Width, uint32 Height);
 		void CreateFence();
 
@@ -253,12 +252,12 @@ namespace Ideal
 		bool m_fullScreenMode = false;
 		RECT m_windowRect;
 
-		// RTV
-		std::shared_ptr<Ideal::D3D12DescriptorHeap> m_rtvHeap;
-		std::shared_ptr<Ideal::D3D12Texture> m_renderTargets[SWAP_CHAIN_FRAME_COUNT];
-		// DSV
-		ComPtr<ID3D12DescriptorHeap> m_dsvHeap = nullptr;
-		ComPtr<ID3D12Resource> m_depthStencil = nullptr;
+		std::shared_ptr<Ideal::D3D12Texture> m_swapChains[SWAP_CHAIN_FRAME_COUNT];
+
+		
+		//ComPtr<ID3D12Resource> m_depthStencil = nullptr;
+		// 2025.03.06
+		std::shared_ptr<Ideal::D3D12Texture> m_mainDepthTexture; // 이거 좀 애매한데 나중에 삭제하든 뭘하든 할 것
 
 		ComPtr<ID3D12Fence> m_fence = nullptr;
 		uint64 m_fenceValue = 0;
@@ -425,11 +424,14 @@ namespace Ideal
 		// 2025.03.06
 		// Descriptor Heap을 바꾸겠다.
 		// 일단 RTV부터
+		// 다음 DSV
+		//
 		void CreateDescriptorHeaps();
 
 		uint32 m_maxNumStandardDescriptor;
 		uint32 m_maxNumSamplerDescriptor;
 		uint32 m_maxNumRTVDescriptor;
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_rtvHeap2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_dsvHeap2;
 	};
 }

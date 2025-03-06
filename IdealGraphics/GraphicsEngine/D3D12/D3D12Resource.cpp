@@ -112,8 +112,19 @@ void D3D12Resource::FreeHandle()
 	m_srvHandle2.Free();
 	m_rtvHandle2.Free();
 	m_uavHandle2.Free();
+	m_dsvHandle2.Free();
 
 	m_resource.Reset();
+}
+
+void D3D12Resource::EmplaceDSV2(const D3D12DescriptorHandle2& InDSVHandle)
+{
+	m_dsvHandle2 = InDSVHandle;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetDSV2() const
+{
+	return m_dsvHandle2;
 }
 
 //------------------------UploadBuffer------------------------//

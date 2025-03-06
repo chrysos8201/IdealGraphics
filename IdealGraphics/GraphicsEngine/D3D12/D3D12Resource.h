@@ -52,10 +52,12 @@ namespace Ideal
 		void EmplaceSRV2(const D3D12DescriptorHandle2& InSRVHandle);
 		void EmplaceRTV2(const D3D12DescriptorHandle2& InRTVHandle);
 		void EmplaceUAV2(const D3D12DescriptorHandle2& InUAVHandle);
+		void EmplaceDSV2(const D3D12DescriptorHandle2& InDSVHandle);
 
 		D3D12DescriptorHandle2 GetSRV2() const;
 		D3D12DescriptorHandle2 GetRTV2() const;
 		D3D12DescriptorHandle2 GetUAV2() const;
+		D3D12DescriptorHandle2 GetDSV2() const;
 
 		void FreeHandle();
 
@@ -63,6 +65,7 @@ namespace Ideal
 		D3D12DescriptorHandle2 m_srvHandle2;
 		D3D12DescriptorHandle2 m_rtvHandle2;
 		D3D12DescriptorHandle2 m_uavHandle2;
+		D3D12DescriptorHandle2 m_dsvHandle2;
 
 	protected:
 		ComPtr<ID3D12Resource> m_resource = nullptr;

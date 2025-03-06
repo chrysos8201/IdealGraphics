@@ -230,6 +230,7 @@
     <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Descriptors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -343,6 +344,7 @@
     <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />
     <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Descriptors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

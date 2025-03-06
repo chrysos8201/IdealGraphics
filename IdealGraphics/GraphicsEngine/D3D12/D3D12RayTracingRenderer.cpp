@@ -357,13 +357,13 @@ finishAdapter:
 	}
 
 
-	D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
-	//Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)), L"Device does not support options16!");
-	HRESULT hr = m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16));
-	if (options16.GPUUploadHeapSupported == false)
-	{
-		MyMessageBoxW(L"Device does not supprot GPU upload heap!");
-	}
+	//D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
+	////Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)), L"Device does not support options16!");
+	//HRESULT hr = m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16));
+	//if (options16.GPUUploadHeapSupported == false)
+	//{
+	//	MyMessageBoxW(L"Device does not supprot GPU upload heap!");
+	//}
 
 
 	//D3D12_FEATURE_DATA_D3D12_OPTIONS17 option17 = {};

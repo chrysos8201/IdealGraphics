@@ -18,11 +18,12 @@ Ideal::D3D12Texture::~D3D12Texture()
 	m_srvHandle.Free();
 	m_rtvHandle.Free();
 	m_dsvHandle.Free();
-	for (uint32 i = 0; i < m_uavHandles.size(); ++i)
-	{
-		m_uavHandles[i].Free();
-	}
-	m_uavHandles.clear();
+	//for (uint32 i = 0; i < m_uavHandles.size(); ++i)
+	//{
+	//	m_uavHandles[i].Free();
+	//}
+	//m_uavHandles.clear();
+	m_uavHandle.Free();
 	m_srvHandleInEditor.Free();
 }
 
@@ -55,50 +56,18 @@ void Ideal::D3D12Texture::Free()
 	m_rtvHandle.Free();
 	m_dsvHandle.Free();
 	//m_uavHandle.Free();
-	for (uint32 i = 0; i < m_uavHandles.size(); ++i)
-	{
-		m_uavHandles[i].Free();
-	}
-	m_uavHandles.clear();
+	//for (uint32 i = 0; i < m_uavHandles.size(); ++i)
+	//{
+	//	m_uavHandles[i].Free();
+	//}
+	//m_uavHandles.clear();
+	m_uavHandle.Free();
 	m_srvHandleInEditor.Free();
-}
-
-void Ideal::D3D12Texture::EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle)
-{
-	m_srvHandle = SRVHandle;
-}
-
-void Ideal::D3D12Texture::EmplaceRTV(Ideal::D3D12DescriptorHandle RTVHandle)
-{
-	m_rtvHandle = RTVHandle;
 }
 
 void Ideal::D3D12Texture::EmplaceDSV(Ideal::D3D12DescriptorHandle DSVHandle)
 {
 	m_dsvHandle = DSVHandle;
-}
-
-void Ideal::D3D12Texture::EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle)
-{
-	m_uavHandles.push_back(UAVHandle);
-}
-
-Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetSRV()
-{
-	if (m_srvHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
-	{
-		__debugbreak();
-	}
-	return m_srvHandle;
-}
-
-Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetRTV()
-{
-	if (m_rtvHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
-	{
-		__debugbreak();
-	}
-	return m_rtvHandle;
 }
 
 Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetDSV()
@@ -109,24 +78,6 @@ Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetDSV()
 	}
 	return m_dsvHandle;
 }
-
-Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetUAV(uint32 i /*= 0*/)
-{
-	if (i > m_uavHandles.size() - 1)
-	{
-		// 현재 가지고 있는 UAV handle이 원하는 개수보다 적을떄
-		__debugbreak();
-	}
-	D3D12DescriptorHandle returnHandle = m_uavHandles[i];
-
-	if (returnHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
-	{
-		__debugbreak();
-	}
-
-	return returnHandle;
-}
-
 void Ideal::D3D12Texture::SetUploadBuffer(ComPtr<ID3D12Resource> UploadBuffer, uint64 UploadBufferSize)
 {
 	m_uploadBuffer = UploadBuffer;

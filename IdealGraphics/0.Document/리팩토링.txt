@@ -1,0 +1,52 @@
+
+2025.03.06
+새로운 엔진을 만들기에는 너무 오래걸린다고 판단함.
+리팩토링하겠다.
+그래서 리팩토링 일지를 쓰겠음~!
+
+
+
+그리고 D3D12Resource << 이거 
+SRV랑 RTV등 View들이 너무 더럽다. 이유가 D3D12 Resource 내부에서 View를 가지고 있게 하지 않았다.
+D3D12Texture같은 경우 내가 View들을 따로 넣을 수 있게 만들어두어서 편했다.
+이 View들을 D3D12Resource에 옮기겠다.
+당연히 관련 사용 코드들도 다 뜯어고쳐야 한다.
+
+리소스 스테이트 변경도 좀 쉽게..
+	-> Resource Barrier
+
+DescriptorHandle도 기능 추가?
+	-> IsValid?
+
+D3D12Texture Free() 이거 수정할 것
+
+
+
+일단 HRESULT를 받는 d3d12 API 관련 함수를 좀 고쳐야겠다.
+-> 디버깅을 위함
+D3D12는 보통 터지면 Device를 삭제하는데 이 Device에서 그래도 백 번 양보해서 조금이나마 쓸만한
+메세지를 던진다. 이걸 받자.
+-> C++20 으로 바꾸면 오류난다. 나중으로 미루겠다.
+
+
+Descriptor Heap의 개수도 관리를 해야한다.
+여기저기 Descirptor Heap이 퍼져있다.
+Descriptor Heap을 줄이고 조금 손을 보자.
+그리고 Descriptor Heap의 최대 개수도 알 수 있는 방법이 있었다. 초기 개수를 변경하자
+-> 새로운 버전의 Descriptor Heap은 나머지를 손보고 바꾸어야 할 것 같음
+	-> 수정 사항이 너무 많음.
+
+RenderPass
+사실 레이트레이싱을 하면서 렌더 패스를 신경 쓰지 않았다.
+RenderPass를 관리하는 클래스를 만들겠다.
+먼저 Forward
+그 다음 Deferred도 만들겠다
+
+
+
+
+>> 준비가 되면 Geometry Shader를 시작하겠다.
+
+
+2025.03.06
+c++20 으로 바꾸니 c1214 /zc:twoPhase 오류 발생

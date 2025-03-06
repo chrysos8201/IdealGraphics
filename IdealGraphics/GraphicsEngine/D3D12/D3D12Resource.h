@@ -9,6 +9,7 @@ namespace Ideal
 {
 	class D3D12UnorderedAccessView;
 	class D3D12UAVBuffer;
+	class D3D12DescriptorHandle;
 }
 namespace Ideal
 {
@@ -17,11 +18,29 @@ namespace Ideal
 	public:
 		D3D12Resource();
 		virtual ~D3D12Resource();
-
 		void Release();
+
 	public:
 		ID3D12Resource* GetResource() const;
 		ComPtr<ID3D12Resource> GetResourceComPtr();
+
+	public:
+		// 2025.03.06
+		// View들을 다 여기로 옮겨버리겠다.
+		// Descriptor Handle
+		void EmplaceSRV(const D3D12DescriptorHandle& InSRVHandle);
+		void EmplaceRTV(const D3D12DescriptorHandle& InRTVHandle);
+		void EmplaceUAV(const D3D12DescriptorHandle& InUAVHandle);
+
+		D3D12DescriptorHandle GetSRV() const;
+		D3D12DescriptorHandle GetRTV() const;
+		D3D12DescriptorHandle GetUAV() const;
+
+	protected:
+		D3D12DescriptorHandle m_srvHandle;
+		D3D12DescriptorHandle m_rtvHandle;
+		D3D12DescriptorHandle m_uavHandle;
+
 	protected:
 		ComPtr<ID3D12Resource> m_resource = nullptr;
 	};

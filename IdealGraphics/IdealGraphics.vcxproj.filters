@@ -229,6 +229,7 @@
     <ClInclude Include="Misc\Utils\RandomValue.h" />
     <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -341,6 +342,7 @@
     <ClCompile Include="Misc\Utils\RandomValue.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />
     <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
@@ -396,5 +398,8 @@
     <None Include="..\Shaders\Raytracing\DisneyBSDF.hlsli" />
     <None Include="..\Shaders\Particle\ParticleCommon.hlsli" />
     <None Include="ThirdParty\Include\DirectXTK12\SimpleMath.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="0.Document\리팩토링.txt" />
   </ItemGroup>
 </Project>

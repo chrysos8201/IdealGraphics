@@ -27,12 +27,54 @@ void D3D12Resource::Release()
 {
 	//m_resource->Release();
 	//m_resource = nullptr;
-	m_resource.Reset();
+	//m_resource.Reset();
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> D3D12Resource::GetResourceComPtr()
 {
 	return m_resource;
+}
+
+void D3D12Resource::EmplaceSRV(const D3D12DescriptorHandle& InSRVHandle)
+{
+	m_srvHandle = InSRVHandle;
+}
+
+void D3D12Resource::EmplaceRTV(const D3D12DescriptorHandle& InRTVHandle)
+{
+	m_rtvHandle = InRTVHandle;
+}
+
+void D3D12Resource::EmplaceUAV(const D3D12DescriptorHandle& InUAVHandle)
+{
+	m_uavHandle = InUAVHandle;
+}
+
+Ideal::D3D12DescriptorHandle D3D12Resource::GetSRV() const
+{
+	if (m_srvHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
+	{
+		__debugbreak();
+	}
+	return m_srvHandle;
+}
+
+Ideal::D3D12DescriptorHandle D3D12Resource::GetRTV() const
+{
+	if (m_rtvHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
+	{
+		__debugbreak();
+	}
+	return m_rtvHandle;
+}
+
+Ideal::D3D12DescriptorHandle D3D12Resource::GetUAV() const
+{
+	if (m_uavHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
+	{
+		__debugbreak();
+	}
+	return m_uavHandle;
 }
 
 //------------------------UploadBuffer------------------------//

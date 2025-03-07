@@ -207,20 +207,6 @@ namespace Ideal
 		);
 		void CreateIndexBufferUint16(std::shared_ptr<Ideal::D3D12IndexBuffer> OutIndexBuffer,
 			std::vector<uint16>& Indices);
-
-		//template <typename T>
-		//void CreateInstanceBuffer(std::shared_ptr<Ideal::D3D12UploadBuffer> OutInstanceBuffer, std::vector<T> InstanceData, uint32 ElementCount)
-		//{
-		//	m_commandAllocator->Reset();
-		//	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-		//
-		//	OutInstanceBuffer = std::make_shared<Ideal::D3D12UploadBuffer>();
-		//	OutInstanceBuffer->Create(m_device.Get(), sizeof(T) * ElementCount);
-		//	void* data = OutInstanceBuffer->Map();
-		//	memcpy(data, InstanceData.data(), sizeof(T) * ElementCount);
-		//	OutInstanceBuffer->UnMap();
-		//}
-
 		// 파일 로드하여 srv로 만든다.
 		void CreateTexture(std::shared_ptr<Ideal::D3D12Texture>& OutTexture, const std::wstring& Path, bool IgnoreSRGB = false, uint32 MipLevels = 1, bool IsNormalMap = false);
 

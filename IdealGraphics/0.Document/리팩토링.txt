@@ -35,6 +35,20 @@ Descriptor Heap을 줄이고 조금 손을 보자.
 그리고 Descriptor Heap의 최대 개수도 알 수 있는 방법이 있었다. 초기 개수를 변경하자
 -> 새로운 버전의 Descriptor Heap은 나머지를 손보고 바꾸어야 할 것 같음
 	-> 수정 사항이 너무 많음.
+	// -> Main RTV, DSV는 수정 완료. -> 가능성을 봤음
+	// -> Resource Manager에서 DescriptorHeap을 바꾸면 한동안 프로그램 실행을 못해버린다.
+	// -> 기존 DescriptorManager을 사용해서 RaytracingManager까지 사용을 하도록 하였는데..
+	// Descriptor를 사용하는 블럭 내에서 크게 할당을 하도록 바꾸면 
+	// -> 이건 고민을 좀...
+	// 일단... 그냥 다 바꾸어버리겠다.
+	// 1. 리소스 매니저 DescriptorHeap 바꾸기
+	// 2. Main DescriptorHeap 바꾸기
+	// 3. 두 개 있음. Main Descriptor Heap
+	// -> DescriptorManager, MainDynamicDescriptorHeap
+
+
+
+
 
 RenderPass
 사실 레이트레이싱을 하면서 렌더 패스를 신경 쓰지 않았다.

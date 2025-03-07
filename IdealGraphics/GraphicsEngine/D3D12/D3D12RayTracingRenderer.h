@@ -104,7 +104,6 @@ namespace Ideal
 		static const uint32 MAX_PENDING_FRAME_COUNT = SWAP_CHAIN_FRAME_COUNT - 1;
 
 	private:
-		//static const uint32 MAX_DRAW_COUNT_PER_FRAME = 8192;
 		static const uint32 MAX_DRAW_COUNT_PER_FRAME = 16384;
 		static const uint32	MAX_DESCRIPTOR_COUNT = 16384 * 4;
 		static const uint32	MAX_UI_DESCRIPTOR_COUNT = 256;

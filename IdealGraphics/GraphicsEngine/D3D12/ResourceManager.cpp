@@ -80,22 +80,30 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	m_fence->SetName(L"ResourceManager Fence");
 
+	// 2025.03.07 : Refactor Descriptor Heap
 	//------------CBV_SRV_UAV Heap-----------//
-	m_cbv_srv_uavHeap = std::make_shared<D3D12DynamicDescriptorHeap>();
-	m_cbv_srv_uavHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_CBV_SRV_UAV);
-	//m_srvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, m_srvHeapCount);
-	m_cbv_srv_uavHeap->GetDescriptorHeap()->SetName(L"D3D12CBVSRVUAVDescriptorHeap");
+	m_cbv_srv_uavHeap2 = std::make_shared<D3D12DescriptorHeap2>(
+		m_device,
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1
+	);
 
 	//------------RTV Heap-----------//
-	m_rtvHeap = std::make_shared<Ideal::D3D12DynamicDescriptorHeap>();
-	//m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
-	m_rtvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_RTV);
-	m_rtvHeap->GetDescriptorHeap()->SetName(L"D3D12RTVDescriptorHeap");
+	m_rtvHeap2 = std::make_shared<Ideal::D3D12DescriptorHeap2>(
+		m_device,
+		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		256
+	);
 
 	//-----------DSV Heap------------//
-	m_dsvHeap = std::make_shared<Ideal::D3D12DynamicDescriptorHeap>();
-	m_dsvHeap->Create(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, NUM_OFFLINE_DESCRIPTOR_HEAP_DSV);
-	m_dsvHeap->GetDescriptorHeap()->SetName(L"D3D12DSVDescriptorHeap");
+	m_dsvHeap2 = std::make_shared<Ideal::D3D12DescriptorHeap2>(
+		m_device,
+		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		128
+	);
 
 	//--------Manager--------//
 	m_uploadCommandListPoolManager = std::make_shared<Ideal::UploadCommandListPool>();
@@ -266,7 +274,7 @@ void Ideal::ResourceManager::CreateTexture(std::shared_ptr<Ideal::D3D12Texture>&
 	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
 #endif
 	ComPtr<ID3D12Resource> resource;
-	Ideal::D3D12DescriptorHandle srvHandle;
+	Ideal::D3D12DescriptorHandle2 srvHandle;
 	//D3D12_SUBRESOURCE_DATA subResource;
 	std::vector<D3D12_SUBRESOURCE_DATA> subResources;
 
@@ -415,8 +423,8 @@ void Ideal::ResourceManager::CreateTexture(std::shared_ptr<Ideal::D3D12Texture>&
 	//}
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = MipLevels;
-	srvHandle = m_cbv_srv_uavHeap->Allocate();
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvHandle.GetCpuHandle();
+	srvHandle = m_cbv_srv_uavHeap2->Allocate(1);
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvHandle.GetCPUDescriptorHandleStart();
 	m_device->CreateShaderResourceView(resource.Get(), &srvDesc, cpuHandle);
 
 	//----------------------Create Unordered Access View--------------------------//
@@ -438,7 +446,7 @@ void Ideal::ResourceManager::CreateTexture(std::shared_ptr<Ideal::D3D12Texture>&
 
 	//----------------------Final Create---------------------//
 	OutTexture->Create(resource, m_deferredDeleteManager);
-	OutTexture->EmplaceSRV(srvHandle);
+	OutTexture->EmplaceSRV2(srvHandle);
 }
 
 void ResourceManager::CreateDynamicTexture(std::shared_ptr<Ideal::D3D12Texture>& OutTexture, uint32 Width, uint32 Height)
@@ -497,10 +505,10 @@ void ResourceManager::CreateDynamicTexture(std::shared_ptr<Ideal::D3D12Texture>&
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	auto handle = m_cbv_srv_uavHeap->Allocate();
-	m_device->CreateShaderResourceView(TextureResource.Get(), &srvDesc, handle.GetCpuHandle());
+	auto handle = m_cbv_srv_uavHeap2->Allocate(1);
+	m_device->CreateShaderResourceView(TextureResource.Get(), &srvDesc, handle.GetCPUDescriptorHandleStart());
 
-	OutTexture->EmplaceSRV(handle);
+	OutTexture->EmplaceSRV2(handle);
 }
 
 void ResourceManager::CreateTextureDDS(std::shared_ptr<Ideal::D3D12Texture>& OutTexture, const std::wstring& Path)
@@ -518,7 +526,7 @@ void ResourceManager::CreateTextureDDS(std::shared_ptr<Ideal::D3D12Texture>& Out
 	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
 
 	ComPtr<ID3D12Resource> resource;
-	Ideal::D3D12DescriptorHandle srvHandle;
+	Ideal::D3D12DescriptorHandle2 srvHandle;
 
 	//----------------------Load DDS Texture From File--------------------------//
 
@@ -633,13 +641,13 @@ void ResourceManager::CreateTextureDDS(std::shared_ptr<Ideal::D3D12Texture>& Out
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 	//----------------------Allocate Descriptor-----------------------//
-	srvHandle = m_cbv_srv_uavHeap->Allocate();
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvHandle.GetCpuHandle();
+	srvHandle = m_cbv_srv_uavHeap2->Allocate(1);
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvHandle.GetCPUDescriptorHandleStart();
 	m_device->CreateShaderResourceView(resource.Get(), &srvDesc, cpuHandle);
 
 	//----------------------Final Create---------------------//
 	OutTexture->Create(resource, m_deferredDeleteManager);
-	OutTexture->EmplaceSRV(srvHandle);
+	OutTexture->EmplaceSRV2(srvHandle);
 
 
 }
@@ -707,10 +715,10 @@ void ResourceManager::CreateEmptyTexture2D(std::shared_ptr<Ideal::D3D12Texture>&
 		srvDesc.Format = Format;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
-		Ideal::D3D12DescriptorHandle srvHandle = m_cbv_srv_uavHeap->Allocate();
-		m_device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle.GetCpuHandle());
+		Ideal::D3D12DescriptorHandle2 srvHandle = m_cbv_srv_uavHeap2->Allocate(1);
+		m_device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle.GetCPUDescriptorHandleStart());
 
-		OutTexture->EmplaceSRV(srvHandle);
+		OutTexture->EmplaceSRV2(srvHandle);
 	}
 
 	if (makeRTV)
@@ -720,20 +728,20 @@ void ResourceManager::CreateEmptyTexture2D(std::shared_ptr<Ideal::D3D12Texture>&
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		rtvDesc.Texture2D.MipSlice = 0;
 
-		Ideal::D3D12DescriptorHandle rtvHandle = m_rtvHeap->Allocate();
-		m_device->CreateRenderTargetView(resource.Get(), &rtvDesc, rtvHandle.GetCpuHandle());
+		Ideal::D3D12DescriptorHandle2 rtvHandle = m_rtvHeap2->Allocate(1);
+		m_device->CreateRenderTargetView(resource.Get(), &rtvDesc, rtvHandle.GetCPUDescriptorHandleStart());
 
-		OutTexture->EmplaceRTV(rtvHandle);
+		OutTexture->EmplaceRTV2(rtvHandle);
 	}
 
 	if (makeUAV)
 	{
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-		Ideal::D3D12DescriptorHandle uavHandle = m_cbv_srv_uavHeap->Allocate();
-		m_device->CreateUnorderedAccessView(resource.Get(), nullptr, &uavDesc, uavHandle.GetCpuHandle());
+		Ideal::D3D12DescriptorHandle2 uavHandle = m_cbv_srv_uavHeap2->Allocate(1);
+		m_device->CreateUnorderedAccessView(resource.Get(), nullptr, &uavDesc, uavHandle.GetCPUDescriptorHandleStart());
 
-		OutTexture->EmplaceUAV(uavHandle);
+		OutTexture->EmplaceUAV2(uavHandle);
 	}
 
 	if (makeDSV)
@@ -742,10 +750,10 @@ void ResourceManager::CreateEmptyTexture2D(std::shared_ptr<Ideal::D3D12Texture>&
 		dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-		auto dsvHandle = m_dsvHeap->Allocate();
-		m_device->CreateDepthStencilView(resource.Get(), &dsvDesc, dsvHandle.GetCpuHandle());
+		auto dsvHandle = m_dsvHeap2->Allocate(1);
+		m_device->CreateDepthStencilView(resource.Get(), &dsvDesc, dsvHandle.GetCPUDescriptorHandleStart());
 
-		OutTexture->EmplaceDSV(dsvHandle);
+		OutTexture->EmplaceDSV2(dsvHandle);
 	}
 }
 
@@ -768,8 +776,8 @@ std::shared_ptr<Ideal::D3D12ShaderResourceView> ResourceManager::CreateSRV(std::
 		srvDesc.Buffer.StructureByteStride = ElementSize;
 	}
 
-	Ideal::D3D12DescriptorHandle allocatedHandle = m_cbv_srv_uavHeap->Allocate();
-	m_device->CreateShaderResourceView(Resource->GetResource(), &srvDesc, allocatedHandle.GetCpuHandle());
+	Ideal::D3D12DescriptorHandle2 allocatedHandle = m_cbv_srv_uavHeap2->Allocate(1);
+	m_device->CreateShaderResourceView(Resource->GetResource(), &srvDesc, allocatedHandle.GetCPUDescriptorHandleStart());
 	std::shared_ptr<Ideal::D3D12ShaderResourceView> ret = std::make_shared<Ideal::D3D12ShaderResourceView>();
 	ret->SetResourceLocation(allocatedHandle);
 	return ret;
@@ -784,8 +792,8 @@ std::shared_ptr<Ideal::D3D12UnorderedAccessView> ResourceManager::CreateUAV(std:
 	uavDesc.Buffer.StructureByteStride = ElementSize;
 	uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
-	Ideal::D3D12DescriptorHandle allocatedHandle = m_cbv_srv_uavHeap->Allocate();
-	m_device->CreateUnorderedAccessView(Resource->GetResource(), nullptr, &uavDesc, allocatedHandle.GetCpuHandle());
+	Ideal::D3D12DescriptorHandle2 allocatedHandle = m_cbv_srv_uavHeap2->Allocate(1);
+	m_device->CreateUnorderedAccessView(Resource->GetResource(), nullptr, &uavDesc, allocatedHandle.GetCPUDescriptorHandleStart());
 	std::shared_ptr<Ideal::D3D12UnorderedAccessView> ret = std::make_shared<Ideal::D3D12UnorderedAccessView>();
 	ret->SetResourceLocation(allocatedHandle);
 	ret->SetResource(Resource->GetResource());
@@ -811,8 +819,8 @@ std::shared_ptr<Ideal::D3D12ShaderResourceView> ResourceManager::CreateSRV(ComPt
 		srvDesc.Buffer.StructureByteStride = ElementSize;
 	}
 
-	Ideal::D3D12DescriptorHandle allocatedHandle = m_cbv_srv_uavHeap->Allocate();
-	m_device->CreateShaderResourceView(Resource.Get(), &srvDesc, allocatedHandle.GetCpuHandle());
+	Ideal::D3D12DescriptorHandle2 allocatedHandle = m_cbv_srv_uavHeap2->Allocate(1);
+	m_device->CreateShaderResourceView(Resource.Get(), &srvDesc, allocatedHandle.GetCPUDescriptorHandleStart());
 	std::shared_ptr<Ideal::D3D12ShaderResourceView> ret = std::make_shared<Ideal::D3D12ShaderResourceView>();
 	ret->SetResourceLocation(allocatedHandle);
 	return ret;

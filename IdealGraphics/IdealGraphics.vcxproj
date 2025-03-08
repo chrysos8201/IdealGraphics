@@ -205,7 +205,6 @@
     <ClInclude Include="Editor\imguizmo\ImZoomSlider.h" />
     <ClInclude Include="GraphicsEngine\D3D12\DeferredDeleteManager.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UAV.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorManager.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.h" />
     <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -257,7 +256,6 @@
     <ClInclude Include="GraphicsEngine\public\ITexture.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealCamera.h" />
     <ClInclude Include="GraphicsEngine\D3D12\ResourceManager.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h" />
     <ClInclude Include="GraphicsEngine\public\ICamera.h" />
     <ClInclude Include="GraphicsEngine\public\IdealRenderer.h" />
     <ClInclude Include="GraphicsEngine\public\IdealRendererFactory.h" />
@@ -268,10 +266,8 @@
     <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealSkinnedMesh.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealAnimation.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealRenderScene.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealPointLight.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealSpotLight.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealScreenQuad.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.h" />
     <ClInclude Include="GraphicsEngine\public\IDirectionalLight.h" />
     <ClInclude Include="GraphicsEngine\Resource\UI\IdealCanvas.h" />
@@ -290,7 +286,6 @@
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Resource.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Texture.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12Renderer.h" />
     <ClInclude Include="Misc\ThirdParty\Utils\PIX.h" />
     <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\Definitions.h" />
@@ -369,7 +364,6 @@
     <ClCompile Include="Editor\imguizmo\ImSequencer.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\DeferredDeleteManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UAV.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -401,7 +395,6 @@
     <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealMesh.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealBone.cpp" />
@@ -410,10 +403,8 @@
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMesh.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealAnimation.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealRenderScene.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealPointLight.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealSpotLight.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealScreenQuad.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\UI\IdealCanvas.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\UI\IdealImage.cpp" />
@@ -431,7 +422,6 @@
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Resource.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Renderer.cpp" />
     <ClCompile Include="Launch\LaunchWindow.cpp" />
     <ClCompile Include="GraphicsEngine\VertexInfo.cpp" />
     <ClCompile Include="Misc\ThirdParty\Utils\StringUtils.cpp" />

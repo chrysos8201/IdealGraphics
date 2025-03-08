@@ -77,9 +77,6 @@
       <Filter>Misc\Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Misc\ThirdParty\Utils\PIX.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12Renderer.h">
-      <Filter>GraphicsEngine</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
@@ -103,9 +100,6 @@
     <ClInclude Include="GraphicsEngine\public\IdealRendererFactory.h" />
     <ClInclude Include="GraphicsEngine\public\ICamera.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealCamera.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\D3D12\ResourceManager.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
@@ -129,11 +123,9 @@
     <ClInclude Include="GraphicsEngine\public\ISkinnedMeshObject.h" />
     <ClInclude Include="GraphicsEngine\public\IAnimation.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealAnimation.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealRenderScene.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealPointLight.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealSpotLight.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealScreenQuad.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.h" />
     <ClInclude Include="GraphicsEngine\public\ISpotLight.h" />
     <ClInclude Include="GraphicsEngine\public\IPointLight.h" />
@@ -162,7 +154,6 @@
     <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.h" />
     <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorManager.h" />
     <ClInclude Include="GraphicsEngine\public\IRendererResource.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UAV.h" />
     <ClInclude Include="GraphicsEngine\D3D12\DeferredDeleteManager.h" />
@@ -249,9 +240,6 @@
     <ClCompile Include="Launch\LaunchWindow.cpp">
       <Filter>Launch</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Renderer.cpp">
-      <Filter>GraphicsEngine</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
@@ -271,9 +259,6 @@
     <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
     <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
@@ -295,11 +280,9 @@
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMesh.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealAnimation.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealRenderScene.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealPointLight.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealSpotLight.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealScreenQuad.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.cpp" />
     <ClCompile Include="Editor\imgui\imgui.cpp" />
     <ClCompile Include="Editor\imgui\imgui_demo.cpp" />
@@ -317,7 +300,6 @@
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UAV.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\DeferredDeleteManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.cpp" />

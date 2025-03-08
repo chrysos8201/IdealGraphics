@@ -15,7 +15,8 @@ namespace Ideal
 	class IdealStaticMesh;
 	class D3D12Renderer;
 
-	class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
+	class DeferredDeleteManager;
 	class D3D12DynamicConstantBufferAllocator;
 	//--raytracing--//
 	class RaytracingManager;
@@ -43,7 +44,7 @@ namespace Ideal
 		// 2024.05.07 Ver2
 		void Draw(std::shared_ptr<Ideal::IdealRenderer> Renderer);
 
-		void DebugDraw(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool);
+		void DebugDraw(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 
 	public:
 		virtual void SetTransformMatrix(const Matrix& Transform) override { m_transform = Transform; m_isDirty = true; }

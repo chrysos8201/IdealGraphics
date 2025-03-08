@@ -2,7 +2,7 @@
 
 #include "Core/Core.h"
 #include "GraphicsEngine/public/IdealRenderer.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 
 #include <d3d12.h>
 #include <d3dx12.h>
@@ -34,9 +34,7 @@ namespace Ideal
 	class ResourceManager;
 	class ShaderManager;
 
-	class D3D12DescriptorHeap;
 	class D3D12DescriptorHeap2;
-	class D3D12DynamicDescriptorHeap;
 	class D3D12Texture;
 	class D3D12PipelineStateObject;
 	class D3D12Viewport;
@@ -218,7 +216,6 @@ namespace Ideal
 
 		ComPtr<ID3D12GraphicsCommandList4> m_commandLists[MAX_PENDING_FRAME_COUNT];
 		ComPtr<ID3D12CommandAllocator> m_commandAllocators[MAX_PENDING_FRAME_COUNT];
-		std::shared_ptr<Ideal::D3D12DescriptorHeap> m_descriptorHeaps[MAX_PENDING_FRAME_COUNT] = {};
 		std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> m_cbAllocator[MAX_PENDING_FRAME_COUNT] = {};
 		std::shared_ptr<Ideal::D3D12UploadBufferPool> m_BLASInstancePool[MAX_PENDING_FRAME_COUNT] = {};
 
@@ -322,9 +319,6 @@ namespace Ideal
 		std::vector<std::shared_ptr<Ideal::IdealStaticMeshObject>> m_staticMeshObject;
 		std::vector<std::shared_ptr<Ideal::IdealSkinnedMeshObject>> m_skinnedMeshObject;
 
-		// 여러 Descriptor Pool과 고정적으로 사용될 srv_cbv_uav heap을 합쳤다.
-		std::shared_ptr<Ideal::D3D12DescriptorManager> m_descriptorManager;
-
 		// 2024.07.02 Wait 뺀 버전의 BLAS , TLAS 빌드 만들기
 		void RaytracingManagerInit();
 		void RaytracingManagerUpdate();
@@ -337,11 +331,9 @@ namespace Ideal
 
 		// UI
 	private:
-		void CreateUIDescriptorHeap();
 		void CreateCanvas();
 		void DrawCanvas();
 		void SetCanvasSize(uint32 Width, uint32 Height);
-		std::shared_ptr<Ideal::D3D12DescriptorHeap> m_mainDescriptorHeaps[MAX_PENDING_FRAME_COUNT];
 		std::shared_ptr<Ideal::IdealCanvas> m_UICanvas;
 
 		void UpdateTextureWithImage(std::shared_ptr<Ideal::D3D12Texture> Texture, BYTE* SrcBits, uint32 SrcWidth, uint32 SrcHeight);
@@ -368,9 +360,9 @@ namespace Ideal
 		void CreateEditorRTV(uint32 Width, uint32 Height);
 
 		bool m_isEditor;
-		Ideal::D3D12DescriptorHandle m_imguiSRVHandle;
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_imguiSRVHeap;
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_editorRTVHeap;
+		Ideal::D3D12DescriptorHandle2 m_imguiSRVHandle;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_imguiSRVHeap2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_editorRTVHeap2;
 		std::shared_ptr<Ideal::D3D12Texture> m_editorTexture;
 
 		Vector2 m_mainCameraEditorTopLeft;
@@ -432,5 +424,6 @@ namespace Ideal
 		uint32 m_maxNumRTVDescriptor;
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_rtvHeap2;
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_dsvHeap2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_mainDescriptorHeap2;
 	};
 }

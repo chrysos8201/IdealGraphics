@@ -9,12 +9,13 @@ struct ID3D12PipelineState;
 
 namespace Ideal
 {
-	class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
 	class D3D12DynamicConstantBufferAllocator;
 	class IdealStaticMeshObject;
 	class D3D12Shader;
 	class D3D12VertexBuffer;
 	class D3D12UploadBuffer;
+	class DeferredDeleteManager;
 }
 
 namespace Ideal
@@ -50,7 +51,7 @@ namespace Ideal
 		void SetVSLine(std::shared_ptr<Ideal::D3D12Shader> Shader);
 		void SetPSLine(std::shared_ptr<Ideal::D3D12Shader> Shader);
 
-		void DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData);
+		void DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData, std::shared_ptr<Ideal::DeferredDeleteManager>DeferredDeleteManager);
 
 		void AddDebugLine(Vector3 start, Vector3 end, Color Color = Color(1,0,0));
 		//void DebugLineInstanceBake(ComPtr<ID3D12Device> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager);

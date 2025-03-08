@@ -2,17 +2,18 @@
 #include "GraphicsEngine/Resource/IdealMesh.h"
 #include "GraphicsEngine/Resource/IdealMaterial.h"
 #include "GraphicsEngine/Resource/IdealStaticMesh.h"
-#include "GraphicsEngine/D3D12/D3D12Renderer.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
 #include "GraphicsEngine/D3D12/Raytracing/RaytracingManager.h"
 #include "Misc/Utils/StringUtils.h"
 #include "GraphicsEngine/D3D12/Raytracing/DXRAccelerationStructure.h"
 #include "GraphicsEngine/D3D12/Raytracing/DXRAccelerationStructureManager.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/D3D12/Raytracing/RayTracingFlagManger.h"
+#include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
+
 
 Ideal::IdealStaticMeshObject::IdealStaticMeshObject()
 {
@@ -91,7 +92,7 @@ void Ideal::IdealStaticMeshObject::Draw(std::shared_ptr<Ideal::IdealRenderer> Re
 	m_staticMesh->Draw(Renderer, m_transform);
 }
 
-void Ideal::IdealStaticMeshObject::DebugDraw(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool)
+void Ideal::IdealStaticMeshObject::DebugDraw(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	// Transform Data 
 	auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
@@ -99,17 +100,18 @@ void Ideal::IdealStaticMeshObject::DebugDraw(ComPtr<ID3D12Device> Device, ComPtr
 	cbTransform->World = m_transform.Transpose();
 	cbTransform->WorldInvTranspose = m_transform.Transpose().Invert();
 	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
-	auto handle0 = DescriptorHeap->Allocate();
-	Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Transform, handle0.GetGpuHandle());
+	auto handle0 = DescriptorHeap->Allocate(1);
+	Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Transform, handle0.GetGPUDescriptorHandleStart());
+	DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 
 	// Color Data
 	auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_Color));
 	memcpy(cb2->SystemMemoryAddress, &m_cbDebugColor, sizeof(CB_Color));
-	auto handle1 = DescriptorHeap->Allocate();
-	Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Color, handle1.GetGpuHandle());
-
+	auto handle1 = DescriptorHeap->Allocate(1);
+	Device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Color, handle1.GetGPUDescriptorHandleStart());
+	DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle1);
 	m_staticMesh->DebugDraw(Device, CommandList);
 }
 

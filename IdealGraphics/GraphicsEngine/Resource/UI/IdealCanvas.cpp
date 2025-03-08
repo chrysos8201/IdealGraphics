@@ -6,7 +6,7 @@
 #include "GraphicsEngine/VertexInfo.h"
 #include "GraphicsEngine/Resource/UI/IdealSprite.h"
 #include "GraphicsEngine/Resource/UI/IdealText.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
@@ -27,7 +27,7 @@ void Ideal::IdealCanvas::Init(ComPtr<ID3D12Device> Device)
 	CreatePSO(Device);
 }
 
-void Ideal::IdealCanvas::DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool)
+void Ideal::IdealCanvas::DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	SortSpriteByZ();
 	// TODO Set
@@ -51,7 +51,7 @@ void Ideal::IdealCanvas::DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12Gr
 			transparentSprites.push_back(sprite);
 			continue;
 		}
-		sprite.lock()->DrawSprite(Device, CommandList, UIDescriptorHeap, CBPool, Vector2(m_uiCanvasWidth, m_uiCanvasHeight));
+		sprite.lock()->DrawSprite(Device, CommandList, UIDescriptorHeap, CBPool, Vector2(m_uiCanvasWidth, m_uiCanvasHeight), DeferredDeleteManager);
 	}
 
 	for (auto& text : m_texts)
@@ -85,7 +85,7 @@ void Ideal::IdealCanvas::DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12Gr
 		{
 			continue;
 		}
-		sprite.lock()->DrawSprite(Device, CommandList, UIDescriptorHeap, CBPool, Vector2(m_uiCanvasWidth, m_uiCanvasHeight));
+		sprite.lock()->DrawSprite(Device, CommandList, UIDescriptorHeap, CBPool, Vector2(m_uiCanvasWidth, m_uiCanvasHeight), DeferredDeleteManager);
 	}
 }
 

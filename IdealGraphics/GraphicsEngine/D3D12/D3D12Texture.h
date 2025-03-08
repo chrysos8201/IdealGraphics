@@ -2,7 +2,7 @@
 #include "GraphicsEngine/Resource/ResourceBase.h"
 #include "ITexture.h"
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include <memory>
 
 struct ID3D12Resource;
@@ -35,10 +35,6 @@ namespace Ideal
 
 		// DeferredDelete에 넣어주어야 한다.
 		void Free();
-		void EmplaceDSV(Ideal::D3D12DescriptorHandle DSVHandle);
-
-		Ideal::D3D12DescriptorHandle GetDSV();
-		
 
 		void SetUploadBuffer(ComPtr<ID3D12Resource> UploadBuffer, uint64 UploadBufferSize);
 		ComPtr<ID3D12Resource> GetUploadBuffer() { return m_uploadBuffer; }
@@ -48,11 +44,11 @@ namespace Ideal
 		void UpdateTexture(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList);
 
 	public:
-		void EmplaceSRVInEditor(Ideal::D3D12DescriptorHandle SRVHandle);
+		void EmplaceSRVInEditor(Ideal::D3D12DescriptorHandle2 SRVHandle);
 
 	private:
-		Ideal::D3D12DescriptorHandle m_dsvHandle;
-		Ideal::D3D12DescriptorHandle m_srvHandleInEditor;
+		Ideal::D3D12DescriptorHandle2 m_dsvHandle;
+		Ideal::D3D12DescriptorHandle2 m_srvHandleInEditor;
 
 		ComPtr<ID3D12Resource> m_uploadBuffer;
 		uint64 m_uploadBufferSize = 0;

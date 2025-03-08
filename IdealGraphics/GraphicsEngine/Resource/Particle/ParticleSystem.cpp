@@ -13,6 +13,7 @@
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/D3D12/ResourceManager.h"
 #include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "Misc/Utils/RandomValue.h"
 #include "GraphicsEngine/Resource/IdealCamera.h"
 #include <random>
@@ -118,7 +119,7 @@ void Ideal::ParticleSystem::Init(ComPtr<ID3D12Device> Device, ComPtr<ID3D12RootS
 
 void Ideal::ParticleSystem::Free()
 {
-	m_ParticleStructuredBuffer->Free();
+	m_ParticleStructuredBuffer->FreeHandle();
 }
 
 void Ideal::ParticleSystem::SetResourceManager(std::shared_ptr<Ideal::ResourceManager> ResourceManager)
@@ -131,7 +132,7 @@ void Ideal::ParticleSystem::SetDeferredDeleteManager(std::shared_ptr<Ideal::Defe
 	m_DeferredDeleteManager = DeferredDeleteManager;
 }
 
-void Ideal::ParticleSystem::DrawParticle(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, Vector3 CameraPos, std::shared_ptr<Ideal::IdealCamera> Camera)
+void Ideal::ParticleSystem::DrawParticle(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, Vector3 CameraPos, std::shared_ptr<Ideal::IdealCamera> Camera, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	m_currentTime += m_deltaTime;
 	m_cbParticleSystem.CurrentTime = m_currentTime;
@@ -176,7 +177,7 @@ void Ideal::ParticleSystem::DrawParticle(ComPtr<ID3D12Device> Device, ComPtr<ID3
 			{
 				RENDER_MODE_BILLBOARD_CreatePipelineState(Device);
 			}
-			DrawRenderBillboard(Device, CommandList, DescriptorHeap, CBPool);
+			DrawRenderBillboard(Device, CommandList, DescriptorHeap, CBPool, DeferredDeleteManager);
 		}
 		break;
 		case Ideal::ParticleMenu::ERendererMode::Mesh:
@@ -186,7 +187,7 @@ void Ideal::ParticleSystem::DrawParticle(ComPtr<ID3D12Device> Device, ComPtr<ID3
 				RENDER_MODE_MESH_CreatePipelineState(Device);
 			}
 			CommandList->SetPipelineState(m_RENDER_MODE_MESH_pipelineState.Get());
-			DrawRenderMesh(Device, CommandList, DescriptorHeap, CBPool, Camera);
+			DrawRenderMesh(Device, CommandList, DescriptorHeap, CBPool, Camera, DeferredDeleteManager);
 		}
 		break;
 		default:
@@ -762,7 +763,7 @@ void Ideal::ParticleSystem::SetCustomData(Ideal::ParticleMenu::ECustomData Custo
 	}
 }
 
-void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::IdealCamera> Camera)
+void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::IdealCamera> Camera, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 
 	// Transform Data
@@ -799,9 +800,10 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 
 		auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
 		memcpy(cb1->SystemMemoryAddress, &m_cbTransform, sizeof(CB_Transform));
-		auto handle1 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
+		auto handle1 = DescriptorHeap->Allocate(1);
+		Device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGPUDescriptorHandleStart());
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle1);
 	}
 
 	CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -821,9 +823,10 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 		m_cbParticleSystem.Time = m_currentDurationTime;
 		auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
 		memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
-		auto handle2 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGpuHandle());
+		auto handle2 = DescriptorHeap->Allocate(1);
+		Device->CopyDescriptorsSimple(1, handle2.GetCPUDescriptorHandleStart(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGPUDescriptorHandleStart());
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle2);
 	}
 	// SRV
 	if (m_particleMaterial.lock())
@@ -833,9 +836,10 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 			auto texture = m_particleMaterial.lock()->GetTexture0().lock();
 			if (texture)
 			{
-				auto handle3 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle3.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture0, handle3.GetGpuHandle());
+				auto handle3 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle3.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture0, handle3.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle3);
 			}
 		}
 		// Texture1
@@ -843,9 +847,10 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 			auto texture = m_particleMaterial.lock()->GetTexture1().lock();
 			if (texture)
 			{
-				auto handle4 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle4.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture1, handle4.GetGpuHandle());
+				auto handle4 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle4.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture1, handle4.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle4);
 			}
 		}
 		// Texture2
@@ -853,16 +858,17 @@ void Ideal::ParticleSystem::DrawRenderMesh(ComPtr<ID3D12Device> Device, ComPtr<I
 			auto texture = m_particleMaterial.lock()->GetTexture2().lock();
 			if (texture)
 			{
-				auto handle5 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle5.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture2, handle5.GetGpuHandle());
+				auto handle5 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle5.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture2, handle5.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle5);
 			}
 		}
 	}
 	CommandList->DrawIndexedInstanced(m_Renderer_Mesh.lock()->GetElementCount(), 1, 0, 0, 0);
 }
 
-void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool)
+void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 
 	m_ParticleStructuredBuffer->TransitionToSRV(CommandList.Get());
@@ -888,9 +894,9 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 		m_cbTransform.WorldInvTranspose = m_cbTransform.World.Invert();
 		auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_Transform));
 		memcpy(cb1->SystemMemoryAddress, &m_cbTransform, sizeof(CB_Transform));
-		auto handle1 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGpuHandle());
+		auto handle1 = DescriptorHeap->Allocate(1);
+		Device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Transform, handle1.GetGPUDescriptorHandleStart());
 
 		// CustomData
 		UpdateCustomData();
@@ -903,18 +909,19 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 		m_cbParticleSystem.DeltaTime = m_deltaTime;
 		auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
 		memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
-		auto handle2 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle2.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGpuHandle());
+		auto handle2 = DescriptorHeap->Allocate(1);
+		Device->CopyDescriptorsSimple(1, handle2.GetCPUDescriptorHandleStart(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle2.GetGPUDescriptorHandleStart());
 	}
 	// SRV
 	if (m_particleMaterial.lock())
 	{
 		// StructuredBuffer PositionBuffer
 		{
-			auto handle = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), m_ParticleStructuredBuffer->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticlePosBuffer, handle.GetGpuHandle());
+			auto handle = DescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), m_ParticleStructuredBuffer->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticlePosBuffer, handle.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 		}
 
 		// Texture0
@@ -922,9 +929,10 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 			auto texture = m_particleMaterial.lock()->GetTexture0().lock();
 			if (texture)
 			{
-				auto handle3 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle3.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture0, handle3.GetGpuHandle());
+				auto handle3 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle3.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture0, handle3.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle3);
 			}
 		}
 		// Texture1
@@ -932,9 +940,10 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 			auto texture = m_particleMaterial.lock()->GetTexture1().lock();
 			if (texture)
 			{
-				auto handle4 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle4.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture1, handle4.GetGpuHandle());
+				auto handle4 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle4.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture1, handle4.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle4);
 			}
 		}
 		// Texture2
@@ -942,9 +951,10 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 			auto texture = m_particleMaterial.lock()->GetTexture2().lock();
 			if (texture)
 			{
-				auto handle5 = DescriptorHeap->Allocate();
-				Device->CopyDescriptorsSimple(1, handle5.GetCpuHandle(), texture->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture2, handle5.GetGpuHandle());
+				auto handle5 = DescriptorHeap->Allocate(1);
+				Device->CopyDescriptorsSimple(1, handle5.GetCPUDescriptorHandleStart(), texture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::SRV_ParticleTexture2, handle5.GetGPUDescriptorHandleStart());
+				DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle5);
 			}
 		}
 	}
@@ -955,7 +965,7 @@ void Ideal::ParticleSystem::DrawRenderBillboard(ComPtr<ID3D12Device> Device, Com
 	CommandList->DrawInstanced(m_maxParticles, 1, 0, 0);
 }
 
-void Ideal::ParticleSystem::ComputeRenderBillboard(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool)
+void Ideal::ParticleSystem::ComputeRenderBillboard(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	// 먼저 컴퓨트 셰이더로 위치 계산을 하겠다. 만약 사용될 버퍼가 없으면 만든다.
 	UpdateShape();
@@ -965,9 +975,10 @@ void Ideal::ParticleSystem::ComputeRenderBillboard(ComPtr<ID3D12Device> Device, 
 		CommandList->SetPipelineState(m_RENDER_MODE_BILLBOARD_ComputePipelineState.Get());
 
 		{
-			auto handle = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), m_ParticleStructuredBuffer->GetUAV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetComputeRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::UAV_ParticlePosBuffer, handle.GetGpuHandle());
+			auto handle = DescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), m_ParticleStructuredBuffer->GetUAV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetComputeRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::UAV_ParticlePosBuffer, handle.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 		}
 		{
 			// ParticleData
@@ -976,9 +987,10 @@ void Ideal::ParticleSystem::ComputeRenderBillboard(ComPtr<ID3D12Device> Device, 
 			m_cbParticleSystem.DeltaTime = m_deltaTime;
 			auto cb2 = CBPool->Allocate(Device.Get(), sizeof(CB_ParticleSystem));
 			memcpy(cb2->SystemMemoryAddress, &m_cbParticleSystem, sizeof(CB_ParticleSystem));
-			auto handle = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetComputeRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle.GetGpuHandle());
+			auto handle = DescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), cb2->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetComputeRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_ParticleSystemData, handle.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 		}
 
 		// TODO : Dispatch

@@ -1,7 +1,5 @@
 #pragma once
 #include <d3d12.h>
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
-
 // 2025.03.06
 // Descriptor 구조 변경..
 #include "GraphicsEngine/D3D12/D3D12Descriptors.h"
@@ -33,18 +31,6 @@ namespace Ideal
 		// 2025.03.06
 		// View들을 다 여기로 옮겨버리겠다.
 		// Descriptor Handle
-		void EmplaceSRV(const D3D12DescriptorHandle& InSRVHandle);
-		void EmplaceRTV(const D3D12DescriptorHandle& InRTVHandle);
-		void EmplaceUAV(const D3D12DescriptorHandle& InUAVHandle);
-
-		D3D12DescriptorHandle GetSRV() const;
-		D3D12DescriptorHandle GetRTV() const;
-		D3D12DescriptorHandle GetUAV() const;
-
-	protected:
-		D3D12DescriptorHandle m_srvHandle;
-		D3D12DescriptorHandle m_rtvHandle;
-		D3D12DescriptorHandle m_uavHandle;
 
 	public:
 		// 2025.03.06
@@ -164,18 +150,18 @@ namespace Ideal
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
 		void Free();
 
-		void EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle);
-		void EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle);
+		//void EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle);
+		//void EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle);
 
-		Ideal::D3D12DescriptorHandle GetSRV();
-		Ideal::D3D12DescriptorHandle GetUAV();
+		//Ideal::D3D12DescriptorHandle GetSRV();
+		//Ideal::D3D12DescriptorHandle GetUAV();
 
 		void TransitionToSRV(ID3D12GraphicsCommandList* CmdList);
 		void TransitionToUAV(ID3D12GraphicsCommandList* CmdList);
 
 	private:
-		Ideal::D3D12DescriptorHandle m_srvHandle;
-		Ideal::D3D12DescriptorHandle m_uavHandle;
+		//Ideal::D3D12DescriptorHandle m_srvHandle;
+		//Ideal::D3D12DescriptorHandle m_uavHandle;
 
 	};
 

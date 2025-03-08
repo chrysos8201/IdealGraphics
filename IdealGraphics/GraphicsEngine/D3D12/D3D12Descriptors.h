@@ -82,6 +82,7 @@ namespace Ideal
 		void Free(D3D12DescriptorHandle2& Handle);
 
 		void Destroy();
+		ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() const { return DescriptorHeap; }
 
 	private:
 		void InitAllocator();

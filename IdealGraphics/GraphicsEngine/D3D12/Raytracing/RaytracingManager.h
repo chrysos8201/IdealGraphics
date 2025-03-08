@@ -17,10 +17,8 @@ namespace Ideal
 	class D3D12Shader;
 	class ResourceManager;
 	class D3D12ShaderResourceView;
-	class D3D12DynamicDescriptorHeap;
-	class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
 	class D3D12DynamicConstantBufferAllocator;
-	class D3D12DescriptorManager;
 	class D3D12UnorderedAccessView;
 	class D3D12Texture;
 
@@ -157,8 +155,8 @@ namespace Ideal
 		~RaytracingManager();
 
 	public:
-		void Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager, std::shared_ptr<Ideal::D3D12Shader> RaytracingShader, std::shared_ptr<Ideal::D3D12Shader> AnimationShader, std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager, uint32 Width, uint32 Height);
-		void DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr<ID3D12GraphicsCommandList4> CommandList, std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager, uint32 CurrentFrameIndex, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, SceneConstantBuffer SceneCB, CB_LightList* LightCB, std::shared_ptr<Ideal::D3D12Texture> SkyBoxTexture);
+		void Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager, std::shared_ptr<Ideal::D3D12Shader> RaytracingShader, std::shared_ptr<Ideal::D3D12Shader> AnimationShader, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, uint32 Width, uint32 Height);
+		void DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr<ID3D12GraphicsCommandList4> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, uint32 CurrentFrameIndex, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, SceneConstantBuffer SceneCB, CB_LightList* LightCB, std::shared_ptr<Ideal::D3D12Texture> SkyBoxTexture, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 		void Resize(std::shared_ptr<Ideal::ResourceManager> ResourceManager, ComPtr<ID3D12Device5> Device, uint32 Width, uint32 Height);
 
 		// TODO :
@@ -167,7 +165,7 @@ namespace Ideal
 			std::shared_ptr<Ideal::D3D12RayTracingRenderer> Renderer,
 			ComPtr<ID3D12Device5> Device,
 			std::shared_ptr<Ideal::ResourceManager> ResourceManager,
-			std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager,
+			std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager,
 			std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool,
 			std::shared_ptr<Ideal::IMeshObject> MeshObject,
 			std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager,
@@ -178,12 +176,12 @@ namespace Ideal
 		void CreateRenderTarget(ComPtr<ID3D12Device5> Device, const uint32& Width, const uint32& Height);
 		ComPtr<ID3D12Resource> GetRaytracingOutputResource();
 
-		Ideal::D3D12DescriptorHandle GetRaytracingOutputRTVHandle();
-		Ideal::D3D12DescriptorHandle GetRaytracingOutputSRVHandle();
+		Ideal::D3D12DescriptorHandle2 GetRaytracingOutputRTVHandle();
+		Ideal::D3D12DescriptorHandle2 GetRaytracingOutputSRVHandle();
 
 		//---AS---//
 		std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> GetBLASByName(const std::wstring& Name);
-		std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> AddBLAS(std::shared_ptr<Ideal::D3D12RayTracingRenderer> Renderer, ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager, std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::IMeshObject> MeshObject, const wchar_t* Name, bool IsSkinnedData = false);
+		std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> AddBLAS(std::shared_ptr<Ideal::D3D12RayTracingRenderer> Renderer, ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::IMeshObject> MeshObject, const wchar_t* Name, bool IsSkinnedData = false);
 		std::shared_ptr<Ideal::BLASInstanceDesc> AllocateInstanceByBLAS(std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> BLAS, uint32 InstanceContributionToHitGroupIndex = UINT_MAX, Matrix transform = Matrix::Identity, BYTE InstanceMask = 1);
 
 		//void DeleteBLASByName(const std::wstring& Name);
@@ -220,11 +218,11 @@ namespace Ideal
 
 		//---UAV Render Target---//
 		ComPtr<ID3D12Resource> m_raytracingOutput = nullptr;
-		D3D12_CPU_DESCRIPTOR_HANDLE m_raytacingOutputResourceUAVCpuDescriptorHandle;
-		std::shared_ptr<Ideal::D3D12DescriptorHeap> m_raytracingOutputDescriptorHeap = nullptr;
-		std::shared_ptr<Ideal::D3D12DescriptorHeap> m_RTV_raytracingOutputDescriptorHeap = nullptr;
-		Ideal::D3D12DescriptorHandle m_raytracingOutputSRV;
-		Ideal::D3D12DescriptorHandle m_raytracingOutputRTV;
+		Ideal::D3D12DescriptorHandle2 m_raytacingOutputResourceUAVCpuDescriptorHandle2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_raytracingOutputDescriptorHeap2 = nullptr;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_RTV_raytracingOutputDescriptorHeap2 = nullptr;
+		Ideal::D3D12DescriptorHandle2 m_raytracingOutputSRV;
+		Ideal::D3D12DescriptorHandle2 m_raytracingOutputRTV;
 
 		//---Root Signature---//
 		ComPtr<ID3D12RootSignature> m_raytracingGlobalRootSignature = nullptr;
@@ -252,7 +250,7 @@ namespace Ideal
 		void UpdateMaterial(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 		// Material의 텍스쳐가 바뀌었는지를 검사한다.
 		void UpdateTexture(ComPtr<ID3D12Device5> Device);
-		void CreateMaterialInRayTracing(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager, std::weak_ptr<Ideal::IdealMaterial> NewMaterial);
+		void CreateMaterialInRayTracing(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, std::weak_ptr<Ideal::IdealMaterial> NewMaterial);
 		void DeleteMaterialInRayTracing(std::shared_ptr<Ideal::IMaterial> Material);
 
 	private:
@@ -269,12 +267,13 @@ namespace Ideal
 			ComPtr<ID3D12Device5> Device,
 			ComPtr<ID3D12GraphicsCommandList4> CommandList,
 			std::shared_ptr<Ideal::ResourceManager> ResourceManager,
-			std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager,
+			std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager,
 			uint32 CurrentContextIndex,
 			std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool,
 			std::shared_ptr<Ideal::D3D12VertexBuffer> VertexBuffer,
 			CB_Bone* BoneData,
-			std::shared_ptr<Ideal::D3D12UnorderedAccessView> UAV_OutVertex
+			std::shared_ptr<Ideal::D3D12UnorderedAccessView> UAV_OutVertex,
+			std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager
 		);
 
 	private:

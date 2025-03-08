@@ -4,7 +4,6 @@
 
 #include "GraphicsEngine/D3D12/D3D12RootSignature.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
-#include "GraphicsEngine/D3D12/D3D12Renderer.h"
 
 Ideal::D3D12PipelineStateObject::D3D12PipelineStateObject()
 {

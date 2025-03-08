@@ -4,7 +4,7 @@
 #include <d3dx12.h>
 #include "GraphicsEngine/VertexInfo.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 

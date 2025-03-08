@@ -94,7 +94,10 @@ D3D12DescriptorHeap2::D3D12DescriptorHeap2(ComPtr<ID3D12Device> Device, D3D12_DE
 	{
 		bShaderVisible = false;
 	}
-
+	else
+	{
+		bShaderVisible = true;
+	}
 	MaxNumDescriptors = InMaxNumDescriptors;
 	//IndexCreator.Init(MaxNumDescriptors);
 	InitAllocator();

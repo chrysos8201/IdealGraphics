@@ -2,7 +2,6 @@
 //#include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
 #include "ThirdParty/Include/DirectXTK12/WICTextureLoader.h"
-#include "GraphicsEngine/D3D12/D3D12Renderer.h"
 #include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
 #include <d3d12.h>
 #include <d3dx12.h>
@@ -15,21 +14,17 @@ Ideal::D3D12Texture::D3D12Texture()
 Ideal::D3D12Texture::~D3D12Texture()
 {
 	// 2024.11.06 : 뭔가 리사이즈 할 때 죽는다.
-	m_srvHandle.Free();
-	m_rtvHandle.Free();
-	m_dsvHandle.Free();
-	//for (uint32 i = 0; i < m_uavHandles.size(); ++i)
-	//{
-	//	m_uavHandles[i].Free();
-	//}
-	//m_uavHandles.clear();
-	m_uavHandle.Free();
+	//m_srvHandle.Free();
+	//m_rtvHandle.Free();
+	//m_dsvHandle.Free();
+	//m_uavHandle.Free();
+	FreeHandle();
 	m_srvHandleInEditor.Free();
 }
 
 uint64 Ideal::D3D12Texture::GetImageID()
 {
-	return static_cast<uint64>(m_srvHandleInEditor.GetGpuHandle().ptr);
+	return static_cast<uint64>(m_srvHandleInEditor.GetGPUDescriptorHandleStart().ptr);
 }
 
 uint32 Ideal::D3D12Texture::GetWidth()
@@ -52,32 +47,15 @@ void Ideal::D3D12Texture::Create(ComPtr<ID3D12Resource> Resource, std::shared_pt
 
 void Ideal::D3D12Texture::Free()
 {
-	m_srvHandle.Free();
-	m_rtvHandle.Free();
-	m_dsvHandle.Free();
+	//m_srvHandle.Free();
+	//m_rtvHandle.Free();
+	//m_dsvHandle.Free();
+	//
 	//m_uavHandle.Free();
-	//for (uint32 i = 0; i < m_uavHandles.size(); ++i)
-	//{
-	//	m_uavHandles[i].Free();
-	//}
-	//m_uavHandles.clear();
-	m_uavHandle.Free();
+	FreeHandle();
 	m_srvHandleInEditor.Free();
 }
 
-void Ideal::D3D12Texture::EmplaceDSV(Ideal::D3D12DescriptorHandle DSVHandle)
-{
-	m_dsvHandle = DSVHandle;
-}
-
-Ideal::D3D12DescriptorHandle Ideal::D3D12Texture::GetDSV()
-{
-	if (m_dsvHandle.GetCpuHandle().ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
-	{
-		__debugbreak();
-	}
-	return m_dsvHandle;
-}
 void Ideal::D3D12Texture::SetUploadBuffer(ComPtr<ID3D12Resource> UploadBuffer, uint64 UploadBufferSize)
 {
 	m_uploadBuffer = UploadBuffer;
@@ -142,7 +120,7 @@ void Ideal::D3D12Texture::UpdateTexture(ComPtr<ID3D12Device> Device, ComPtr<ID3D
 	}
 }
 
-void Ideal::D3D12Texture::EmplaceSRVInEditor(Ideal::D3D12DescriptorHandle SRVHandle)
+void Ideal::D3D12Texture::EmplaceSRVInEditor(Ideal::D3D12DescriptorHandle2 SRVHandle)
 {
 	m_srvHandleInEditor = SRVHandle;
 }

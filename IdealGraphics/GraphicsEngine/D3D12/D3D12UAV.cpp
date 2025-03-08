@@ -10,18 +10,18 @@ Ideal::D3D12UnorderedAccessView::~D3D12UnorderedAccessView()
 	m_handle.Free();
 }
 
-void Ideal::D3D12UnorderedAccessView::Create(ID3D12Device* Device, ID3D12Resource* Resource, const Ideal::D3D12DescriptorHandle& Handle, const D3D12_UNORDERED_ACCESS_VIEW_DESC& UAVDesc)
+void Ideal::D3D12UnorderedAccessView::Create(ID3D12Device* Device, ID3D12Resource* Resource, const Ideal::D3D12DescriptorHandle2& Handle, const D3D12_UNORDERED_ACCESS_VIEW_DESC& UAVDesc)
 {
-	Device->CreateUnorderedAccessView(Resource, nullptr, &UAVDesc, Handle.GetCpuHandle());
+	Device->CreateUnorderedAccessView(Resource, nullptr, &UAVDesc, Handle.GetCPUDescriptorHandleStart());
 	m_handle = Handle;
 }
 
-Ideal::D3D12DescriptorHandle Ideal::D3D12UnorderedAccessView::GetHandle()
+Ideal::D3D12DescriptorHandle2 Ideal::D3D12UnorderedAccessView::GetHandle()
 {
 	return m_handle;
 }
 
-void Ideal::D3D12UnorderedAccessView::SetResourceLocation(const Ideal::D3D12DescriptorHandle& handle)
+void Ideal::D3D12UnorderedAccessView::SetResourceLocation(const Ideal::D3D12DescriptorHandle2& handle)
 {
 	m_handle = handle;
 }

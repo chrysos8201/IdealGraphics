@@ -1,7 +1,6 @@
 #include "GraphicsEngine/Resource/UI/IdealCanvas.h"
 #include <d3d12.h>
 #include <d3dx12.h>
-#include "GraphicsEngine/D3D12/D3D12PipelineStateObject.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
 #include "GraphicsEngine/VertexInfo.h"
 #include "GraphicsEngine/Resource/UI/IdealSprite.h"

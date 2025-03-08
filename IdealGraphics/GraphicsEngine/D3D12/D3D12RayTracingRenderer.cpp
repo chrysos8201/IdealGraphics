@@ -14,8 +14,6 @@
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
 #include "GraphicsEngine/D3D12/ResourceManager.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
-#include "GraphicsEngine/D3D12/D3D12PipelineStateObject.h"
-#include "GraphicsEngine/D3D12/D3D12RootSignature.h"
 #include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12Viewport.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
@@ -1774,6 +1772,7 @@ void Ideal::D3D12RayTracingRenderer::DrawPostScreen()
 	m_commandLists[m_currentContextIndex]->IASetVertexBuffers(0, 1, &defaultQuadMesh->GetVertexBufferView());
 	m_commandLists[m_currentContextIndex]->IASetIndexBuffer(&defaultQuadMesh->GetIndexBufferView());
 	auto handle = m_mainDescriptorHeap2->Allocate(1);
+	m_deferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 	// m_device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), m_raytracingManager->GetRaytracingOutputSRVHandle().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), m_mainTexture->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::PostScreenRootSignature::Slot::SRV_Scene, handle.GetGPUDescriptorHandleStart());
@@ -2716,6 +2715,7 @@ void Ideal::D3D12RayTracingRenderer::DrawTerrain()
 	auto cb0 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Global));
 	memcpy(cb0->SystemMemoryAddress, &m_globalCB, sizeof(CB_Global));
 	auto handle0 = m_mainDescriptorHeap2->Allocate(1);
+	m_deferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 	m_device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
 
@@ -2726,6 +2726,7 @@ void Ideal::D3D12RayTracingRenderer::DrawTerrain()
 	cbTransform->WorldInvTranspose = m_terrainTransform.Transpose().Invert();
 	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
 	auto handle1 = m_mainDescriptorHeap2->Allocate(1);
+	m_deferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle1);
 	m_device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Transform, handle1.GetGPUDescriptorHandleStart());
 
@@ -2877,6 +2878,7 @@ void Ideal::D3D12RayTracingRenderer::DrawTessellation()
 	auto cb0 = m_cbAllocator[m_currentContextIndex]->Allocate(m_device.Get(), sizeof(CB_Global));
 	memcpy(cb0->SystemMemoryAddress, &m_globalCB, sizeof(CB_Global));
 	auto handle0 = m_mainDescriptorHeap2->Allocate(1);
+	m_deferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 	m_device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
 
@@ -2887,6 +2889,7 @@ void Ideal::D3D12RayTracingRenderer::DrawTessellation()
 	cbTransform->WorldInvTranspose = m_simpleTessellationTransform.Transpose().Invert();
 	memcpy(cb1->SystemMemoryAddress, cbTransform, sizeof(CB_Transform));
 	auto handle1 = m_mainDescriptorHeap2->Allocate(1);
+	m_deferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle1);
 	m_device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_commandLists[m_currentContextIndex]->SetGraphicsRootDescriptorTable(Ideal::BasicRootSignature::Slot::CBV_Transform, handle1.GetGPUDescriptorHandleStart());
 

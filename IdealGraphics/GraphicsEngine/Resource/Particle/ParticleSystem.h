@@ -86,7 +86,6 @@ namespace Ideal
 		std::shared_ptr<Ideal::D3D12Shader> m_RENDER_MODE_BILLBOARD_VS;
 		std::shared_ptr<Ideal::D3D12Shader> m_RENDER_MODE_BILLBOARD_GS;
 		std::shared_ptr<Ideal::D3D12Shader> m_ps;
-		std::shared_ptr<Ideal::D3D12PipelineStateObject> m_pso;
 
 		//std::weak_ptr<Ideal::D3D12VertexBuffer> m_particleVertexBuffer;
 

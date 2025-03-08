@@ -110,8 +110,6 @@
     <ClInclude Include="GraphicsEngine\ConstantBufferInfo.h" />
     <ClInclude Include="GraphicsEngine\Resource\ModelAnimation.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealMesh.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12RootSignature.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Shader.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealBone.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealStaticMeshObject.h" />
@@ -270,8 +268,6 @@
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resource\ModelAnimation.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealMesh.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12RootSignature.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Shader.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealBone.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealStaticMeshObject.cpp" />

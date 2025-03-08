@@ -148,21 +148,9 @@ namespace Ideal
 	{
 	public:
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
-		void Free();
-
-		//void EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle);
-		//void EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle);
-
-		//Ideal::D3D12DescriptorHandle GetSRV();
-		//Ideal::D3D12DescriptorHandle GetUAV();
 
 		void TransitionToSRV(ID3D12GraphicsCommandList* CmdList);
 		void TransitionToUAV(ID3D12GraphicsCommandList* CmdList);
-
-	private:
-		//Ideal::D3D12DescriptorHandle m_srvHandle;
-		//Ideal::D3D12DescriptorHandle m_uavHandle;
-
 	};
 
 	// VertexBuffer

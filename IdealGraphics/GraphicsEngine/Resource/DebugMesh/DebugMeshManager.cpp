@@ -182,9 +182,9 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
 		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
 		auto handle0 = DescriptorHeap->Allocate(1);
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 		Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
-		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 		for (auto& m : m_meshes)
 		{
 			m.lock()->DebugDraw(Device, CommandList, DescriptorHeap, CBPool, DeferredDeleteManager);
@@ -199,9 +199,9 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
 		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
 		auto handle0 = DescriptorHeap->Allocate(1);
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 		Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
-		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 
 		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_lineVB->GetView();
 		

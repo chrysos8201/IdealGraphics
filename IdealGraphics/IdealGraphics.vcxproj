@@ -239,8 +239,6 @@
     <ClInclude Include="Editor\imgui\imstb_truetype.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Shader.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12RootSignature.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.h" />
     <ClInclude Include="GraphicsEngine\ConstantBufferInfo.h" />
     <ClInclude Include="GraphicsEngine\public\IAnimation.h" />
     <ClInclude Include="GraphicsEngine\public\IdealRendererDefinitions.h" />
@@ -391,8 +389,6 @@
     <ClCompile Include="Editor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Shader.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12RootSignature.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp" />
     <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />

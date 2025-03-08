@@ -103,8 +103,6 @@ namespace Ideal
 
 	private:
 		static const uint32 MAX_DRAW_COUNT_PER_FRAME = 16384;
-		static const uint32	MAX_DESCRIPTOR_COUNT = 16384 * 4;
-		static const uint32	MAX_UI_DESCRIPTOR_COUNT = 256;
 		static const uint32 MAX_EDITOR_SRV_COUNT = 16384;
 
 		// Display Resolution
@@ -250,8 +248,6 @@ namespace Ideal
 
 		std::shared_ptr<Ideal::D3D12Texture> m_swapChains[SWAP_CHAIN_FRAME_COUNT];
 
-		
-		//ComPtr<ID3D12Resource> m_depthStencil = nullptr;
 		// 2025.03.06
 		std::shared_ptr<Ideal::D3D12Texture> m_mainDepthTexture; // 이거 좀 애매한데 나중에 삭제하든 뭘하든 할 것
 
@@ -312,7 +308,6 @@ namespace Ideal
 		CB_Global m_globalCB;
 
 		// Render
-		void CopyRaytracingOutputToBackBuffer();
 		void TransitionMainTextureToRTV();
 		void TransitionMainTextureToSRV();
 		void TransitionMainTextureToUAV();

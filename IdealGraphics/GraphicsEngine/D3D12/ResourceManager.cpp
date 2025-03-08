@@ -116,6 +116,13 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 	CreateParticleVertexBuffer();
 }
 
+void ResourceManager::ShutDown()
+{
+	m_cbv_srv_uavHeap2->Destroy();
+	m_rtvHeap2->Destroy();
+	m_dsvHeap2->Destroy();
+}
+
 void ResourceManager::WaitForResourceUpload()
 {
 	m_uploadCommandListPoolManager->AllWaitForFenceValue();

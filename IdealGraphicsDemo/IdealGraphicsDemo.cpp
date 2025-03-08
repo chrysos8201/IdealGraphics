@@ -228,13 +228,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Create Static Mesh
 		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
 		SampleCart->SetTransformMatrix(
-			Matrix::CreateRotationY(1.f) 
+			Matrix::CreateRotationY(1.f)
 			* Matrix::CreateTranslation(Vector3(5, 2, 5)));
-		
+
 		// Create Material
 		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial0 = gRenderer->CreateMaterial();
 		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial1 = gRenderer->CreateMaterial();
-		
+
 		// Create Texture
 		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_BaseMap.png", true, false, false);
 		SampleCartMaterial0->SetBaseMap(SampleCartBaseTexture0);
@@ -244,7 +244,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		SampleCartMaterial0->SetMaskMap(SampleCartMaskTexture0);
 		// Bind Material
 		SampleCart->GetMeshByIndex(0).lock()->SetMaterialObject(SampleCartMaterial0);
-		
+
 		//// Create Texture
 		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_BaseMap.png", true, false, false);
 		SampleCartMaterial1->SetBaseMap(SampleCartBaseTexture1);
@@ -2635,10 +2635,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				//DebugEnemy->AnimationDeltaTime(0.003f);
 				//DebugPlayer->AnimationDeltaTime(1.003f);
 
-				if (GetAsyncKeyState(VK_END) * 0x8000)
-				{
-					//DebugPlayer->AnimationDeltaTime(0.106f);
-				}
 
 				//DebugPlayer0->AnimationDeltaTime(0.003f);
 #ifdef MAKE_PARTICLE

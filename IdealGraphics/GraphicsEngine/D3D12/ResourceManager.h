@@ -78,6 +78,7 @@ namespace Ideal
 		void Fence();
 		void WaitForFenceValue();
 		void WaitForResourceUpload();
+		void ShutDown();
 
 		//ComPtr<ID3D12DescriptorHeap> GetSRVHeap() { return m_cbv_srv_uavHeap->GetDescriptorHeap(); }
 		//std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> GetSRVPool() { return m_cbv_srv_uavHeap; }

@@ -156,10 +156,11 @@ namespace Ideal
 
 	public:
 		void Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::ResourceManager> ResourceManager, std::shared_ptr<Ideal::D3D12Shader> RaytracingShader, std::shared_ptr<Ideal::D3D12Shader> AnimationShader, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, uint32 Width, uint32 Height);
-		void DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr<ID3D12GraphicsCommandList4> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, uint32 CurrentFrameIndex, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, SceneConstantBuffer SceneCB, CB_LightList* LightCB, std::shared_ptr<Ideal::D3D12Texture> SkyBoxTexture, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
+		void DispatchRays(ComPtr<ID3D12Device5> Device, ComPtr<ID3D12GraphicsCommandList4> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager, uint32 CurrentFrameIndex, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, SceneConstantBuffer SceneCB, CB_LightList* LightCB, std::shared_ptr<Ideal::D3D12Texture> SkyBoxTexture, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager, std::shared_ptr<Ideal::D3D12Texture> MainTexture);
 		void Resize(std::shared_ptr<Ideal::ResourceManager> ResourceManager, ComPtr<ID3D12Device5> Device, uint32 Width, uint32 Height);
 
-		// TODO :
+		void ShutDown();
+
 		void AddObject(
 			std::shared_ptr<Ideal::IdealStaticMeshObject> Object,
 			std::shared_ptr<Ideal::D3D12RayTracingRenderer> Renderer,
@@ -172,12 +173,6 @@ namespace Ideal
 			const wchar_t* Name,
 			bool IsSkinnedData = false
 		);
-		//---UAV Render Target---//
-		void CreateRenderTarget(ComPtr<ID3D12Device5> Device, const uint32& Width, const uint32& Height);
-		ComPtr<ID3D12Resource> GetRaytracingOutputResource();
-
-		Ideal::D3D12DescriptorHandle2 GetRaytracingOutputRTVHandle();
-		Ideal::D3D12DescriptorHandle2 GetRaytracingOutputSRVHandle();
 
 		//---AS---//
 		std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> GetBLASByName(const std::wstring& Name);
@@ -215,14 +210,6 @@ namespace Ideal
 		//---Device---//
 		uint32 m_width = 0;
 		uint32 m_height = 0;
-
-		//---UAV Render Target---//
-		ComPtr<ID3D12Resource> m_raytracingOutput = nullptr;
-		Ideal::D3D12DescriptorHandle2 m_raytacingOutputResourceUAVCpuDescriptorHandle2;
-		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_raytracingOutputDescriptorHeap2 = nullptr;
-		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_RTV_raytracingOutputDescriptorHeap2 = nullptr;
-		Ideal::D3D12DescriptorHandle2 m_raytracingOutputSRV;
-		Ideal::D3D12DescriptorHandle2 m_raytracingOutputRTV;
 
 		//---Root Signature---//
 		ComPtr<ID3D12RootSignature> m_raytracingGlobalRootSignature = nullptr;

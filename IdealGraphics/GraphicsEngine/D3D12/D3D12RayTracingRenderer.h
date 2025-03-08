@@ -255,6 +255,9 @@ namespace Ideal
 		// 2025.03.06
 		std::shared_ptr<Ideal::D3D12Texture> m_mainDepthTexture; // 이거 좀 애매한데 나중에 삭제하든 뭘하든 할 것
 
+		// 메인 텍스쳐를 만들겠다.
+		std::shared_ptr<Ideal::D3D12Texture> m_mainTexture;
+
 		ComPtr<ID3D12Fence> m_fence = nullptr;
 		uint64 m_fenceValue = 0;
 		HANDLE m_fenceEvent = NULL;
@@ -310,9 +313,9 @@ namespace Ideal
 
 		// Render
 		void CopyRaytracingOutputToBackBuffer();
-		void TransitionRayTracingOutputToRTV();
-		void TransitionRayTracingOutputToSRV();
-		void TransitionRayTracingOutputToUAV();
+		void TransitionMainTextureToRTV();
+		void TransitionMainTextureToSRV();
+		void TransitionMainTextureToUAV();
 
 		// AS Manager	
 		std::shared_ptr<Ideal::RaytracingManager> m_raytracingManager;
@@ -425,5 +428,10 @@ namespace Ideal
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_rtvHeap2;
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_dsvHeap2;
 		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_mainDescriptorHeap2;
+
+		// 2025.03.08
+		// 메인 텍스쳐를 바꾸겠다.
+		void CreateMainTexture(uint32 Width, uint32 Height);
+
 	};
 }

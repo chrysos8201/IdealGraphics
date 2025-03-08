@@ -47,6 +47,10 @@ Descriptor Heap을 줄이고 조금 손을 보자.
 	// -> DescriptorManager, MainDynamicDescriptorHeap
 
 
+2025.03.08
+-> Raytracing에서 사용하는 메인 텍스쳐를 빼겠다.
+	-> 기존에 했던 작업인데 날려먹어서 다시 해야함.
+	-> 이렇게 되면 레이트레이싱 매니저에서 DescriptorHeap을 또 가지고 있을 필요가 없을 것이다.
 
 
 

@@ -322,6 +322,7 @@ float3 Shade(
 
     float3 F0;
     const float3 Kt = float3(1,1,1);
+    //const float3 Kt = float3(0.1,0.1,0.1);
     float metallic;
     float roughness;
 

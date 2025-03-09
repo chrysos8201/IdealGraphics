@@ -45,14 +45,7 @@ ResourceManager::ResourceManager()
 
 ResourceManager::~ResourceManager()
 {
-	Fence();
-	WaitForFenceValue();
-
-	m_defaultMaterial.reset();
-	m_defaultAlbedo.reset();
-	m_defaultNormal.reset();
-	m_defaultMask.reset();
-	m_textures.clear();
+	
 }
 
 void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
@@ -118,6 +111,25 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 
 void ResourceManager::ShutDown()
 {
+	Fence();
+	WaitForFenceValue();
+
+	m_defaultMaterial->FreeInRayTracing();
+	m_defaultMaterial.reset();
+	m_defaultAlbedo->Free();
+
+	m_defaultNormal->Free();
+	m_defaultNormal.reset();
+
+	m_defaultMask->Free();
+	m_defaultMask.reset();
+
+	for (auto& t : m_textures)
+	{
+		t.second->Free();
+	}
+	m_textures.clear();
+
 	m_cbv_srv_uavHeap2->Destroy();
 	m_rtvHeap2->Destroy();
 	m_dsvHeap2->Destroy();

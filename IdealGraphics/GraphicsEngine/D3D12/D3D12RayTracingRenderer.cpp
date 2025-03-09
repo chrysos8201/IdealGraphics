@@ -321,7 +321,6 @@ finishAdapter:
 	//m_sceneCB.farZ = m_mainCamera->GetFarZ();
 
 	// load image
-
 	InitTerrain();
 	InitTessellation();
 
@@ -375,23 +374,23 @@ void Ideal::D3D12RayTracingRenderer::ShutDown()
 	}
 
 	// Release MainTexture
-	m_mainTexture->FreeHandle();
+	m_mainTexture->Free();
 
 	// Release MainDepthTexture
-	m_mainDepthTexture->FreeHandle();
+	m_mainDepthTexture->Free();
 	
 	// Release SwapChain
 	for (uint32 i = 0; i < SWAP_CHAIN_FRAME_COUNT; ++i)
 	{
-		m_swapChains[i]->FreeHandle();
+		//m_swapChains[i]->FreeHandle();
+		m_swapChains[i]->Free();
 	}
-
 
 	//----ResourceManager----//
 	m_raytracingManager->ShutDown();
 
 	m_resourceManager->ShutDown();
-	m_resourceManager->GetDefaultMaterial()->FreeInRayTracing();
+	//m_resourceManager->GetDefaultMaterial()->FreeInRayTracing();
 
 	m_raytracingManager = nullptr;
 	m_resourceManager = nullptr;
@@ -2289,6 +2288,10 @@ void Ideal::D3D12RayTracingRenderer::SetImGuiCameraRenderTarget()
 
 void Ideal::D3D12RayTracingRenderer::CreateEditorRTV(uint32 Width, uint32 Height)
 {
+	if (m_editorTexture)
+	{
+		m_editorTexture->Free();
+	}
 	m_editorTexture = std::make_shared<Ideal::D3D12Texture>();
 	{
 		{

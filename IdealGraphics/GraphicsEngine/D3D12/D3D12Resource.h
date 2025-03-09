@@ -45,7 +45,7 @@ namespace Ideal
 		D3D12DescriptorHandle2 GetUAV2() const;
 		D3D12DescriptorHandle2 GetDSV2() const;
 
-		void FreeHandle();
+		virtual void Free();
 
 	protected:
 		D3D12DescriptorHandle2 m_srvHandle2;

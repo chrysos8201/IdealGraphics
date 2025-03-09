@@ -118,7 +118,7 @@ void Ideal::ParticleSystem::Init(ComPtr<ID3D12Device> Device, ComPtr<ID3D12RootS
 
 void Ideal::ParticleSystem::Free()
 {
-	m_ParticleStructuredBuffer->FreeHandle();
+	m_ParticleStructuredBuffer->Free();
 }
 
 void Ideal::ParticleSystem::SetResourceManager(std::shared_ptr<Ideal::ResourceManager> ResourceManager)

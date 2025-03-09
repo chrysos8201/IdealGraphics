@@ -33,8 +33,7 @@ namespace Ideal
 			ComPtr<ID3D12Resource> Resource, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager
 		);
 
-		// DeferredDelete에 넣어주어야 한다.
-		void Free();
+		virtual void Free() override;
 
 		void SetUploadBuffer(ComPtr<ID3D12Resource> UploadBuffer, uint64 UploadBufferSize);
 		ComPtr<ID3D12Resource> GetUploadBuffer() { return m_uploadBuffer; }
@@ -47,7 +46,6 @@ namespace Ideal
 		void EmplaceSRVInEditor(Ideal::D3D12DescriptorHandle2 SRVHandle);
 
 	private:
-		Ideal::D3D12DescriptorHandle2 m_dsvHandle;
 		Ideal::D3D12DescriptorHandle2 m_srvHandleInEditor;
 
 		ComPtr<ID3D12Resource> m_uploadBuffer;

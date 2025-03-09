@@ -65,7 +65,7 @@ Ideal::D3D12DescriptorHandle2 D3D12Resource::GetUAV2() const
 	return m_uavHandle2;
 }
 
-void D3D12Resource::FreeHandle()
+void D3D12Resource::Free()
 {
 	m_srvHandle2.Free();
 	m_rtvHandle2.Free();

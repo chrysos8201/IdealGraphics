@@ -2286,10 +2286,10 @@ void Ideal::D3D12RayTracingRenderer::SetImGuiCameraRenderTarget()
 	commandList->OMSetRenderTargets(1, &rtvHandle.GetCPUDescriptorHandleStart(), FALSE, &m_mainDepthTexture->GetDSV2().GetCPUDescriptorHandleStart());
 }
 
-void Ideal::D3D12RayTracingRenderer::CreateEditorRTV(uint32 Width, uint32 Height)
-{
+void Ideal::D3D12RayTracingRenderer::CreateEditorRTV(uint32 Width, uint32 Height){
 	if (m_editorTexture)
 	{
+
 		m_editorTexture->Free();
 	}
 	m_editorTexture = std::make_shared<Ideal::D3D12Texture>();

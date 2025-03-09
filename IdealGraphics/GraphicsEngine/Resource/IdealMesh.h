@@ -56,21 +56,9 @@ namespace Ideal
 				m_indexBuffer = std::make_shared<Ideal::D3D12IndexBuffer>();
 				ResourceManager->CreateIndexBuffer(m_indexBuffer, m_indices);
 			}
-			//------------Clear-----------//
-			//// 2024.09.05 Particle일 때는 Vertex를 지우지 않는다.
-			//// -> Custom Data로 채워넣기 위함
-			//if (!Particle)
-			//{
-			//	m_vertices.clear();
-			//}
+
 			m_vertices.clear();
 			m_indices.clear();
-
-			//----------Material----------//
-			//if (m_material)
-			//{
-			//	m_material->Create(ResourceManager);
-			//}
 		}
 
 

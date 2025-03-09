@@ -2740,7 +2740,7 @@ void Ideal::D3D12RayTracingRenderer::DrawTerrain()
 
 void Ideal::D3D12RayTracingRenderer::AddTerrainToRaytracing()
 {
-	return;
+	//return;
 	std::shared_ptr<Ideal::IdealStaticMesh> staticMesh = std::make_shared<Ideal::IdealStaticMesh>();
 
 	std::shared_ptr <Ideal::IdealMesh<BasicVertex>> mesh = std::make_shared<Ideal::IdealMesh<BasicVertex>>();

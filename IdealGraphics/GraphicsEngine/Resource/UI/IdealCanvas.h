@@ -13,7 +13,6 @@ namespace Ideal
 	class IdealSprite;
 	class IdealText;
 	class D3D12DynamicConstantBufferAllocator;
-	class D3D12DescriptorHeap;
 	class DeferredDeleteManager;
 	class D3D12DescriptorHeap2;
 }

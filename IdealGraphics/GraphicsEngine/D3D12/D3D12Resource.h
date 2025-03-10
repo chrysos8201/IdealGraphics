@@ -1,6 +1,8 @@
 #pragma once
 #include <d3d12.h>
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+// 2025.03.06
+// Descriptor 구조 변경..
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 
 struct ID3D12Resource;
 struct ID3D12Device;
@@ -9,6 +11,8 @@ namespace Ideal
 {
 	class D3D12UnorderedAccessView;
 	class D3D12UAVBuffer;
+	class D3D12DescriptorHandle;
+	class D3D12DescriptorHandle2;
 }
 namespace Ideal
 {
@@ -17,11 +21,38 @@ namespace Ideal
 	public:
 		D3D12Resource();
 		virtual ~D3D12Resource();
-
 		void Release();
+
 	public:
 		ID3D12Resource* GetResource() const;
 		ComPtr<ID3D12Resource> GetResourceComPtr();
+
+	public:
+		// 2025.03.06
+		// View들을 다 여기로 옮겨버리겠다.
+		// Descriptor Handle
+
+	public:
+		// 2025.03.06
+		// Descriptor 구조를 변경하면서 핸들도 새로운 것으로 바꾸겠다.
+		void EmplaceSRV2(const D3D12DescriptorHandle2& InSRVHandle);
+		void EmplaceRTV2(const D3D12DescriptorHandle2& InRTVHandle);
+		void EmplaceUAV2(const D3D12DescriptorHandle2& InUAVHandle);
+		void EmplaceDSV2(const D3D12DescriptorHandle2& InDSVHandle);
+
+		D3D12DescriptorHandle2 GetSRV2() const;
+		D3D12DescriptorHandle2 GetRTV2() const;
+		D3D12DescriptorHandle2 GetUAV2() const;
+		D3D12DescriptorHandle2 GetDSV2() const;
+
+		virtual void Free();
+
+	protected:
+		D3D12DescriptorHandle2 m_srvHandle2;
+		D3D12DescriptorHandle2 m_rtvHandle2;
+		D3D12DescriptorHandle2 m_uavHandle2;
+		D3D12DescriptorHandle2 m_dsvHandle2;
+
 	protected:
 		ComPtr<ID3D12Resource> m_resource = nullptr;
 	};
@@ -117,21 +148,9 @@ namespace Ideal
 	{
 	public:
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
-		void Free();
-
-		void EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle);
-		void EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle);
-
-		Ideal::D3D12DescriptorHandle GetSRV();
-		Ideal::D3D12DescriptorHandle GetUAV();
 
 		void TransitionToSRV(ID3D12GraphicsCommandList* CmdList);
 		void TransitionToUAV(ID3D12GraphicsCommandList* CmdList);
-
-	private:
-		Ideal::D3D12DescriptorHandle m_srvHandle;
-		Ideal::D3D12DescriptorHandle m_uavHandle;
-
 	};
 
 	// VertexBuffer

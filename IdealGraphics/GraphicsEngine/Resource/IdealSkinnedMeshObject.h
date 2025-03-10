@@ -20,7 +20,7 @@ namespace Ideal
 	class ResourceManager;
 	class D3D12DynamicConstantBufferAllocator;
 	class D3D12UAVBuffer;
-	class D3D12DescriptorManager;
+	class D3D12DescriptorHeap2;
 	class D3D12UnorderedAccessView;
 	class BLASInstanceDesc;
 }
@@ -95,10 +95,11 @@ namespace Ideal
 			ComPtr<ID3D12Device5> Device,
 			ComPtr<ID3D12GraphicsCommandList4> CommandList,
 			std::shared_ptr<Ideal::ResourceManager> ResourceManager,
-			std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager,
+			std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager,
 			uint32 CurrentContextIndex,
 			std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool,
-			std::shared_ptr<Ideal::RaytracingManager> RaytracingManager
+			std::shared_ptr<Ideal::RaytracingManager> RaytracingManager,
+			std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager
 		);
 		void SetBLAS(std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> InBLAS);
 		std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> GetBLAS();

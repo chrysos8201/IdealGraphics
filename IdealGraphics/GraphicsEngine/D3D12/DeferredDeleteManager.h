@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Core.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include <d3d12.h>
 #include <d3dx12.h>
 
@@ -55,6 +56,10 @@ namespace Ideal
 
 		void AddMaterialToDefferedDelete(std::shared_ptr<Ideal::IdealMaterial> Material);
 		void DeleteMaterial(uint32 DeleteContextIndex);
+
+		void AddDescriptorHandleToDeferredDelete(Ideal::D3D12DescriptorHandle2 DescriptorHandle);
+		void DeleteDescriptorHandle(uint32 DeleteContextIndex);
+
 	private:
 		uint32 m_currentContextIndex = 0;
 
@@ -64,5 +69,6 @@ namespace Ideal
 		std::vector<std::shared_ptr<Ideal::DXRTopLevelAccelerationStructure>> m_tlasToDelete[MAX_PENDING_FRAMES];
 		std::vector<std::shared_ptr<Ideal::D3D12Texture>> m_textureToDelete[MAX_PENDING_FRAMES];
 		std::vector<std::shared_ptr<Ideal::IdealMaterial>> m_materialToDelete[MAX_PENDING_FRAMES];
+		std::vector<Ideal::D3D12DescriptorHandle2> m_descriptorHandleToDelete[MAX_PENDING_FRAMES];
 	};
 }

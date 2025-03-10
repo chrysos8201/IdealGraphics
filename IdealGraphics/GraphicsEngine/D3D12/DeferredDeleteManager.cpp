@@ -22,6 +22,7 @@ void Ideal::DeferredDeleteManager::DeleteDeferredResources(uint32 CurrentContext
 	DeleteMeshObject(CurrentContextIndex);
 	DeleteBLAS(CurrentContextIndex);
 	DeleteTLAS(CurrentContextIndex);
+	DeleteDescriptorHandle(CurrentContextIndex);
 	m_currentContextIndex = CurrentContextIndex;
 }
 void Ideal::DeferredDeleteManager::AddD3D12ResourceToDelete(ComPtr<ID3D12Resource> D3D12Resource)
@@ -130,5 +131,22 @@ void Ideal::DeferredDeleteManager::DeleteMaterial(uint32 DeleteContextIndex)
 			Resource.reset();
 		}
 		m_materialToDelete[DeleteContextIndex].clear();
+	}
+}
+
+void Ideal::DeferredDeleteManager::AddDescriptorHandleToDeferredDelete(Ideal::D3D12DescriptorHandle2 DescriptorHandle)
+{
+	m_descriptorHandleToDelete[m_currentContextIndex].push_back(DescriptorHandle);
+}
+
+void Ideal::DeferredDeleteManager::DeleteDescriptorHandle(uint32 DeleteContextIndex)
+{
+	if (m_descriptorHandleToDelete[DeleteContextIndex].size() > 0)
+	{
+		for (auto& Resource : m_descriptorHandleToDelete[DeleteContextIndex])
+		{
+			Resource.Free();
+		}
+		m_descriptorHandleToDelete[DeleteContextIndex].clear();
 	}
 }

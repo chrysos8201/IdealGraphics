@@ -35,6 +35,56 @@ Microsoft::WRL::ComPtr<ID3D12Resource> D3D12Resource::GetResourceComPtr()
 	return m_resource;
 }
 
+void D3D12Resource::EmplaceSRV2(const D3D12DescriptorHandle2& InSRVHandle)
+{
+	m_srvHandle2 = InSRVHandle;
+}
+
+void D3D12Resource::EmplaceRTV2(const D3D12DescriptorHandle2& InRTVHandle)
+{
+	m_rtvHandle2 = InRTVHandle;
+}
+
+void D3D12Resource::EmplaceUAV2(const D3D12DescriptorHandle2& InUAVHandle)
+{
+	m_uavHandle2 = InUAVHandle;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetSRV2() const
+{
+	return m_srvHandle2;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetRTV2() const
+{
+	return m_rtvHandle2;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetUAV2() const
+{
+	return m_uavHandle2;
+}
+
+void D3D12Resource::Free()
+{
+	m_srvHandle2.Free();
+	m_rtvHandle2.Free();
+	m_uavHandle2.Free();
+	m_dsvHandle2.Free();
+
+	m_resource.Reset();
+}
+
+void D3D12Resource::EmplaceDSV2(const D3D12DescriptorHandle2& InDSVHandle)
+{
+	m_dsvHandle2 = InDSVHandle;
+}
+
+Ideal::D3D12DescriptorHandle2 D3D12Resource::GetDSV2() const
+{
+	return m_dsvHandle2;
+}
+
 //------------------------UploadBuffer------------------------//
 
 D3D12UploadBuffer::D3D12UploadBuffer()
@@ -417,22 +467,6 @@ std::shared_ptr<Ideal::D3D12UnorderedAccessView> D3D12UAVBuffer::GetUAV()
 	return m_uav;
 }
 
-void D3D12StructuredBuffer::Free()
-{
-	m_srvHandle.Free();
-	m_uavHandle.Free();
-}
-
-void D3D12StructuredBuffer::EmplaceSRV(Ideal::D3D12DescriptorHandle SRVHandle)
-{
-	m_srvHandle = SRVHandle;
-}
-
-void D3D12StructuredBuffer::EmplaceUAV(Ideal::D3D12DescriptorHandle UAVHandle)
-{
-	m_uavHandle = UAVHandle;
-}
-
 void D3D12StructuredBuffer::Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer)
 {
 	D3D12GPUBuffer::CreateBuffer(Device, ElementSize, ElementCount, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
@@ -475,12 +509,12 @@ void D3D12StructuredBuffer::TransitionToUAV(ID3D12GraphicsCommandList* CmdList)
 	CmdList->ResourceBarrier(1, &resourceBarrier);
 }
 
-Ideal::D3D12DescriptorHandle D3D12StructuredBuffer::GetSRV()
-{
-	return m_srvHandle;
-}
-
-Ideal::D3D12DescriptorHandle D3D12StructuredBuffer::GetUAV()
-{
-	return m_uavHandle;
-}
+// Ideal::D3D12DescriptorHandle D3D12StructuredBuffer::GetSRV()
+// {
+// 	return m_srvHandle;
+// }
+// 
+// Ideal::D3D12DescriptorHandle D3D12StructuredBuffer::GetUAV()
+// {
+// 	return m_uavHandle;
+// }

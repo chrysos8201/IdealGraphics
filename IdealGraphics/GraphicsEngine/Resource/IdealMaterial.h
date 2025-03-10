@@ -2,7 +2,7 @@
 #include "IMaterial.h"
 #include "GraphicsEngine/Resource/ResourceBase.h"
 #include "GraphicsEngine/ConstantBufferInfo.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/Raytracing/RayTracingFlagManger.h"
 #include "GraphicsEngine/IdealLayer.h"
 
@@ -114,19 +114,19 @@ namespace Ideal
 		//--- Ray Tracing Info ---//
 		void FreeInRayTracing();
 		void CopyHandleToRayTracingDescriptorTable(ComPtr<ID3D12Device> Device);
-		Ideal::D3D12DescriptorHandle GetBaseTextureHandleInRayTracing() { return m_diffuseTextureInRayTracing; }
-		Ideal::D3D12DescriptorHandle GetNormalTextureHandleInRayTracing() { return m_normalTextureInRayTracing; }
-		Ideal::D3D12DescriptorHandle GetMaskTextureHandleInRayTracing() { return m_maskTextureInRayTracing; }
-		void SetDiffuseTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle handle) { m_diffuseTextureInRayTracing = handle; }
-		void SetNormalTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle handle) { m_normalTextureInRayTracing = handle; }
-		void SetMaskTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle handle) { m_maskTextureInRayTracing = handle; }
+		Ideal::D3D12DescriptorHandle2 GetBaseTextureHandleInRayTracing() { return m_diffuseTextureInRayTracing; }
+		Ideal::D3D12DescriptorHandle2 GetNormalTextureHandleInRayTracing() { return m_normalTextureInRayTracing; }
+		Ideal::D3D12DescriptorHandle2 GetMaskTextureHandleInRayTracing() { return m_maskTextureInRayTracing; }
+		void SetDiffuseTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle2 handle) { m_diffuseTextureInRayTracing = handle; }
+		void SetNormalTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle2 handle) { m_normalTextureInRayTracing = handle; }
+		void SetMaskTextureHandleInRayTracing(Ideal::D3D12DescriptorHandle2 handle) { m_maskTextureInRayTracing = handle; }
 		void AddRefCountInRayTracing() { m_refCountInRayTracing++; }
 
 	private:
 		// ray tracing descriptor table handles
-		Ideal::D3D12DescriptorHandle m_diffuseTextureInRayTracing;
-		Ideal::D3D12DescriptorHandle m_normalTextureInRayTracing;
-		Ideal::D3D12DescriptorHandle m_maskTextureInRayTracing;
+		Ideal::D3D12DescriptorHandle2 m_diffuseTextureInRayTracing;
+		Ideal::D3D12DescriptorHandle2 m_normalTextureInRayTracing;
+		Ideal::D3D12DescriptorHandle2 m_maskTextureInRayTracing;
 		uint64 m_refCountInRayTracing = 0;
 
 	private:

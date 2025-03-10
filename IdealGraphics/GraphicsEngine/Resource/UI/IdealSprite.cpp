@@ -3,7 +3,8 @@
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
 #include "GraphicsEngine/Resource/IdealMesh.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
+#include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
@@ -20,7 +21,7 @@ Ideal::IdealSprite::~IdealSprite()
 
 }
 
-void Ideal::IdealSprite::DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, const Vector2& ScreenSize)
+void Ideal::IdealSprite::DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, const Vector2& ScreenSize, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	SetScreenSize(ScreenSize);
 	//m_cbSprite.ScreenSize = ScreenSize;
@@ -48,18 +49,20 @@ void Ideal::IdealSprite::DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12Gr
 		// SRV
 		if (!m_texture.expired())
 		{
-			auto handle = UIDescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), m_texture.lock()->GetSRV().GetCpuHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetGraphicsRootDescriptorTable(Ideal::RectRootSignature::Slot::SRV_Sprite, handle.GetGpuHandle());
+			auto handle = UIDescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), m_texture.lock()->GetSRV2().GetCPUDescriptorHandleStart(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetGraphicsRootDescriptorTable(Ideal::RectRootSignature::Slot::SRV_Sprite, handle.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 		}
 
 		// Sprite Constant Buffer
 		{
 			auto cb = CBPool->Allocate(Device.Get(), sizeof(CB_Sprite));
 			memcpy(cb->SystemMemoryAddress, &m_cbSprite, sizeof(CB_Sprite));
-			auto handle = UIDescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle.GetCpuHandle(), cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetGraphicsRootDescriptorTable(Ideal::RectRootSignature::Slot::CBV_RectInfo, handle.GetGpuHandle());
+			auto handle = UIDescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle.GetCPUDescriptorHandleStart(), cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetGraphicsRootDescriptorTable(Ideal::RectRootSignature::Slot::CBV_RectInfo, handle.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle);
 		}
 	}
 	// TODO : DrawIndexedInstanced

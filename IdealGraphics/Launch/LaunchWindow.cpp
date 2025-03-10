@@ -5,7 +5,7 @@
 #include "Launch/LaunchWindow.h"
 #include "Core/Core.h"
 
-#include "GraphicsEngine/D3D12/D3D12Renderer.h"
+//#include "GraphicsEngine/D3D12/D3D12Renderer.h"
 
 #define MAX_LOADSTRING 100
 
@@ -49,8 +49,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     {
         // 일부러 NullPtr 생성
-        std::shared_ptr<Ideal::D3D12Renderer> renderer; // = std::make_shared<Ideal::D3D12Renderer>(g_hWnd, 1280, 960);
-        renderer->Init();
+        //std::shared_ptr<Ideal::D3D12Renderer> renderer; // = std::make_shared<Ideal::D3D12Renderer>(g_hWnd, 1280, 960);
+        //renderer->Init();
 
         while (msg.message != WM_QUIT)
         {
@@ -62,11 +62,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             else
             {
                 // MAIN LOOP
-                renderer->Tick();
-                renderer->Render();
+                //renderer->Tick();
+                //renderer->Render();
             }
         }
-        renderer->Release();
+       // renderer->Release();
     }
 #ifdef _DEBUG
     _ASSERT(_CrtCheckMemory());

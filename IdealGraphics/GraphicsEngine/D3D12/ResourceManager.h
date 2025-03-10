@@ -1,5 +1,6 @@
 #pragma once
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+//#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include <winnt.h>
 
 #include "GraphicsEngine/VertexInfo.h"
@@ -17,7 +18,8 @@ namespace Ideal
 	class D3D12ShaderResourceView;
 	class D3D12UnorderedAccessView;
 	class D3D12Texture;
-	class D3D12DescriptorHeap;
+	//class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
 	class IdealStaticMeshObject;
 	class IdealSkinnedMeshObject;
 	template <typename> class IdealMesh;
@@ -57,9 +59,6 @@ namespace Ideal
 
 	class ResourceManager : public std::enable_shared_from_this<ResourceManager>
 	{
-		static const uint32 MAX_DSV_HEAP_COUNT = 5;
-		static const uint32 MAX_RTV_HEAP_COUNT = 32;
-
 	private:
 		//--resource id--//
 		uint64 AllocateMaterialID();
@@ -79,9 +78,10 @@ namespace Ideal
 		void Fence();
 		void WaitForFenceValue();
 		void WaitForResourceUpload();
+		void ShutDown();
 
-		ComPtr<ID3D12DescriptorHeap> GetSRVHeap() { return m_cbv_srv_uavHeap->GetDescriptorHeap(); }
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> GetSRVPool() { return m_cbv_srv_uavHeap; }
+		//ComPtr<ID3D12DescriptorHeap> GetSRVHeap() { return m_cbv_srv_uavHeap->GetDescriptorHeap(); }
+		//std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> GetSRVPool() { return m_cbv_srv_uavHeap; }
 
 		template <typename TType>
 		void CreateStructuredBuffer(std::shared_ptr<Ideal::D3D12StructuredBuffer> OutStructuredBuffer, std::vector<TType>& Vertices)
@@ -116,7 +116,7 @@ namespace Ideal
 			WaitForFenceValue();
 
 			//-------------SRV--------------//
-			auto srvHandle = m_cbv_srv_uavHeap->Allocate();
+			auto srvHandle = m_cbv_srv_uavHeap2->Allocate(1);
 			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			srvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -125,11 +125,11 @@ namespace Ideal
 			srvDesc.Buffer.StructureByteStride = sizeof(TType);
 			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 			
-			m_device->CreateShaderResourceView(OutStructuredBuffer->GetResource(), &srvDesc, srvHandle.GetCpuHandle());
-			OutStructuredBuffer->EmplaceSRV(srvHandle);
+			m_device->CreateShaderResourceView(OutStructuredBuffer->GetResource(), &srvDesc, srvHandle.GetCPUDescriptorHandleStart());
+			OutStructuredBuffer->EmplaceSRV2(srvHandle);
 			
 			//-------------UAV--------------//
-			auto uavHandle = m_cbv_srv_uavHeap->Allocate();
+			auto uavHandle = m_cbv_srv_uavHeap2->Allocate(1);
 			D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 			uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
@@ -139,8 +139,8 @@ namespace Ideal
 			uavDesc.Buffer.CounterOffsetInBytes = 0;
 			uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			
-			m_device->CreateUnorderedAccessView(OutStructuredBuffer->GetResource(), nullptr, &uavDesc, uavHandle.GetCpuHandle());
-			OutStructuredBuffer->EmplaceUAV(uavHandle);
+			m_device->CreateUnorderedAccessView(OutStructuredBuffer->GetResource(), nullptr, &uavDesc, uavHandle.GetCPUDescriptorHandleStart());
+			OutStructuredBuffer->EmplaceUAV2(uavHandle);
 		}
 
 		template <typename TVertexType>
@@ -210,20 +210,6 @@ namespace Ideal
 		);
 		void CreateIndexBufferUint16(std::shared_ptr<Ideal::D3D12IndexBuffer> OutIndexBuffer,
 			std::vector<uint16>& Indices);
-
-		//template <typename T>
-		//void CreateInstanceBuffer(std::shared_ptr<Ideal::D3D12UploadBuffer> OutInstanceBuffer, std::vector<T> InstanceData, uint32 ElementCount)
-		//{
-		//	m_commandAllocator->Reset();
-		//	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-		//
-		//	OutInstanceBuffer = std::make_shared<Ideal::D3D12UploadBuffer>();
-		//	OutInstanceBuffer->Create(m_device.Get(), sizeof(T) * ElementCount);
-		//	void* data = OutInstanceBuffer->Map();
-		//	memcpy(data, InstanceData.data(), sizeof(T) * ElementCount);
-		//	OutInstanceBuffer->UnMap();
-		//}
-
 		// 파일 로드하여 srv로 만든다.
 		void CreateTexture(std::shared_ptr<Ideal::D3D12Texture>& OutTexture, const std::wstring& Path, bool IgnoreSRGB = false, uint32 MipLevels = 1, bool IsNormalMap = false);
 
@@ -247,7 +233,7 @@ namespace Ideal
 		void DeleteStaticMeshObject(std::shared_ptr<Ideal::IdealStaticMeshObject> Mesh);
 		void DeleteSkinnedMeshObject(std::shared_ptr<Ideal::IdealSkinnedMeshObject> Mesh);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHeap() { return m_rtvHeap->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(); };
+		//D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHeap() { return m_rtvHeap->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(); };
 
 		std::shared_ptr<Ideal::IdealMaterial> CreateMaterial();
 
@@ -276,13 +262,9 @@ namespace Ideal
 
 	private:
 		// Descriptor heaps
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_cbv_srv_uavHeap;
-		// const uint32 m_srvHeapCount = 16384;
-		const uint32 m_srvHeapCount = 16384 * 4;
-
-		// 2024.05.14 Multi Render Target
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_rtvHeap;
-		std::shared_ptr<Ideal::D3D12DynamicDescriptorHeap> m_dsvHeap;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_cbv_srv_uavHeap2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_rtvHeap2;
+		std::shared_ptr<Ideal::D3D12DescriptorHeap2> m_dsvHeap2;
 
 	private:
 		std::wstring m_assetPath;

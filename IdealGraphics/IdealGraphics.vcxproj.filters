@@ -77,9 +77,6 @@
       <Filter>Misc\Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Misc\ThirdParty\Utils\PIX.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12Renderer.h">
-      <Filter>GraphicsEngine</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Viewport.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
@@ -103,9 +100,6 @@
     <ClInclude Include="GraphicsEngine\public\IdealRendererFactory.h" />
     <ClInclude Include="GraphicsEngine\public\ICamera.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealCamera.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.h">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsEngine\D3D12\ResourceManager.h">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClInclude>
@@ -116,8 +110,6 @@
     <ClInclude Include="GraphicsEngine\ConstantBufferInfo.h" />
     <ClInclude Include="GraphicsEngine\Resource\ModelAnimation.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealMesh.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12RootSignature.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Shader.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealBone.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealStaticMeshObject.h" />
@@ -129,11 +121,9 @@
     <ClInclude Include="GraphicsEngine\public\ISkinnedMeshObject.h" />
     <ClInclude Include="GraphicsEngine\public\IAnimation.h" />
     <ClInclude Include="GraphicsEngine\Resource\IdealAnimation.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealRenderScene.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealPointLight.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealSpotLight.h" />
-    <ClInclude Include="GraphicsEngine\Resource\IdealScreenQuad.h" />
     <ClInclude Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.h" />
     <ClInclude Include="GraphicsEngine\public\ISpotLight.h" />
     <ClInclude Include="GraphicsEngine\public\IPointLight.h" />
@@ -162,7 +152,6 @@
     <ClInclude Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.h" />
     <ClInclude Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.h" />
-    <ClInclude Include="GraphicsEngine\D3D12\D3D12DescriptorManager.h" />
     <ClInclude Include="GraphicsEngine\public\IRendererResource.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12UAV.h" />
     <ClInclude Include="GraphicsEngine\D3D12\DeferredDeleteManager.h" />
@@ -229,6 +218,8 @@
     <ClInclude Include="Misc\Utils\RandomValue.h" />
     <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Descriptors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -246,9 +237,6 @@
   <ItemGroup>
     <ClCompile Include="Launch\LaunchWindow.cpp">
       <Filter>Launch</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12Renderer.cpp">
-      <Filter>GraphicsEngine</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Viewport.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
@@ -269,9 +257,6 @@
     <ClCompile Include="GraphicsEngine\Resource\ResourceBase.cpp" />
     <ClCompile Include="GraphicsEngine\private\IdealRendererFactory.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealCamera.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorHeap.cpp">
-      <Filter>GraphicsEngine\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsEngine\D3D12\ResourceManager.cpp">
       <Filter>GraphicsEngine\D3D12</Filter>
     </ClCompile>
@@ -283,8 +268,6 @@
     </ClCompile>
     <ClCompile Include="GraphicsEngine\Resource\ModelAnimation.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealMesh.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12PipelineStateObject.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12RootSignature.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Shader.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealBone.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealStaticMeshObject.cpp" />
@@ -293,11 +276,9 @@
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMeshObject.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealSkinnedMesh.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\IdealAnimation.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealRenderScene.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12ConstantBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealPointLight.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealSpotLight.cpp" />
-    <ClCompile Include="GraphicsEngine\Resource\IdealScreenQuad.cpp" />
     <ClCompile Include="GraphicsEngine\Resource\Light\IdealDirectionalLight.cpp" />
     <ClCompile Include="Editor\imgui\imgui.cpp" />
     <ClCompile Include="Editor\imgui\imgui_demo.cpp" />
@@ -315,7 +296,6 @@
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\DXRAccelerationStructureManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UploadBufferPool.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RaytracingManager.cpp" />
-    <ClCompile Include="GraphicsEngine\D3D12\D3D12DescriptorManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12UAV.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\DeferredDeleteManager.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\Raytracing\RayTracingFlagManger.cpp" />
@@ -341,6 +321,8 @@
     <ClCompile Include="Misc\Utils\RandomValue.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />
     <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Descriptors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">
@@ -396,5 +378,8 @@
     <None Include="..\Shaders\Raytracing\DisneyBSDF.hlsli" />
     <None Include="..\Shaders\Particle\ParticleCommon.hlsli" />
     <None Include="ThirdParty\Include\DirectXTK12\SimpleMath.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="0.Document\리팩토링.txt" />
   </ItemGroup>
 </Project>

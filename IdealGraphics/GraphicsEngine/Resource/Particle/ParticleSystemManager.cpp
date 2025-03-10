@@ -3,7 +3,8 @@
 #include <d3d12.h>
 #include <d3dx12.h>
 #include "GraphicsEngine/Resource/Particle/ParticleSystem.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
+#include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
@@ -158,7 +159,7 @@ void Ideal::ParticleSystemManager::DeleteParticleSystem(std::shared_ptr<Ideal::P
 	}
 }
 
-void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData, std::shared_ptr<Ideal::IdealCamera> Camera)
+void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData, std::shared_ptr<Ideal::IdealCamera> Camera, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	// 먼저 위치 계산부터 하겠음
 	CommandList->SetComputeRootSignature(m_rootSignature.Get());
@@ -168,7 +169,7 @@ void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, Co
 		{
 			if (p->GetRenderMode() == Ideal::ParticleMenu::ERendererMode::Billboard)
 			{
-				p->ComputeRenderBillboard(Device, CommandList, DescriptorHeap, CBPool);
+				p->ComputeRenderBillboard(Device, CommandList, DescriptorHeap, CBPool, DeferredDeleteManager);
 			}
 		}
 	}
@@ -178,7 +179,7 @@ void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, Co
 		{
 			if (p->GetRenderMode() == Ideal::ParticleMenu::ERendererMode::Billboard)
 			{
-				p->ComputeRenderBillboard(Device, CommandList, DescriptorHeap, CBPool);
+				p->ComputeRenderBillboard(Device, CommandList, DescriptorHeap, CBPool, DeferredDeleteManager);
 			}
 		}
 	}
@@ -189,16 +190,17 @@ void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, Co
 		// Global Data 
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
 		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
-		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
+		auto handle0 = DescriptorHeap->Allocate(1);
+		Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::ParticleSystemRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 	}
 	for (auto& p : m_particlesNoTransparency)
 	{
 		// TODO: DRAW
 		if (p->GetActive())
 		{
-			p->DrawParticle(Device, CommandList, DescriptorHeap, CBPool, CB_GlobalData->eyePos, Camera);
+			p->DrawParticle(Device, CommandList, DescriptorHeap, CBPool, CB_GlobalData->eyePos, Camera, DeferredDeleteManager);
 		}
 	}
 	for (auto& p : m_particles)
@@ -206,7 +208,7 @@ void Ideal::ParticleSystemManager::DrawParticles(ComPtr<ID3D12Device> Device, Co
 		// TODO: DRAW
 		if (p->GetActive())
 		{
-			p->DrawParticle(Device, CommandList, DescriptorHeap, CBPool, CB_GlobalData->eyePos, Camera);
+			p->DrawParticle(Device, CommandList, DescriptorHeap, CBPool, CB_GlobalData->eyePos, Camera, DeferredDeleteManager);
 		}
 	}
 }

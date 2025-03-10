@@ -5,10 +5,11 @@
 #include "GraphicsEngine/VertexInfo.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/Resource/IdealStaticMeshObject.h"
+#include "GraphicsEngine/D3D12/DeferredDeleteManager.h"
 
 void Ideal::DebugMeshManager::Init(ComPtr<ID3D12Device> Device)
 {
@@ -170,7 +171,7 @@ void Ideal::DebugMeshManager::SetPSLine(std::shared_ptr<Ideal::D3D12Shader> Shad
 	m_psLine = Shader;
 }
 
-void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData)
+void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, CB_Global* CB_GlobalData, std::shared_ptr<Ideal::DeferredDeleteManager>DeferredDeleteManager)
 {
 	/// Bind To Shader
 	{
@@ -180,13 +181,13 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		// Global Data 
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
 		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
-		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
-
+		auto handle0 = DescriptorHeap->Allocate(1);
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
+		Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugMeshRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
 		for (auto& m : m_meshes)
 		{
-			m.lock()->DebugDraw(Device, CommandList, DescriptorHeap, CBPool);
+			m.lock()->DebugDraw(Device, CommandList, DescriptorHeap, CBPool, DeferredDeleteManager);
 		}
 	}
 
@@ -197,9 +198,10 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 		// Global Data
 		auto cb0 = CBPool->Allocate(Device.Get(), sizeof(CB_Global));
 		memcpy(cb0->SystemMemoryAddress, CB_GlobalData, sizeof(CB_Global));
-		auto handle0 = DescriptorHeap->Allocate();
-		Device->CopyDescriptorsSimple(1, handle0.GetCpuHandle(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_Global, handle0.GetGpuHandle());
+		auto handle0 = DescriptorHeap->Allocate(1);
+		DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
+		Device->CopyDescriptorsSimple(1, handle0.GetCPUDescriptorHandleStart(), cb0->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_Global, handle0.GetGPUDescriptorHandleStart());
 
 		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = m_lineVB->GetView();
 		
@@ -214,10 +216,10 @@ void Ideal::DebugMeshManager::DrawDebugMeshes(ComPtr<ID3D12Device> Device, ComPt
 			cbDebugLine.color = l.color;
 			auto cb1 = CBPool->Allocate(Device.Get(), sizeof(CB_DebugLine));
 			memcpy(cb1->SystemMemoryAddress, &cbDebugLine, sizeof(CB_DebugLine));
-			auto handle1 = DescriptorHeap->Allocate();
-			Device->CopyDescriptorsSimple(1, handle1.GetCpuHandle(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_LineInfo, handle1.GetGpuHandle());
-		
+			auto handle1 = DescriptorHeap->Allocate(1);
+			Device->CopyDescriptorsSimple(1, handle1.GetCPUDescriptorHandleStart(), cb1->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			CommandList->SetGraphicsRootDescriptorTable(Ideal::DebugLineRootSignature::Slot::CBV_LineInfo, handle1.GetGPUDescriptorHandleStart());
+			DeferredDeleteManager->AddDescriptorHandleToDeferredDelete(handle0);
 			CommandList->DrawInstanced(2, 1, 0, 0);
 		}
 		//CommandList->DrawInstanced(2, static_cast<uint32>(m_lines.size()), 0, 0);

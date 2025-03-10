@@ -58,6 +58,7 @@ namespace Ideal
 	public:
 		virtual void Init() abstract;
 		virtual void Tick() abstract;
+		virtual void ShutDown() abstract;
 		virtual void Render() abstract;
 		virtual void Resize(UINT Width, UINT Height) abstract;
 		virtual void ToggleFullScreenWindow() abstract;

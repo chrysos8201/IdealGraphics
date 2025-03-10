@@ -5,9 +5,8 @@
 #include "GraphicsEngine/Resource/IdealBone.h"
 #include "GraphicsEngine/Resource/IdealAnimation.h"
 #include "GraphicsEngine/Resource/IdealSkinnedMesh.h"
-#include "GraphicsEngine/D3D12/D3D12Renderer.h"
 #include "GraphicsEngine/D3D12/D3D12ConstantBufferPool.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 #include "GraphicsEngine/D3D12/D3D12Texture.h"
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
@@ -16,7 +15,6 @@
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
 #include "GraphicsEngine/D3D12/ResourceManager.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorManager.h"
 #include "GraphicsEngine/D3D12/D3D12UAV.h"
 #include "GraphicsEngine/D3D12/Raytracing/DXRAccelerationStructureManager.h"
 #include "GraphicsEngine/VertexInfo.h"
@@ -71,57 +69,7 @@ void Ideal::IdealSkinnedMeshObject::Init(std::shared_ptr<IdealRenderer> Renderer
 
 void Ideal::IdealSkinnedMeshObject::Draw(std::shared_ptr<Ideal::IdealRenderer> Renderer)
 {
-	if (!m_isDraw)
-	{
-		return;
-	}
-
-	std::shared_ptr<Ideal::D3D12Renderer> d3d12Renderer = std::static_pointer_cast<Ideal::D3D12Renderer>(Renderer);
-	ComPtr<ID3D12GraphicsCommandList> commandList = d3d12Renderer->GetCommandList();
-	ComPtr<ID3D12Device> device = d3d12Renderer->GetDevice();
-	std::shared_ptr<Ideal::D3D12DescriptorHeap> descriptorHeap = d3d12Renderer->GetMainDescriptorHeap();
 	
-	AnimationPlay();
-
-	// Bind Descriptor Table
-	auto handle = descriptorHeap->Allocate(2);
-	uint32 incrementSize = d3d12Renderer->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	commandList->SetGraphicsRootDescriptorTable(SKINNED_MESH_DESCRIPTOR_TABLE_INDEX_OBJ, handle.GetGpuHandle());
-
-	{
-		// Bind Transform
-		auto cb = d3d12Renderer->ConstantBufferAllocate(sizeof(CB_Transform));
-		if (!cb)
-		{
-			__debugbreak();
-		}
-
-		CB_Transform* t = (CB_Transform*)cb->SystemMemoryAddress;
-		t->World = m_transform.Transpose();
-		t->WorldInvTranspose = m_transform.Transpose().Invert();
-
-		// Copy To Main Descriptor Table
-		CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), SKINNED_MESH_DESCRIPTOR_INDEX_CBV_TRANSFORM, incrementSize);
-		device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	}
-
-	// Bind Bone
-	{
-		auto cb = d3d12Renderer->ConstantBufferAllocate(sizeof(CB_Bone));
-		if (!cb)
-		{
-			__debugbreak();
-		}
-
-		CB_Bone* b = (CB_Bone*)cb->SystemMemoryAddress;
-		*b = m_cbBoneData;
-
-		// Copy To Main Descriptor Table
-		CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(handle.GetCpuHandle(), SKINNED_MESH_DESCRIPTOR_INDEX_CBV_BONE, incrementSize);
-		device->CopyDescriptorsSimple(1, cbvDest, cb->CpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	}
-
-	m_skinnedMesh->Draw(Renderer);
 }
 
 void Ideal::IdealSkinnedMeshObject::SetAnimation(const std::string& AnimationName, bool ReserveAnimation /*= true*/)
@@ -341,10 +289,11 @@ void Ideal::IdealSkinnedMeshObject::UpdateBLASInstance(
 	ComPtr<ID3D12Device5> Device,
 	ComPtr<ID3D12GraphicsCommandList4> CommandList,
 	std::shared_ptr<Ideal::ResourceManager> ResourceManager,
-	std::shared_ptr<Ideal::D3D12DescriptorManager> DescriptorManager,
+	std::shared_ptr<Ideal::D3D12DescriptorHeap2> DescriptorManager,
 	uint32 CurrentContextIndex,
 	std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool,
-	std::shared_ptr<Ideal::RaytracingManager> RaytracingManager
+	std::shared_ptr<Ideal::RaytracingManager> RaytracingManager,
+	std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager
 )
 {
 	if (m_playAnimation == false)
@@ -378,7 +327,8 @@ void Ideal::IdealSkinnedMeshObject::UpdateBLASInstance(
 					meshes[i]->GetVertexBuffer(),
 					&m_cbBoneData,
 					//m_uavView
-					m_vertexBufferUAVs[i]
+					m_vertexBufferUAVs[i],
+					DeferredDeleteManager
 				);
 			}
 		}

@@ -33,7 +33,7 @@ void Ideal::IdealText::ChangeText(const std::wstring& Text, const DirectX::Simpl
 	}
 	textImage = new BYTE[width * height * 4];
 
-	m_textManager.lock()->WriteTextToBitmap(textImage, width, height, width * 4, m_fontHandle, Text.c_str(), Color);
+	//m_textManager.lock()->WriteTextToBitmap(textImage, width, height, width * 4, m_fontHandle, Text.c_str(), Color);
 
 }
 
@@ -63,38 +63,38 @@ void Ideal::IdealText::SetFontHandle(std::shared_ptr<Ideal::FontHandle> FontHand
 
 void Ideal::IdealText::UpdateDynamicTextureWithImage(ComPtr<ID3D12Device> Device)
 {
-	if (!m_isChanged)
-		return;
-	m_isChanged = false;
-	std::weak_ptr<Ideal::D3D12Texture> Texture = m_textSprite->GetTexture();
-
-	D3D12_RESOURCE_DESC desc = Texture.lock()->GetResource()->GetDesc();
-	D3D12_PLACED_SUBRESOURCE_FOOTPRINT Footprint;
-	uint32 rows = 0;
-	uint64 rowSize = 0;
-	uint64 TotalBytes = 0;
-	Device->GetCopyableFootprints(&desc, 0, 1, 0, &Footprint, &rows, &rowSize, &TotalBytes);
-
-	BYTE* mappedPtr = nullptr;
-	CD3DX12_RANGE writeRange(0, 0);
-	HRESULT hr = Texture.lock()->GetUploadBuffer()->Map(0, &writeRange, reinterpret_cast<void**>(&mappedPtr));
-	Check(hr);
-
-	BYTE* pSrc = textImage;
-	BYTE* pDest = mappedPtr;
-	for (uint32 y = 0; y < desc.Height; ++y)
-	{
-		memcpy(pDest, pSrc, desc.Width * 4);
-		pSrc += (desc.Width * 4);
-		pDest += Footprint.Footprint.RowPitch;
-	}
-	Texture.lock()->GetUploadBuffer()->Unmap(0, nullptr);
-	Texture.lock()->SetUpdated();
+	//if (!m_isChanged)
+	//	return;
+	//m_isChanged = false;
+	//std::weak_ptr<Ideal::D3D12Texture> Texture = m_textSprite->GetTexture();
+	//
+	//D3D12_RESOURCE_DESC desc = Texture.lock()->GetResource()->GetDesc();
+	//D3D12_PLACED_SUBRESOURCE_FOOTPRINT Footprint;
+	//uint32 rows = 0;
+	//uint64 rowSize = 0;
+	//uint64 TotalBytes = 0;
+	//Device->GetCopyableFootprints(&desc, 0, 1, 0, &Footprint, &rows, &rowSize, &TotalBytes);
+	//
+	//BYTE* mappedPtr = nullptr;
+	//CD3DX12_RANGE writeRange(0, 0);
+	//HRESULT hr = Texture.lock()->GetUploadBuffer()->Map(0, &writeRange, reinterpret_cast<void**>(&mappedPtr));
+	//Check(hr);
+	//
+	//BYTE* pSrc = textImage;
+	//BYTE* pDest = mappedPtr;
+	//for (uint32 y = 0; y < desc.Height; ++y)
+	//{
+	//	memcpy(pDest, pSrc, desc.Width * 4);
+	//	pSrc += (desc.Width * 4);
+	//	pDest += Footprint.Footprint.RowPitch;
+	//}
+	//Texture.lock()->GetUploadBuffer()->Unmap(0, nullptr);
+	//Texture.lock()->SetUpdated();
 }
 
 void Ideal::IdealText::Resize(uint32 Width, uint32 Height)
 {
-	m_textSprite->ReSize(Width, Height);
+	//m_textSprite->ReSize(Width, Height);
 }
 
 void Ideal::IdealText::ResizeTexture(float Width, float Height)

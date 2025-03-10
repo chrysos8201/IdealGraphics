@@ -12,9 +12,9 @@ namespace Ideal
 	class D3D12PipelineStateObject;
 	class IdealSprite;
 	class IdealText;
-	class D3D12DynamicDescriptorHeap;
 	class D3D12DynamicConstantBufferAllocator;
-	class D3D12DescriptorHeap;
+	class DeferredDeleteManager;
+	class D3D12DescriptorHeap2;
 }
 
 namespace Ideal
@@ -46,7 +46,7 @@ namespace Ideal
 
 	public:
 		void Init(ComPtr<ID3D12Device> Device);
-		void DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool);
+		void DrawCanvas(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 
 		void AddSprite(std::weak_ptr<Ideal::IdealSprite> Sprite);
 		void DeleteSprite(std::weak_ptr<Ideal::IdealSprite> Sprite);

@@ -4,7 +4,7 @@
 #include <d3dx12.h>
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
-#include "GraphicsEngine/D3D12/D3D12DescriptorHeap.h"
+#include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 
 #include "GraphicsEngine/ConstantBufferInfo.h"
 #include "GraphicsEngine/Resource/IdealMesh.h"
@@ -37,13 +37,13 @@ namespace Ideal
 		uint32 IndexCount;
 
 		// refactor
-		Ideal::D3D12DescriptorHandle SRV_VertexBuffer;
-		Ideal::D3D12DescriptorHandle SRV_IndexBuffer;
-		Ideal::D3D12DescriptorHandle SRV_Diffuse;
-		Ideal::D3D12DescriptorHandle SRV_Normal;
-		Ideal::D3D12DescriptorHandle SRV_Metallic;
-		Ideal::D3D12DescriptorHandle SRV_Roughness;
-		Ideal::D3D12DescriptorHandle SRV_Mask;
+		Ideal::D3D12DescriptorHandle2 SRV_VertexBuffer;
+		Ideal::D3D12DescriptorHandle2 SRV_IndexBuffer;
+		Ideal::D3D12DescriptorHandle2 SRV_Diffuse;
+		Ideal::D3D12DescriptorHandle2 SRV_Normal;
+		Ideal::D3D12DescriptorHandle2 SRV_Metallic;
+		Ideal::D3D12DescriptorHandle2 SRV_Roughness;
+		Ideal::D3D12DescriptorHandle2 SRV_Mask;
 		CB_MaterialInfo C_MaterialInfo;
 
 		std::weak_ptr<Ideal::IdealMaterial> Material;

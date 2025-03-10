@@ -12,10 +12,10 @@ namespace Ideal
 {
 	class D3D12Texture;
 	class D3D12DynamicConstantBufferAllocator;
-	class D3D12DynamicDescriptorHeap;
-	class D3D12DescriptorHeap;
+	class D3D12DescriptorHeap2;
 	template <typename> class IdealMesh;
 	class ITexture;
+	class DeferredDeleteManager;
 }
 
 namespace Ideal
@@ -28,7 +28,7 @@ namespace Ideal
 
 	public:
 		// device, cb pool, commandlist ÇÊ¿ä
-		void DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, const Vector2& ScreenSize);
+		void DrawSprite(ComPtr<ID3D12Device> Device, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12DescriptorHeap2> UIDescriptorHeap, std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> CBPool, const Vector2& ScreenSize, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 		// ComPtr<ID3D12Device> Device, ComPtr<ID3D12CommandList> CommandList, std::shared_ptr<Ideal::D3D12ConstantBufferPool> ConstantBufferPool
 	public:
 		//---Interface---//

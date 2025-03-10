@@ -228,13 +228,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Create Static Mesh
 		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
 		SampleCart->SetTransformMatrix(
-			Matrix::CreateRotationY(1.f) 
+			Matrix::CreateRotationY(1.f)
 			* Matrix::CreateTranslation(Vector3(5, 2, 5)));
-		
+
 		// Create Material
 		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial0 = gRenderer->CreateMaterial();
 		std::shared_ptr<Ideal::IMaterial> SampleCartMaterial1 = gRenderer->CreateMaterial();
-		
+
 		// Create Texture
 		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture0 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_cartdeco_BaseMap.png", true, false, false);
 		SampleCartMaterial0->SetBaseMap(SampleCartBaseTexture0);
@@ -244,7 +244,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		SampleCartMaterial0->SetMaskMap(SampleCartMaskTexture0);
 		// Bind Material
 		SampleCart->GetMeshByIndex(0).lock()->SetMaterialObject(SampleCartMaterial0);
-		
+
 		//// Create Texture
 		std::shared_ptr<Ideal::ITexture> SampleCartBaseTexture1 = gRenderer->CreateTexture(L"../Resources/Textures/cart/T_fruitcart_BaseMap.png", true, false, false);
 		SampleCartMaterial1->SetBaseMap(SampleCartBaseTexture1);
@@ -257,6 +257,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		SampleCart->GetMeshByIndex(2).lock()->SetMaterialObject(SampleCartMaterial1);
 
 		std::shared_ptr<Ideal::IMeshObject> SampleSphere = gRenderer->CreateStaticMeshObject(L"UVSphere/UVSphere");
+		std::shared_ptr<Ideal::IMaterial> SampleSphereMaterial = gRenderer->CreateMaterial();
+		std::shared_ptr<Ideal::ITexture> SampleSphereTextureWhite = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultNonOpaque.png", false, false, false);
+		std::shared_ptr<Ideal::ITexture> SampleSphereTextureNormal = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, true);
+		std::shared_ptr<Ideal::ITexture> SampleSphereTextureMask = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, false);
+		SampleSphereMaterial->SetBaseMap(SampleSphereTextureWhite);
+		SampleSphereMaterial->SetNormalMap(SampleSphereTextureNormal);
+		SampleSphereMaterial->SetMaskMap(SampleSphereTextureMask);
+
+		//SampleSphereMaterial->SetAlphaClipping(true);
+		SampleSphereMaterial->SetSurfaceTypeTransparent(true);
+		SampleSphere->GetMeshByIndex(0).lock()->SetMaterialObject(SampleSphereMaterial);
+		SampleSphere->AlphaClippingCheck();
 
 #pragma endregion
 
@@ -375,26 +387,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//garland->GetMeshByIndex(0).lock()->SetMaterialObject(garlandMaterial);
 		//garland->SetTransformMatrix(DirectX::SimpleMath::Matrix::CreateTranslation(Vector3(0, 5, 0)));
 
-		//auto windowMaterial = gRenderer->CreateMaterial();
-		//auto windowBase = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_BaseMap.png");
-		//auto windowNormal = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_Normal.png");
-		//auto windowMask = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_MaskMap.png");
-		//windowMaterial->SetBaseMap(windowBase);
-		//windowMaterial->SetNormalMap(windowNormal);
-		//windowMaterial->SetMaskMap(windowMask);
-		//windowMaterial->SetSurfaceTypeTransparent(true);
-		//windowMaterial->ChangeLayer(PlayerLayer);
+		auto windowMaterial = gRenderer->CreateMaterial();
+		auto windowBase = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_BaseMap.png");
+		auto windowNormal = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_Normal.png");
+		auto windowMask = gRenderer->CreateTexture(L"../Resources/Textures/Test_10_15/T_town_glass_MaskMap.png");
+		windowMaterial->SetBaseMap(windowBase);
+		windowMaterial->SetNormalMap(windowNormal);
+		windowMaterial->SetMaskMap(windowMask);
+		windowMaterial->SetSurfaceTypeTransparent(true);
+		windowMaterial->ChangeLayer(PlayerLayer);
 		std::vector<std::shared_ptr<Ideal::IMeshObject>> meshes;
 		for (int y = 0; y < 20; y++)
 		{
 			for (int x = 0; x < 20; x++)
 			{
 				std::shared_ptr<Ideal::IMeshObject> plane = gRenderer->CreateStaticMeshObject(L"DebugPlane/Plane");
-				plane->GetMeshByIndex(0).lock()->SetMaterialObject(planeMaterial);
-				//plane->GetMeshByIndex(0).lock()->SetMaterialObject(windowMaterial);
+				//plane->GetMeshByIndex(0).lock()->SetMaterialObject(planeMaterial);
+				plane->GetMeshByIndex(0).lock()->SetMaterialObject(windowMaterial);
 				plane->SetTransformMatrix(DirectX::SimpleMath::Matrix::CreateTranslation(Vector3(y * 2, 0, x * 2)));
 				meshes.push_back(plane);
-				//plane->AlphaClippingCheck();
+				plane->AlphaClippingCheck();
 			}
 		}
 
@@ -2635,10 +2647,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				//DebugEnemy->AnimationDeltaTime(0.003f);
 				//DebugPlayer->AnimationDeltaTime(1.003f);
 
-				if (GetAsyncKeyState(VK_END) * 0x8000)
-				{
-					//DebugPlayer->AnimationDeltaTime(0.106f);
-				}
 
 				//DebugPlayer0->AnimationDeltaTime(0.003f);
 #ifdef MAKE_PARTICLE
@@ -2778,6 +2786,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		planeNormalTexture.reset();
 		gRenderer->DeleteTexture(skybox);
 		skybox.reset();
+
+		gRenderer->ShutDown();
 		gRenderer.reset();
 	}
 

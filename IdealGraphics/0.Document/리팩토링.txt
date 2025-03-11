@@ -71,3 +71,16 @@ RenderPass를 관리하는 클래스를 만들겠다.
 
 2025.03.06
 c++20 으로 바꾸니 c1214 /zc:twoPhase 오류 발생
+
+
+
+///////////////////////////
+2025.03.11
+mesh shader를 하려면
+vertex buffer 부터 meshlet으로 바꾸어야한다....
+마소 샘플에 Meshlet Generator가 있다.
+-> Vertex Buffer를 어케바꾸지?
+
+
+https://chaoticbob.github.io/2024/01/24/mesh-shading-part-1.html
+https://chaoticbob.github.io/2023/12/09/d3d12-mesh-shader.html

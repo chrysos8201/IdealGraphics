@@ -8,6 +8,8 @@
 
 #define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
 
+#define USE_D3D12_DEBUG_LAYER 0
+
 //----USE UPLOAD COMMANDLIST CONTAINER----//
 //#define USE_UPLOAD_CONTAINER
 #define UPLOAD_CONTAINER_COUNT 8
@@ -147,6 +149,18 @@ namespace Ideal
 				UAV_OutMip2,
 				UAV_OutMip3,
 				UAV_OutMip4,
+				Count
+			};
+		}
+	}
+
+	namespace MeshShaderRootSignature
+	{
+		namespace Slot
+		{
+			enum Enum
+			{
+				CBV_Global = 0,
 				Count
 			};
 		}

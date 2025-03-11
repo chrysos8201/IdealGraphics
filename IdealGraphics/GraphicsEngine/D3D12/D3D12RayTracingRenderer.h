@@ -88,6 +88,8 @@ namespace Ideal
 	class RaytracingManager;
 	class D3D12DescriptorManager;
 
+	class MeshShaderManager;
+
 	class D2DTextManager;
 	struct FontHandle;
 	class IdealText;
@@ -212,7 +214,7 @@ namespace Ideal
 		ComPtr<ID3D12Device5> m_device;
 		ComPtr<ID3D12CommandQueue> m_commandQueue;
 
-		ComPtr<ID3D12GraphicsCommandList4> m_commandLists[MAX_PENDING_FRAME_COUNT];
+		ComPtr<ID3D12GraphicsCommandList6> m_commandLists[MAX_PENDING_FRAME_COUNT];
 		ComPtr<ID3D12CommandAllocator> m_commandAllocators[MAX_PENDING_FRAME_COUNT];
 		std::shared_ptr<Ideal::D3D12DynamicConstantBufferAllocator> m_cbAllocator[MAX_PENDING_FRAME_COUNT] = {};
 		std::shared_ptr<Ideal::D3D12UploadBufferPool> m_BLASInstancePool[MAX_PENDING_FRAME_COUNT] = {};
@@ -428,5 +430,11 @@ namespace Ideal
 		// 메인 텍스쳐를 바꾸겠다.
 		void CreateMainTexture(uint32 Width, uint32 Height);
 
+	private:
+		// 2025.03.11
+		// Mesh Shader
+		void CreateMeshShaderManager();
+
+		std::shared_ptr<Ideal::MeshShaderManager> m_meshShaderManager;
 	};
 }

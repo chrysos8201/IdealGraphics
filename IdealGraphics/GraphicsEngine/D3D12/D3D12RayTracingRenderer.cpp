@@ -55,6 +55,8 @@
 #include "GraphicsEngine/D3D12/TestShader.h"
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
 
+#include "GraphicsEngine/D3D12/MeshShader/MeshShaderManager.h"
+
 #include "GraphicsEngine/D2D/D2DTextManager.h"
 
 #define SizeOfInUint32(obj) ((sizeof(obj) - 1) / sizeof(UINT32) + 1)
@@ -136,18 +138,20 @@ void Ideal::D3D12RayTracingRenderer::Init()
 
 #if defined(_DEBUG)
 	{
-		//ComPtr<ID3D12Debug> debugController;
-		//ComPtr<ID3D12Debug1> debugController1;
-		//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-		//{
-		//	debugController->EnableDebugLayer();
-		//
-		//	if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
-		//	{
-		//		debugController1->SetEnableGPUBasedValidation(FALSE);
-		//	}
-		//	dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-		//}
+#if USE_D3D12_DEBUG_LAYER
+		ComPtr<ID3D12Debug> debugController;
+		ComPtr<ID3D12Debug1> debugController1;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+		{
+			debugController->EnableDebugLayer();
+
+			if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
+			{
+				debugController1->SetEnableGPUBasedValidation(FALSE);
+			}
+			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+		}
+#endif
 	}
 #endif
 
@@ -190,13 +194,42 @@ void Ideal::D3D12RayTracingRenderer::Init()
 	}
 finishAdapter:
 
-	D3D12_FEATURE_DATA_D3D12_OPTIONS5 caps = {};
-	Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &caps, sizeof(caps)), L"Device does not support ray tracing!");
-	if (caps.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+	// Ray tracing Support
 	{
-		MyMessageBoxW(L"Device does not support ray tracing!");
+		D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+		Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5)), L"Device does not support ray tracing!");
+		if (options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+		{
+			MyMessageBoxW(L"Device does not support ray tracing!");
+		}
 	}
 
+	// Mesh Shader Support
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
+		m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
+		if (options7.MeshShaderTier < D3D12_MESH_SHADER_TIER_1)
+		{
+			MyMessageBoxW(L"Device does not support Mesh Shader!");
+		}
+
+		D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_5 };
+		if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))
+			|| (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_6_5))
+		{
+			MyMessageBoxW(L"ERROR: Shader Model 6.5 is not supported!");
+		}
+
+		//D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
+		//m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options9, sizeof(options9));
+		//
+		//if (!options9.MeshShaderPipelineStatsSupported)
+		//{
+		//	MyMessageBoxW(L"Device does not support Mesh Shader!");
+		//}
+	}
+
+	// Gpu Upload Support
 	//D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
 	////Check(m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)), L"Device does not support options16!");
 	//HRESULT hr = m_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16));
@@ -325,6 +358,9 @@ finishAdapter:
 
 	// create resource
 	//CreateDeviceDependentResources();
+
+	// Test Mesh Shader
+	CreateMeshShaderManager();
 
 	RaytracingManagerInit();
 	m_raytracingManager->CreateMaterialInRayTracing(m_device, m_mainDescriptorHeap2, m_resourceManager->GetDefaultMaterial());
@@ -486,6 +522,9 @@ void Ideal::D3D12RayTracingRenderer::Render()
 
 	//--------SimpleTessellation--------//
 	DrawTessellation();
+
+	//--------Mesh Shader--------//
+	m_meshShaderManager->Draw(m_commandLists[m_currentContextIndex]);
 
 	//----Debug Mesh Draw----//
 	if (m_isEditor)
@@ -2935,4 +2974,27 @@ void Ideal::D3D12RayTracingRenderer::CreateMainTexture(uint32 Width, uint32 Heig
 	m_resourceManager->CreateEmptyTexture2D(m_mainTexture, Width, Height, DXGI_FORMAT_R8G8B8A8_UNORM, mainTextureFlag, L"MainTexture");
 
 	m_mainTexture->GetResourceComPtr()->SetName(L"MainTexture");
+}
+
+void Ideal::D3D12RayTracingRenderer::CreateMeshShaderManager()
+{
+	m_meshShaderManager = std::make_shared<Ideal::MeshShaderManager>();
+	CompileShader(L"../Shaders/MeshShader/MeshShader.hlsl",
+		L"../Shaders/MeshShader/",
+		L"MS_MeshShader",
+		L"ms_6_5",
+		L"MSMain"
+	);
+	auto ms = CreateAndLoadShader(L"../Shaders/MeshShader/MS_MeshShader.shader");
+	m_meshShaderManager->SetMS(ms);
+
+	CompileShader(L"../Shaders/MeshShader/TestPixelShader.hlsl",
+		L"../Shaders/MeshShader/",
+		L"PS_TestPixelShader",
+		L"ps_6_5",
+		L"PSMain"
+	);
+	auto ps = CreateAndLoadShader(L"../Shaders/MeshShader/PS_TestPixelShader.shader");
+	m_meshShaderManager->SetPS(ps);
+	m_meshShaderManager->Init(m_device);
 }

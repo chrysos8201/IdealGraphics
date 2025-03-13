@@ -48,7 +48,7 @@ void Ideal::MeshShaderManager::SetMesh(std::shared_ptr<Ideal::IMeshObject> Mesh)
 		0.f	// occlusion culling을 위해 필요하다고 함.
 	);
 
-	int a = 3;
+	int a = 2;
 }
 
 void Ideal::MeshShaderManager::Init(ComPtr<ID3D12Device5> Device)

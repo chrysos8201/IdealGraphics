@@ -221,6 +221,7 @@
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Descriptors.h" />
     <ClInclude Include="GraphicsEngine\D3D12\MeshShader\MeshShaderManager.h" />
+    <ClInclude Include="Misc\MeshOptimizer\meshoptimizer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -325,6 +326,23 @@
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Descriptors.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\MeshShader\MeshShaderManager.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\indexgenerator.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\overdrawanalyzer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\overdrawoptimizer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\partition.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\quantization.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\simplifier.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\spatialorder.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\stripifier.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vcacheanalyzer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vcacheoptimizer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vertexcodec.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vertexfilter.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vfetchanalyzer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\vfetchoptimizer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\allocator.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\clusterizer.cpp" />
+    <ClCompile Include="Misc\MeshOptimizer\indexcodec.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

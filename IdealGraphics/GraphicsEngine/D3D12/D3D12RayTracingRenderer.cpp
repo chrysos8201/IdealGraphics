@@ -794,7 +794,7 @@ void Ideal::D3D12RayTracingRenderer::SetMainCamera(std::shared_ptr<ICamera> Came
 	m_mainCamera = std::static_pointer_cast<Ideal::IdealCamera>(Camera);
 }
 
-std::shared_ptr<Ideal::IMeshObject> Ideal::D3D12RayTracingRenderer::CreateStaticMeshObject(const std::wstring& FileName)
+std::shared_ptr<Ideal::IMeshObject> Ideal::D3D12RayTracingRenderer::CreateStaticMeshObject(const std::wstring& FileName, bool AddRayTracing/* = false*/)
 {
 	std::shared_ptr<Ideal::IdealStaticMeshObject> newStaticMesh = std::make_shared<Ideal::IdealStaticMeshObject>();
 	m_resourceManager->CreateStaticMeshObject(newStaticMesh, FileName, false);
@@ -804,8 +804,10 @@ std::shared_ptr<Ideal::IMeshObject> Ideal::D3D12RayTracingRenderer::CreateStatic
 	// temp
 	auto mesh = std::static_pointer_cast<Ideal::IdealStaticMeshObject>(newStaticMesh);
 
-	RaytracingManagerAddObject(mesh);
-
+	if (AddRayTracing)
+	{
+		RaytracingManagerAddObject(mesh);
+	}
 	m_staticMeshObject.push_back(mesh);
 	return newStaticMesh;
 	//return nullptr;
@@ -2997,4 +2999,9 @@ void Ideal::D3D12RayTracingRenderer::CreateMeshShaderManager()
 	auto ps = CreateAndLoadShader(L"../Shaders/MeshShader/PS_TestPixelShader.shader");
 	m_meshShaderManager->SetPS(ps);
 	m_meshShaderManager->Init(m_device);
+
+	// TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+	std::shared_ptr<Ideal::IMeshObject> SampleCart = CreateStaticMeshObject(L"cart/SM_cart", false);
+	m_meshShaderManager->SetMesh(SampleCart);
+
 }

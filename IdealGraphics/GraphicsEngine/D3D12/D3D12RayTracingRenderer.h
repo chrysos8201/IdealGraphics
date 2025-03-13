@@ -126,7 +126,7 @@ namespace Ideal
 
 		std::shared_ptr<ICamera> CreateCamera() override;
 		void SetMainCamera(std::shared_ptr<ICamera> Camera) override;
-		std::shared_ptr<Ideal::IMeshObject> CreateStaticMeshObject(const std::wstring& FileName) override;
+		std::shared_ptr<Ideal::IMeshObject> CreateStaticMeshObject(const std::wstring& FileName, bool AddRayTracing = true) override;
 		std::shared_ptr<Ideal::ISkinnedMeshObject> CreateSkinnedMeshObject(const std::wstring& FileName) override;
 		void DeleteMeshObject(std::shared_ptr<Ideal::IMeshObject> MeshObject) override;
 		void DeleteDebugMeshObject(std::shared_ptr<Ideal::IMeshObject> DebugMeshObject) override;

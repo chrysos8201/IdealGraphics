@@ -57,8 +57,8 @@ namespace Ideal
 				ResourceManager->CreateIndexBuffer(m_indexBuffer, m_indices);
 			}
 
-			m_vertices.clear();
-			m_indices.clear();
+			//m_vertices.clear();
+			//m_indices.clear();
 		}
 
 
@@ -82,7 +82,10 @@ namespace Ideal
 		{
 			m_indices.insert(m_indices.end(), indices.begin(), indices.end());
 		}
-
+		std::vector<uint32>& GetIndicesRef()
+		{
+			return m_indices;
+		}
 		const std::string& GetMaterialName() { return m_materialName; }
 		void SetMaterialName(const std::string& MaterialName) { m_materialName = MaterialName; }
 		std::weak_ptr<Ideal::IdealMaterial> GetMaterial() { return m_material; }

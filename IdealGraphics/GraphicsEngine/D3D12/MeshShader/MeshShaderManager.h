@@ -5,6 +5,8 @@
 
 namespace Ideal
 {
+	class IdealStaticMeshObject;
+	class IMeshObject;
 	class D3D12Shader;
 }
 
@@ -15,6 +17,10 @@ namespace Ideal
 	public:
 		MeshShaderManager();
 		~MeshShaderManager() = default;
+
+		// TEST TEST TEST TEST TEST TEST //
+		void SetMesh(std::shared_ptr<Ideal::IMeshObject> Mesh);
+		std::shared_ptr<Ideal::IdealStaticMeshObject> m_testMesh;
 
 	public:
 		void Init(ComPtr<ID3D12Device5> Device);

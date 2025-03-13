@@ -2,9 +2,53 @@
 #include "GraphicsEngine/D3D12/D3D12Shader.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 
+#include "GraphicsEngine/Resource/IdealStaticMeshObject.h"
+#include "GraphicsEngine/Resource/IdealMesh.h"
+#include "Misc/MeshOptimizer/meshoptimizer.h"
+
 Ideal::MeshShaderManager::MeshShaderManager()
 {
 
+}
+
+void Ideal::MeshShaderManager::SetMesh(std::shared_ptr<Ideal::IMeshObject> Mesh)
+{
+	/////////////// TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST////////////
+	m_testMesh = std::static_pointer_cast<Ideal::IdealStaticMeshObject>(Mesh);
+	auto getMesh = m_testMesh->GetMeshByIndex(0);
+	auto castedMesh = std::static_pointer_cast<Ideal::IdealMesh<BasicVertex>>(getMesh.lock());
+
+	auto vertices = castedMesh->GetVerticesRef();
+	auto indices = castedMesh->GetIndicesRef();
+
+	// Meshlet Generation
+	uint32 maxVertices = 64;
+	uint32 maxTriangles = 128;
+
+	const std::size_t maxMeshlets = meshopt_buildMeshletsBound(indices.size(), maxVertices, maxTriangles);
+
+	std::vector<meshopt_Meshlet> meshoptMeshlets;
+	std::vector<uint32> meshletVertexIndices;
+	std::vector<uint8> meshletTriangles;
+	meshoptMeshlets.resize(maxMeshlets);
+	meshletVertexIndices.resize(maxMeshlets * maxVertices);
+	meshletTriangles.resize(maxMeshlets * maxVertices * 3);
+	
+	const auto count = meshopt_buildMeshlets(
+		meshoptMeshlets.data(),
+		meshletVertexIndices.data(),
+		meshletTriangles.data(),
+		indices.data(),
+		indices.size(),
+		(const float*)(vertices.data()) + offsetof(BasicVertex, Position)/sizeof(float),
+		vertices.size(),
+		sizeof(BasicVertex),
+		maxVertices,
+		maxTriangles,
+		0.f	// occlusion culling을 위해 필요하다고 함.
+	);
+
+	int a = 3;
 }
 
 void Ideal::MeshShaderManager::Init(ComPtr<ID3D12Device5> Device)

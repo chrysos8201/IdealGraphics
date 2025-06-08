@@ -524,7 +524,7 @@ void Ideal::D3D12RayTracingRenderer::Render()
 	DrawTessellation();
 
 	//--------Mesh Shader--------//
-	m_meshShaderManager->Draw(m_commandLists[m_currentContextIndex]);
+	m_meshShaderManager->Draw(m_device, m_commandLists[m_currentContextIndex], m_mainDescriptorHeap2, m_deferredDeleteManager, m_cbAllocator[m_currentContextIndex], m_globalCB);
 
 	//----Debug Mesh Draw----//
 	if (m_isEditor)
@@ -3002,6 +3002,6 @@ void Ideal::D3D12RayTracingRenderer::CreateMeshShaderManager()
 
 	// TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 	std::shared_ptr<Ideal::IMeshObject> SampleCart = CreateStaticMeshObject(L"cart/SM_cart", false);
-	m_meshShaderManager->SetMesh(SampleCart);
+	m_meshShaderManager->SetMesh(SampleCart, m_resourceManager);
 
 }

@@ -177,6 +177,23 @@ namespace Ideal
 			
 			Fence();
 			WaitForFenceValue();
+
+
+			//2025.03.14// 그냥 다 SRV 만들어버리겠다. 얼마 크지도 않고
+
+			auto handle = m_cbv_srv_uavHeap2->Allocate(1);
+
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			//srvDesc.Format = Resource->GetDesc().Format;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srvDesc.Buffer.NumElements = elementCount;
+			srvDesc.Buffer.StructureByteStride = elementSize;
+			srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+			m_device->CreateShaderResourceView(OutVertexBuffer->GetResource(), &srvDesc, handle.GetCPUDescriptorHandleStart());
+			OutVertexBuffer->EmplaceSRV2(handle);
 #endif
 #ifdef USE_UPLOAD_CONTAINER
 			const uint32 elementSize = sizeof(TVertexType);

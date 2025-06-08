@@ -256,19 +256,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		SampleCart->GetMeshByIndex(1).lock()->SetMaterialObject(SampleCartMaterial1);
 		SampleCart->GetMeshByIndex(2).lock()->SetMaterialObject(SampleCartMaterial1);
 
-		std::shared_ptr<Ideal::IMeshObject> SampleSphere = gRenderer->CreateStaticMeshObject(L"UVSphere/UVSphere");
-		std::shared_ptr<Ideal::IMaterial> SampleSphereMaterial = gRenderer->CreateMaterial();
-		std::shared_ptr<Ideal::ITexture> SampleSphereTextureWhite = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultNonOpaque.png", false, false, false);
-		std::shared_ptr<Ideal::ITexture> SampleSphereTextureNormal = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, true);
-		std::shared_ptr<Ideal::ITexture> SampleSphereTextureMask = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, false);
-		SampleSphereMaterial->SetBaseMap(SampleSphereTextureWhite);
-		SampleSphereMaterial->SetNormalMap(SampleSphereTextureNormal);
-		SampleSphereMaterial->SetMaskMap(SampleSphereTextureMask);
-
-		//SampleSphereMaterial->SetAlphaClipping(true);
-		SampleSphereMaterial->SetSurfaceTypeTransparent(true);
-		SampleSphere->GetMeshByIndex(0).lock()->SetMaterialObject(SampleSphereMaterial);
-		SampleSphere->AlphaClippingCheck();
+		//std::shared_ptr<Ideal::IMeshObject> SampleSphere = gRenderer->CreateStaticMeshObject(L"UVSphere/UVSphere");
+		//std::shared_ptr<Ideal::IMaterial> SampleSphereMaterial = gRenderer->CreateMaterial();
+		//std::shared_ptr<Ideal::ITexture> SampleSphereTextureWhite = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultNonOpaque.png", false, false, false);
+		//std::shared_ptr<Ideal::ITexture> SampleSphereTextureNormal = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, true);
+		//std::shared_ptr<Ideal::ITexture> SampleSphereTextureMask = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", false, false, false);
+		//SampleSphereMaterial->SetBaseMap(SampleSphereTextureWhite);
+		//SampleSphereMaterial->SetNormalMap(SampleSphereTextureNormal);
+		//SampleSphereMaterial->SetMaskMap(SampleSphereTextureMask);
+		//
+		////SampleSphereMaterial->SetAlphaClipping(true);
+		//SampleSphereMaterial->SetSurfaceTypeTransparent(true);
+		//SampleSphere->GetMeshByIndex(0).lock()->SetMaterialObject(SampleSphereMaterial);
+		//SampleSphere->AlphaClippingCheck();
 
 #pragma endregion
 

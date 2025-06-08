@@ -161,6 +161,10 @@ namespace Ideal
 			enum Enum
 			{
 				CBV_Global = 0,
+				SRV_Vertices,
+				SRV_Meshlet,
+				SRV_MeshletTriangle,
+				SRV_MeshletVertexIndices,
 				Count
 			};
 		}

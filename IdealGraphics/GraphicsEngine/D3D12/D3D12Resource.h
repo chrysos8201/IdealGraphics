@@ -131,6 +131,10 @@ namespace Ideal
 		// 만들 때 리소스 스테이트를 COPY_DEST로 초기화 해준다.
 		void CreateBuffer(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount, D3D12_RESOURCE_FLAGS Flags = D3D12_RESOURCE_FLAG_NONE);
 
+		// 25.06.08
+		// ID3D12Heap에 CreatePlacedResource로 만들겠음
+		void CreateBuffer(ID3D12Device* Device, ID3D12Heap* Heap, uint32 Offset, uint32 ElementSize, uint32 ElementCount, D3D12_RESOURCE_FLAGS Flags = D3D12_RESOURCE_FLAG_NONE);
+
 		// GPU에서 버퍼를 만든다.
 		//void InitializeBuffer();
 		uint32 GetBufferSize() const;
@@ -164,6 +168,7 @@ namespace Ideal
 		// Upload Buffer에 있는 데이터를 GPU Buffer에 복사한다.
 		// 내부에서 리소스 베리어를 걸어주고 Buffer View를 만든다.
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
+		void Create(ID3D12Device* Device, ID3D12Heap* Heap, uint32 Offset, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, std::shared_ptr<Ideal::D3D12UploadBuffer> UploadBuffer);
 		void CreateAndCopyResource(ComPtr<ID3D12Device> Device, uint32 ElementSize, uint32 ElementCount, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12Resource> Resource, D3D12_RESOURCE_STATES BeforeState);
 

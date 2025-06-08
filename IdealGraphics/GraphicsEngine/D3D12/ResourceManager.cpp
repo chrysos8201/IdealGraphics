@@ -107,6 +107,9 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 	CreateDefaultQuadMesh2();
 	CreateDefaultDebugLine();
 	CreateParticleVertexBuffer();
+
+	//----25.06.08 D3D12Heap Å×½ºÆ®----//
+	CreateD3D12Heap();
 }
 
 void ResourceManager::ShutDown()
@@ -1535,3 +1538,13 @@ std::shared_ptr<Ideal::D3D12VertexBuffer> ResourceManager::GetParticleVertexBuff
 	return m_particleVertexBuffer;
 }
 
+void ResourceManager::CreateD3D12Heap()
+{
+	D3D12_HEAP_DESC heapDesc;
+	heapDesc.SizeInBytes = 64ull * 1024 * 1024;	// 64mb
+	heapDesc.Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;	// 64kb
+	heapDesc.Flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
+
+	HRESULT hr = m_device->CreateHeap(&heapDesc, IID_PPV_ARGS(m_heap.GetAddressOf()));
+}

@@ -124,10 +124,10 @@ namespace Ideal
 			srvDesc.Buffer.NumElements = elementCount;
 			srvDesc.Buffer.StructureByteStride = sizeof(TType);
 			srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-			
+
 			m_device->CreateShaderResourceView(OutStructuredBuffer->GetResource(), &srvDesc, srvHandle.GetCPUDescriptorHandleStart());
 			OutStructuredBuffer->EmplaceSRV2(srvHandle);
-			
+
 			//-------------UAV--------------//
 			auto uavHandle = m_cbv_srv_uavHeap2->Allocate(1);
 			D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
@@ -138,7 +138,7 @@ namespace Ideal
 			uavDesc.Buffer.StructureByteStride = sizeof(TType);
 			uavDesc.Buffer.CounterOffsetInBytes = 0;
 			uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-			
+
 			m_device->CreateUnorderedAccessView(OutStructuredBuffer->GetResource(), nullptr, &uavDesc, uavHandle.GetCPUDescriptorHandleStart());
 			OutStructuredBuffer->EmplaceUAV2(uavHandle);
 		}
@@ -151,11 +151,11 @@ namespace Ideal
 #ifndef USE_UPLOAD_CONTAINER
 			m_commandAllocator->Reset();
 			m_commandList->Reset(m_commandAllocator.Get(), nullptr);
-			
+
 			const uint32 elementSize = sizeof(TVertexType);
 			const uint32 elementCount = (uint32)Vertices.size();
 			const uint32 bufferSize = elementSize * elementCount;
-			
+
 			Ideal::D3D12UploadBuffer uploadBuffer;
 			uploadBuffer.Create(m_device.Get(), bufferSize);
 			{
@@ -163,18 +163,29 @@ namespace Ideal
 				memcpy(mappedData, Vertices.data(), bufferSize);
 				uploadBuffer.UnMap();
 			}
-			OutVertexBuffer->Create(m_device.Get(),
+			//OutVertexBuffer->Create(m_device.Get(),
+			//	m_commandList.Get(),
+			//	elementSize,
+			//	elementCount,
+			//	uploadBuffer
+			//);
+
+			// 25.06.08
+			OutVertexBuffer->Create(
+				m_device.Get(),
+				m_heap.Get(),
+				m_heapOffset,
 				m_commandList.Get(),
 				elementSize,
 				elementCount,
 				uploadBuffer
 			);
-			
+
 			//---------Execute---------//
 			m_commandList->Close();
 			ID3D12CommandList* commandLists[] = { m_commandList.Get() };
 			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-			
+
 			Fence();
 			WaitForFenceValue();
 #endif
@@ -182,7 +193,7 @@ namespace Ideal
 			const uint32 elementSize = sizeof(TVertexType);
 			const uint32 elementCount = (uint32)Vertices.size();
 			const uint32 bufferSize = elementSize * elementCount;
-			
+
 			auto Container = m_uploadCommandListPoolManager->AllocateUploadContainer(bufferSize);
 			std::shared_ptr<Ideal::D3D12UploadBuffer> uploadBuffer = Container->UploadBuffer;
 			//uploadBuffer->Create(m_device.Get(), bufferSize);
@@ -197,7 +208,7 @@ namespace Ideal
 				elementCount,
 				uploadBuffer
 			);
-			
+
 			//---------Execute---------//
 			Container->CloseAndExecute(m_commandQueue, m_fence);
 			Fence();
@@ -318,5 +329,11 @@ namespace Ideal
 		const uint32 ParticleCount = 1000;
 
 		std::shared_ptr<Ideal::D3D12VertexBuffer> m_particleVertexBuffer;
+
+		// 25.06.08 ID3D12Heap Å×½ºÆ®
+	private:
+		void CreateD3D12Heap();
+		ComPtr<ID3D12Heap> m_heap;
+		uint32 m_heapOffset = 0;
 	};
 }

@@ -427,6 +427,5 @@ namespace Ideal
 		// 2025.03.08
 		// 메인 텍스쳐를 바꾸겠다.
 		void CreateMainTexture(uint32 Width, uint32 Height);
-
 	};
 }

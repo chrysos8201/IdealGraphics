@@ -98,6 +98,9 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 		128
 	);
 
+	//----25.06.08 D3D12Heap 테스트----//
+	CreateD3D12Heap();
+
 	//--------Manager--------//
 	m_uploadCommandListPoolManager = std::make_shared<Ideal::UploadCommandListPool>();
 	m_uploadCommandListPoolManager->Init(Device, m_fence, UPLOAD_CONTAINER_COUNT);
@@ -108,8 +111,6 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 	CreateDefaultDebugLine();
 	CreateParticleVertexBuffer();
 
-	//----25.06.08 D3D12Heap 테스트----//
-	CreateD3D12Heap();
 }
 
 void ResourceManager::ShutDown()
@@ -1541,10 +1542,22 @@ std::shared_ptr<Ideal::D3D12VertexBuffer> ResourceManager::GetParticleVertexBuff
 void ResourceManager::CreateD3D12Heap()
 {
 	D3D12_HEAP_DESC heapDesc;
-	heapDesc.SizeInBytes = 64ull * 1024 * 1024;	// 64mb
-	heapDesc.Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+	heapDesc.SizeInBytes = 64ull * 1024 * 1024 * 4;	// 64mb * 4
+	heapDesc.Properties = heapProp;
 	heapDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;	// 64kb
 	heapDesc.Flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
 
 	HRESULT hr = m_device->CreateHeap(&heapDesc, IID_PPV_ARGS(m_heap.GetAddressOf()));
+}
+
+void ResourceManager::BeginResourceState()
+{
+
+}
+
+void ResourceManager::EndResourceState()
+{
+
 }

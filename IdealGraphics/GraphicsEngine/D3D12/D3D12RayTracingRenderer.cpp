@@ -320,8 +320,8 @@ finishAdapter:
 	//m_sceneCB.farZ = m_mainCamera->GetFarZ();
 
 	// load image
-	InitTerrain();
-	InitTessellation();
+	//InitTerrain();
+	//InitTessellation();
 
 	// create resource
 	//CreateDeviceDependentResources();
@@ -333,7 +333,7 @@ finishAdapter:
 	SetRendererAmbientIntensity(0.4f);
 
 
-	AddTerrainToRaytracing();
+	//AddTerrainToRaytracing();
 }
 
 void Ideal::D3D12RayTracingRenderer::Tick()
@@ -482,10 +482,10 @@ void Ideal::D3D12RayTracingRenderer::Render()
 	DrawParticle();
 
 	//--------Terrain--------//
-	DrawTerrain();
+	//DrawTerrain();
 
 	//--------SimpleTessellation--------//
-	DrawTessellation();
+	//DrawTessellation();
 
 	//----Debug Mesh Draw----//
 	if (m_isEditor)

@@ -163,26 +163,25 @@ namespace Ideal
 				memcpy(mappedData, Vertices.data(), bufferSize);
 				uploadBuffer.UnMap();
 			}
-			//OutVertexBuffer->Create(m_device.Get(),
-			//	m_commandList.Get(),
-			//	elementSize,
-			//	elementCount,
-			//	uploadBuffer
-			//);
-
-			//// 25.06.08	// 오 성공
-			OutVertexBuffer->Create(
-				m_device.Get(),
-				m_heap.Get(),
-				m_heapOffset,
+			OutVertexBuffer->Create(m_device.Get(),
 				m_commandList.Get(),
 				elementSize,
 				elementCount,
 				uploadBuffer
 			);
+
+			//// 25.06.08	// 오 성공
+			//OutVertexBuffer->Create(
+			//	m_device.Get(),
+			//	m_heap.Get(),
+			//	m_heapOffset,
+			//	m_commandList.Get(),
+			//	elementSize,
+			//	elementCount,
+			//	uploadBuffer
+			//);
+			//m_heapOffset = (m_heapOffset + elementSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
 			
-			m_heapOffset = (m_heapOffset + elementSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
-			//m_heapOffset++;
 
 			//---------Execute---------//
 			m_commandList->Close();
@@ -338,8 +337,6 @@ namespace Ideal
 		void CreateD3D12Heap();
 		ComPtr<ID3D12Heap> m_heap;
 		uint32 m_heapOffset = 0;
-	public:
-		void BeginResourceState();
-		void EndResourceState();
+
 	};
 }

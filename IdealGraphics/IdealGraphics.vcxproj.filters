@@ -220,6 +220,7 @@
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Descriptors.h" />
+    <ClInclude Include="D3D12BuddyAllocator.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -323,6 +324,7 @@
     <ClCompile Include="GraphicsEngine\IdealLayer.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Descriptors.cpp" />
+    <ClCompile Include="D3D12BuddyAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

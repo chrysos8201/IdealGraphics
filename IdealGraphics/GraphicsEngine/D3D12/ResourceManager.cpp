@@ -1551,13 +1551,3 @@ void ResourceManager::CreateD3D12Heap()
 
 	HRESULT hr = m_device->CreateHeap(&heapDesc, IID_PPV_ARGS(m_heap.GetAddressOf()));
 }
-
-void ResourceManager::BeginResourceState()
-{
-
-}
-
-void ResourceManager::EndResourceState()
-{
-
-}

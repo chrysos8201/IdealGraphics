@@ -184,6 +184,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugConsole|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="D3D12BuddyAllocator.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Descriptors.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
     <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
@@ -348,6 +349,7 @@
     <ClInclude Include="ThirdParty\Include\DirectXTK12\XboxDDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="D3D12BuddyAllocator.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Descriptors.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\D3D12Util.cpp" />
     <ClCompile Include="GraphicsEngine\D3D12\UploadCommandListPool.cpp" />

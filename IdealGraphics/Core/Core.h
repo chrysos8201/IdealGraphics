@@ -38,6 +38,17 @@ inline size_t AlignConstantBufferSize(size_t size)
 	return aligned_size;
 }
 
+inline void Check(bool value)
+{
+	if (value == false)
+	{
+		__debugbreak();
+	}
+	else
+	{
+		return;
+	}
+}
 
 inline void Check(HRESULT hr)
 {

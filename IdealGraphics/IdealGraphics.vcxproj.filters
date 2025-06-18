@@ -223,7 +223,8 @@
     <ClInclude Include="GraphicsEngine\RHI\RHIPoolAllocator.h" />
     <ClInclude Include="GraphicsEngine\RHI\RHIPoolAllocationData.h" />
     <ClInclude Include="GraphicsEngine\RHI\RHIMemoryPool.h" />
-    <ClInclude Include="D3D12Common.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12Common.h" />
+    <ClInclude Include="GraphicsEngine\D3D12\D3D12DefaultBufferAllocator.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">
@@ -330,7 +331,8 @@
     <ClCompile Include="GraphicsEngine\RHI\RHIPoolAllocator.cpp" />
     <ClCompile Include="GraphicsEngine\RHI\RHIPoolAllocationData.cpp" />
     <ClCompile Include="GraphicsEngine\RHI\RHIMemoryPool.cpp" />
-    <ClCompile Include="D3D12Common.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12Common.cpp" />
+    <ClCompile Include="GraphicsEngine\D3D12\D3D12DefaultBufferAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BoxPS.hlsl">

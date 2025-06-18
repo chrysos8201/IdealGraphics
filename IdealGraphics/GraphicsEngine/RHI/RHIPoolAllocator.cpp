@@ -1,8 +1,18 @@
 #include "RHIPoolAllocator.h"
 #include "RHIPoolAllocationData.h"
 #include "Core\Core.h"
+#include "RHIMemoryPool.h"
 
-bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, RHIPoolAllocationData& InAllocationData)
+Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
+	: DefaultPoolSize(InDefaultPoolSize),
+	PoolAlignment(InPoolAlignment),
+	MaxAllocationSize(InMaxAllocationSize),
+	bDefragEnabled(bInDefragEnabled)
+{
+
+}
+
+bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& InAllocationData)
 {
 	// TODO : 현재 필요한 리소스의 속성과 맞는 Pool을 가져와야함. -> 이미 Pool ALlocator에서 한번 거를 수 있음.
 	// 만약 없으면 Pool을 새로 만들고 거기서 할당
@@ -13,11 +23,12 @@ bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, RHIPoolA
 	{
 		RHIMemoryPool* Pool = Pools[PoolIndex];
 		// 해당 Pool에서 할당할 수 있는지 확인
-		if (Pool != nullptr)
+		if (Pool != nullptr && !Pool->IsFull() && Pool->TryAllocate(InSizeInBytes,InAllocationAlignment, InAllocationData))
 		{
 			// TODO : 여기서 Pool Allocator 시도 하고 성공하면 true 반환.
 			// 시도하면서 내부에서 AllocationData를 채워야 함.
 			// 성공하면 여기서 함수를 끝낸다.
+			return true;
 		}
 	}
 
@@ -32,27 +43,140 @@ bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, RHIPoolA
 		}
 	}
 
+	uint32 AlignedSize = RHIMemoryPool::GetAlignedSize(InSizeInBytes, PoolAlignment, InAllocationAlignment);
 	if (NewPoolIndex >= 0)
 	{
 		// 비어있던 Pool 채우기
-		// TODO : CreateNewPool
-		//Pools[NewPoolIndex] = 
+		Pools[NewPoolIndex] = CreateNewPool(NewPoolIndex, AlignedSize);
 	}
 	else
 	{
 		// 마지막에 채움
 		NewPoolIndex = Pools.size();
-		// TODO : 새로 만들고 Pools에 넣을 것
+		Pools.push_back(CreateNewPool(NewPoolIndex, AlignedSize));
 		PoolAllocationOrder.push_back(NewPoolIndex);
 	}
 
-	// TODO : 새로 만든 Pools[NewPoolIndex]에서 AllocationPoolData에 할당한다.
+	// 새로 만든 Pools[NewPoolIndex]에서 AllocationPoolData에 할당한다.
 	// 할당 여부에 따라 bool 반환
-	return false;
+	return Pools[NewPoolIndex]->TryAllocate(InSizeInBytes, InAllocationAlignment, InAllocationData);
 }
 
-Ideal::RHIMemoryPool* Ideal::RHIPoolAllocator::CreateNewPool(uint32 InPoolIndex)
+Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocationStrategy(D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment)
 {
-	//RHIMemoryPool* NewPool = new RHIMemoryPool();
-	// 2025.06.17 :: 01.44 여기 하는 중
+	if (Alignment > D3D12ManualSubAllocationAlignment)
+	{
+		return EResourceAllocationStrategy::PlacedResource;
+	}
+
+	// 리소스의 상태 추적과 변경이 필요하면..
+	ED3D12ResourceStateMode ResourceStateMode = InResourceStateMode;
+	if (ResourceStateMode == ED3D12ResourceStateMode::Default)
+	{
+		ResourceStateMode = (InResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) ? ED3D12ResourceStateMode::MultiState : ED3D12ResourceStateMode::SingleState;
+	}
+
+	// 리소스가 다양한 상태를 가질 경우 ID3D12Heap에서 ID3D12Resource를 할당받게 한다. 
+	// 만약 ManualSubAllocation인 경우 하나의 ID3D12Resource를 잘라서 사용하게 될텐데 이 경우 이 리소스를 사용하는 모든 곳에서 상태를 공유하게 된다.
+	return (ResourceStateMode == ED3D12ResourceStateMode::MultiState) ? EResourceAllocationStrategy::PlacedResource : EResourceAllocationStrategy::ManualSubAllocation;
+
+}
+
+Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ComPtr<ID3D12Device> InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
+	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment,InMaxAllocationSize, bInDefragEnabled)
+{
+
+}
+
+bool Ideal::D3D12PoolAllocator::SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, D3D12_RESOURCE_STATES InInitialResourceState,ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment) const
+{
+	D3D12ResourceInitConfig InInitConfig = {};
+	InInitConfig.HeapType = InHeapType;
+	InInitConfig.HeapFlags = InHeapFlags;
+	InInitConfig.ResourceFlags = InResourceFlags;
+	InInitConfig.InitialResourceState = InInitialResourceState;
+	
+	EResourceAllocationStrategy InAllocationStrategy = D3D12PoolAllocator::GetResourceAllocationStrategy(InResourceFlags, InResourceStateMode, Alignment);
+	
+	// PlacedResource인 경우 Resource flag와 state는 검사하지 않는다. heap만 체크한다.
+	// -> 각각 리소스의 상태는 다를 수 있기 때문에
+	if (InAllocationStrategy == EResourceAllocationStrategy::PlacedResource && AllocationStrategy == InAllocationStrategy)
+	{
+		return (InInitConfig.HeapType == InInitConfig.HeapType && InInitConfig.HeapFlags == InInitConfig.HeapFlags);
+	}
+	else
+	{
+		return (InInitConfig == InInitConfig && AllocationStrategy == InAllocationStrategy);
+	}
+}
+
+void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, const D3D12_RESOURCE_DESC& InResourceDesc, const D3D12_RESOURCE_STATES InResourceCreateState, ED3D12ResourceStateMode InResourceStateMode, uint32 InAllocationAlignment, Ideal::D3D12ResourceLocation& ResourceLocation)
+{
+	uint32 InSize = InResourceDesc.Width;
+
+	if (InHeapType == D3D12_HEAP_TYPE_READBACK)
+	{
+		Check(InResourceCreateState == D3D12_RESOURCE_STATE_COPY_DEST);
+	}
+	else if (InHeapType == D3D12_HEAP_TYPE_UPLOAD)
+	{
+		Check(InResourceCreateState == D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+	else if (InResourceCreateState == D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE)
+	{
+		// RTAS의 경우 하나의 상태만 가져야 한다.
+		Check(InResourceStateMode == ED3D12ResourceStateMode::SingleState);
+	}
+
+	// AllocateResource
+	ResourceLocation.Clear();
+	if (InSize == 0)
+	{
+		return;
+	}
+
+	bool bPoolResource = InSize <= MaxAllocationSize;
+	bool bPlacedResource = bPoolResource && (AllocationStrategy == EResourceAllocationStrategy::PlacedResource);
+	if (bPlacedResource)
+	{
+		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
+		// MSAA의 경우 정렬이 4MB이다. 
+		// D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT의 경우 64KB인데 
+		// 기본으로 Pool을 만들때 설정했던 Alignment보다 커지기 때문
+		if (InAllocationAlignment > PoolAlignment || InResourceDesc.Alignment > PoolAlignment)
+		{
+			bPoolResource = false;
+			bPlacedResource = false;
+		}
+	}
+
+	if (bPoolResource)
+	{
+		uint32 AllocationAlignment = InAllocationAlignment;
+
+		// 속성이 맞는 pool에서 할당받게 확실히 한다.
+		if (bPlacedResource)
+		{
+			// ManualSubAllocation의 경우 ID3D12Resource를 내부에서 잘라 사용하니 추가적인 Offset이 필요하지만
+			// PlacedResource인 경우 이미 ID3D12Heap 내에서 올바르게 정렬된 시작 주소를 가지고 있다.
+			// 즉 Place로 생성된 ID3D12Resource 내부에서 Offset을 이용 및 계산하여 view를 만들 필요가 없다(offset은 0이다).
+			AllocationAlignment = PoolAlignment;
+		}
+		else
+		{
+			// ManualSubAllocation인 경우 할당할 리소스의 플래그와 일치해야 한다.
+			// Read Only 리소스의 경우 큰 ID3D12Resource 내부에서 SubAllocate하는데 이는 Resource State를 내부에서 할당된 다른 Resource State와 공유한다는 뜻이다.
+			// ex. PoolAllocator의 BackingResource가 항상 SRV로만 사용되도록 D3D12_RESOURCE_FLAG_NONE으로 설정하였는데
+			// 이를 렌더 타겟으로 할당하려하면 API단에서 안된다.
+			Check(InResourceDesc.Flags == InitConfig.ResourceFlags);
+		}
+
+		RHIPoolAllocationData& AllocationData = ResourceLocation.GetPoolAllocatorData();
+		TryAllocateInternal(InSize, TODO, AllocationData);
+	}
+}
+
+Ideal::RHIMemoryPool* Ideal::D3D12PoolAllocator::CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize)
+{
+
 }

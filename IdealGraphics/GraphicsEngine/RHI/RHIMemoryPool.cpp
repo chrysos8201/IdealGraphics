@@ -1,6 +1,21 @@
 #include "RHIMemoryPool.h"
 #include "d3d12.h"
 #include "d3dx12_core.h"
+#include "D3D12\D3D12Common.h"
+
+template <typename T>
+constexpr T AlignArbitrary(T Val, uint64 Alignment)
+{
+	return (T)((((uint64)Val + Alignment - 1) / Alignment) * Alignment);
+}
+
+uint32 Ideal::RHIMemoryPool::GetAlignedSize(uint32 InSizeInBytes, uint32 InPoolAlignment, uint32 InAllocationAlignment)
+{
+	Check(InAllocationAlignment <= InPoolAlignment);
+
+	uint32 Size = ((InPoolAlignment % InAllocationAlignment) != 0) ? InSizeInBytes + InAllocationAlignment : InSizeInBytes;
+	return AlignArbitrary(Size, InPoolAlignment);	// Á¤·Ä
+}
 
 //using namespace Ideal;
 
@@ -16,6 +31,12 @@ void Ideal::RHIMemoryPool::Init()
 
 }
 
+
+bool Ideal::RHIMemoryPool::TryAllocate(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& AllocationData)
+{
+	// TODO
+	return false;
+}
 
 /// <summary>
 ///  D3D12MemoryPool

@@ -23,7 +23,7 @@ bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, uint32 I
 	{
 		RHIMemoryPool* Pool = Pools[PoolIndex];
 		// 해당 Pool에서 할당할 수 있는지 확인
-		if (Pool != nullptr && !Pool->IsFull() && Pool->TryAllocate(InSizeInBytes,InAllocationAlignment, InAllocationData))
+		if (Pool != nullptr && !Pool->IsFull() && Pool->TryAllocate(InSizeInBytes, InAllocationAlignment, InAllocationData))
 		{
 			// TODO : 여기서 Pool Allocator 시도 하고 성공하면 true 반환.
 			// 시도하면서 내부에서 AllocationData를 채워야 함.
@@ -83,21 +83,21 @@ Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocat
 }
 
 Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ComPtr<ID3D12Device> InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
-	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment,InMaxAllocationSize, bInDefragEnabled)
+RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled)
 {
 
 }
 
-bool Ideal::D3D12PoolAllocator::SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, D3D12_RESOURCE_STATES InInitialResourceState,ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment) const
+bool Ideal::D3D12PoolAllocator::SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment) const
 {
 	D3D12ResourceInitConfig InInitConfig = {};
 	InInitConfig.HeapType = InHeapType;
 	InInitConfig.HeapFlags = InHeapFlags;
 	InInitConfig.ResourceFlags = InResourceFlags;
 	InInitConfig.InitialResourceState = InInitialResourceState;
-	
+
 	EResourceAllocationStrategy InAllocationStrategy = D3D12PoolAllocator::GetResourceAllocationStrategy(InResourceFlags, InResourceStateMode, Alignment);
-	
+
 	// PlacedResource인 경우 Resource flag와 state는 검사하지 않는다. heap만 체크한다.
 	// -> 각각 리소스의 상태는 다를 수 있기 때문에
 	if (InAllocationStrategy == EResourceAllocationStrategy::PlacedResource && AllocationStrategy == InAllocationStrategy)
@@ -172,11 +172,28 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 		}
 
 		RHIPoolAllocationData& AllocationData = ResourceLocation.GetPoolAllocatorData();
-		TryAllocateInternal(InSize, TODO, AllocationData);
+		TryAllocateInternal(InSize, AllocationAlignment, AllocationData);
 	}
 }
 
 Ideal::RHIMemoryPool* Ideal::D3D12PoolAllocator::CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize)
 {
+	uint32 PoolSize = DefaultPoolSize;
 
+	if (InMinimumAllocationSize > PoolSize)
+	{
+		Check(InMinimumAllocationSize <= MaxAllocationSize);
+	
+		unsigned long BitIndex = 0;
+		// 리소스의 사이즈보다 크거나 같은 2의 거듭제곱 형태로 나타낸다.
+		// 이진수를 MSB부터 탐색하여 가장 왼쪽에서부터 몇번째에 있는지 찾아낸다.
+		// ex) 8 = 0b0100 -> (8 - 1) * 2 + 1 = 15, 0b111 -> alignedsize = 8
+		_BitScanReverse(&BitIndex, (InMinimumAllocationSize - 1) * 2 + 1);
+		uint32 NewAlignedSIze = 1 << BitIndex;
+		PoolSize = std::min<uint32>(NewAlignedSIze, (uint32)MaxAllocationSize);
+	}
+
+	D3D12MemoryPool* NewPool = new D3D12MemoryPool(Device, InPoolIndex, PoolSize, PoolAlignment, AllocationStrategy, InitConfig);
+	NewPool->Init();
+	return NewPool;
 }

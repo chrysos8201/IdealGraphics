@@ -35,13 +35,14 @@ namespace Ideal
 	class D3D12MemoryPool : public RHIMemoryPool, public D3D12DeviceChild
 	{
 	public:
-		D3D12MemoryPool(ComPtr<ID3D12Device> InDevice, uint64 InPoolSize, uint32 InPoolAlignment, EResourceAllocationStrategy InAllocationStrategy, D3D12ResourceInitConfig InInitConfig);
+		D3D12MemoryPool(ComPtr<ID3D12Device> InDevice, uint32 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment, EResourceAllocationStrategy InAllocationStrategy, D3D12ResourceInitConfig InInitConfig);
 
 		virtual void Init() override;
 
 	private:
 		EResourceAllocationStrategy AllocationStrategy;
 		D3D12ResourceInitConfig InitConfig;
+		uint32 PoolIndex;
 
 		ComPtr<ID3D12Resource> BackingResource;
 		ComPtr<ID3D12Heap> BackingHeap;

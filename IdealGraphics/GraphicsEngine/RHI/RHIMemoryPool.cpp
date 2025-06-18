@@ -34,7 +34,7 @@ void Ideal::RHIMemoryPool::Init()
 
 bool Ideal::RHIMemoryPool::TryAllocate(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& AllocationData)
 {
-	// TODO
+	// TODO : 여기 채워야함 // 2025.06.18 20:14
 	return false;
 }
 
@@ -44,14 +44,15 @@ bool Ideal::RHIMemoryPool::TryAllocate(uint32 InSizeInBytes, uint32 InAllocation
 /// <param name="Device"></param>
 
 Ideal::D3D12MemoryPool::D3D12MemoryPool(
-	ComPtr<ID3D12Device> Device
+	ComPtr<ID3D12Device> InDevice
+	, uint32 InPoolIndex
 	, uint64 InPoolSize
 	, uint32 InPoolAlignment
 	, EResourceAllocationStrategy InAllocationStrategy
 	, D3D12ResourceInitConfig InInitConfig
-	)
-	: RHIMemoryPool(InPoolSize, InPoolAlignment)
+	) : RHIMemoryPool(InPoolSize, InPoolAlignment)
 	, D3D12DeviceChild(Device)
+	, PoolIndex(InPoolIndex)
 	, AllocationStrategy(InAllocationStrategy)
 	, InitConfig(InInitConfig)
 {

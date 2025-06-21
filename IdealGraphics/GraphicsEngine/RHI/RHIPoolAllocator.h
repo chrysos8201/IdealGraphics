@@ -1,10 +1,10 @@
 #pragma once
 #include "Core\Core.h"
-#include <vector>
 #include "D3D12\D3D12Common.h"
-#include "RHIMemoryPool.h"
+#include "d3d12.h"
 
-namespace Ideal { struct D3D12ResourceInitConfig; }
+using namespace Ideal;
+
 
 namespace Ideal { struct RHIPoolAllocationData; }
 

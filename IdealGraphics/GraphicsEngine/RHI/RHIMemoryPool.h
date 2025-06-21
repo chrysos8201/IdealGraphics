@@ -5,6 +5,7 @@
 #include "D3D12\D3D12Common.h"
 
 struct ID3D12Device;
+using namespace Ideal;
 
 namespace Ideal
 {
@@ -12,7 +13,8 @@ namespace Ideal
 	{
 	public:
 		static uint32 GetAlignedSize(uint32 InSizeInBytes, uint32 InPoolAlignment, uint32 InAllocationAlignment);
-
+		static uint32 GetAlignedOffset(uint32 InOffset, uint32 InPoolAlignment, uint32 InAllocationAlignment);
+	
 	public:
 		RHIMemoryPool(uint64 InPoolSize, uint32 InPoolAlignment);
 		
@@ -20,16 +22,29 @@ namespace Ideal
 
 		bool TryAllocate(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& AllocationData);
 
+		uint64 GetUsedSize() const { return (PoolSize - FreeSize); }
 		bool IsFull() const { return FreeSize == 0; }
 
 	protected:
+		// Free Block 관리 함수
+		int32 FindFreeBlock(uint32 InSizeInBytes, uint32 InAllocationAlignment) const;
+		RHIPoolAllocationData* AddToFreeBlocks(RHIPoolAllocationData* InFreeBlock);
+		void RemoveFromFreeBlocks(RHIPoolAllocationData* InFreeBlock);
+		void ReleaseAllocationData(RHIPoolAllocationData* InData);
+
+		void Validate();
+
+
 		const uint64 PoolSize;
 		const uint32 PoolAlignment;	// 정렬 // 64KB 64MB 4kb
 
 		uint64 FreeSize;
+		uint64 AlignmentWaste;
+		uint64 AllocatedBlocks;
 
 		RHIPoolAllocationData HeadBlock;
 		std::vector<RHIPoolAllocationData*> FreeBlocks;
+		std::vector<RHIPoolAllocationData*> AllocationDataPool;
 	};
 
 	class D3D12MemoryPool : public RHIMemoryPool, public D3D12DeviceChild

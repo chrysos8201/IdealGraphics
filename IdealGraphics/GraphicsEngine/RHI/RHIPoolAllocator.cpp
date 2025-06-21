@@ -1,6 +1,5 @@
 #include "RHIPoolAllocator.h"
 #include "RHIPoolAllocationData.h"
-#include "Core\Core.h"
 #include "RHIMemoryPool.h"
 
 Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
@@ -82,8 +81,11 @@ Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocat
 
 }
 
-Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ComPtr<ID3D12Device> InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
-RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled)
+Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ComPtr<ID3D12Device> InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
+	: D3D12DeviceChild(InDevice),
+	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled),
+	InitConfig(InInitConfig),
+	AllocationStrategy(InAllocationStrategy)
 {
 
 }

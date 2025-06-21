@@ -6,6 +6,7 @@
 
 struct ID3D12Resource;
 struct ID3D12Device;
+namespace Ideal { class D3D12ResourceLocation; }
 
 namespace Ideal
 {
@@ -171,6 +172,8 @@ namespace Ideal
 		void Create(ID3D12Device* Device, ID3D12Heap* Heap, uint32 Offset, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, const D3D12UploadBuffer& UploadBuffer);
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, std::shared_ptr<Ideal::D3D12UploadBuffer> UploadBuffer);
 		void CreateAndCopyResource(ComPtr<ID3D12Device> Device, uint32 ElementSize, uint32 ElementCount, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12Resource> Resource, D3D12_RESOURCE_STATES BeforeState);
+		// ResourceLocation으로 만들 경우
+		void CreateFromResourceLocation(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer, const D3D12ResourceLocation& ResourceLocation);
 
 		D3D12_VERTEX_BUFFER_VIEW GetView() const;
 

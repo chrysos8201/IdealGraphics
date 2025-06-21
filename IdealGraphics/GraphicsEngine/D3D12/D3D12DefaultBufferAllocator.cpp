@@ -30,8 +30,7 @@ void Ideal::D3D12DefaultBufferAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE
 		BufferPool = CreateBufferPool(InHeapType, InHeapFlags, InResourceDesc.Flags, InResourceStateMode, InInitialResourceState, Alignment);
 	}
 
-	// TODO : 이제 해당 Pool로 할당받는다.
-	//BufferPool->All
+	BufferPool->AllocateDefaultResource(InHeapType, InResourceDesc, InInitialResourceState, InResourceStateMode, Alignment, ResourceLocation);
 }
 
 Ideal::D3D12PoolAllocator* Ideal::D3D12DefaultBufferAllocator::CreateBufferPool(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, D3D12_RESOURCE_STATES InInitialResourceState, uint32 Alignment)

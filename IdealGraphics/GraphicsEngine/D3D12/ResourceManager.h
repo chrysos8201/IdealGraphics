@@ -6,6 +6,9 @@
 #include "GraphicsEngine/VertexInfo.h"
 #include "GraphicsEngine/D3D12/UploadCommandListPool.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
+#include "D3D12Common.h"
+
+namespace Ideal { class D3D12DefaultBufferAllocator; }
 // 따로 GPU에 메모리를 업로드 하는 command list를 파서 여기서 사용한다.
 
 namespace Ideal
@@ -170,6 +173,17 @@ namespace Ideal
 				uploadBuffer
 			);
 
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(elementSize * elementCount);
+			D3D12ResourceLocation resourceLocation;
+			DefaultBufferAllocator->AllocateDefaultResource(
+				D3D12_HEAP_TYPE_DEFAULT,
+				D3D12_HEAP_FLAG_NONE,
+				resourceDesc,
+				D3D12_RESOURCE_STATE_COMMON,
+				ED3D12ResourceStateMode::SingleState,
+				resourceLocation
+			);
+
 			//// 25.06.08	// 오 성공
 			//OutVertexBuffer->Create(
 			//	m_device.Get(),
@@ -181,7 +195,7 @@ namespace Ideal
 			//	uploadBuffer
 			//);
 			//m_heapOffset = (m_heapOffset + elementSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
-			
+
 
 			//---------Execute---------//
 			m_commandList->Close();
@@ -337,6 +351,12 @@ namespace Ideal
 		void CreateD3D12Heap();
 		ComPtr<ID3D12Heap> m_heap;
 		uint32 m_heapOffset = 0;
+
+		// 25.06.21 PoolAllocator 테스트
+	private:
+		void CreateDefaultBufferAllocator();
+
+		std::shared_ptr<Ideal::D3D12DefaultBufferAllocator> DefaultBufferAllocator;
 
 	};
 }

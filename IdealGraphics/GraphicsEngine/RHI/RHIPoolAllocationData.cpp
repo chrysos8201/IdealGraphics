@@ -1,4 +1,6 @@
 #include "RHIPoolAllocationData.h"
+#include "Core\Core.h"
+#include "RHIMemoryPool.h"
 
 void Ideal::RHIPoolAllocationData::Reset()
 {
@@ -21,4 +23,50 @@ void Ideal::RHIPoolAllocationData::InitAsHead(int16 InPoolIndex)
 	NextAllocation = this;
 	PreviousAllocation = this;
 	PoolIndex = InPoolIndex;
+}
+
+void Ideal::RHIPoolAllocationData::InitAsAllocated(uint32 InSize, uint32 InPoolAlignment, uint32 InAllocationAlignment, RHIPoolAllocationData* InFree)
+{
+	Check(InFree->IsFree());
+	
+	Reset();
+
+	Size = InSize;
+	Alignment = InAllocationAlignment;
+	SetAllocationType(EAllocationType::Allocated);
+	Offset = RHIMemoryPool::GetAlignedOffset(InFree->Offset, InPoolAlignment, InAllocationAlignment);
+	PoolIndex = InFree->PoolIndex;
+	Locked = true;
+
+	uint32 AlignedSize = RHIMemoryPool::GetAlignedSize(InSize, InPoolAlignment, InAllocationAlignment);
+	InFree->Size -= AlignedSize;
+	InFree->Offset += AlignedSize;
+	InFree->AddBefore(this);
+}
+
+void Ideal::RHIPoolAllocationData::Merge(RHIPoolAllocationData* InOther)
+{
+	Check(IsFree() && InOther->IsFree());
+	Check((Offset + Size) == InOther->Offset);
+	Check(PoolIndex == InOther->GetPoolIndex());
+
+	Size += InOther->Size;
+	InOther->RemoveFromLinkedList();
+	InOther->Reset();
+}
+
+void Ideal::RHIPoolAllocationData::RemoveFromLinkedList()
+{
+	Check(IsFree());
+	PreviousAllocation->NextAllocation = NextAllocation;
+	NextAllocation->PreviousAllocation = PreviousAllocation;
+}
+
+void Ideal::RHIPoolAllocationData::AddBefore(RHIPoolAllocationData* InOther)
+{
+	PreviousAllocation->NextAllocation = InOther;
+	InOther->PreviousAllocation = PreviousAllocation;
+
+	PreviousAllocation = InOther;
+	InOther->NextAllocation = this;
 }

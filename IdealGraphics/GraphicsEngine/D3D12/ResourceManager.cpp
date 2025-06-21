@@ -35,6 +35,7 @@
 #include "Misc/Utils/tinyxml2.h"
 
 #include <filesystem>
+#include "D3D12DefaultBufferAllocator.h"
 
 using namespace Ideal;
 
@@ -100,6 +101,8 @@ void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<
 
 	//----25.06.08 D3D12Heap 테스트----//
 	CreateD3D12Heap();
+	//----25.06.21 DefaultBufferAllocator 테스트----//
+	CreateDefaultBufferAllocator();
 
 	//--------Manager--------//
 	m_uploadCommandListPoolManager = std::make_shared<Ideal::UploadCommandListPool>();
@@ -1550,4 +1553,12 @@ void ResourceManager::CreateD3D12Heap()
 	heapDesc.Flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
 
 	HRESULT hr = m_device->CreateHeap(&heapDesc, IID_PPV_ARGS(m_heap.GetAddressOf()));
+}
+
+void ResourceManager::CreateDefaultBufferAllocator()
+{
+	DefaultBufferAllocator = std::make_shared<Ideal::D3D12DefaultBufferAllocator>(m_device);
+
+
+
 }

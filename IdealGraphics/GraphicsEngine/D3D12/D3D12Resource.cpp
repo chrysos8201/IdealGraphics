@@ -345,6 +345,21 @@ void Ideal::D3D12VertexBuffer::CreateAndCopyResource(ComPtr<ID3D12Device> Device
 	m_vertexBufferView.StrideInBytes = m_elementSize;
 }
 
+void D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer, const D3D12ResourceLocation& ResourceLocation)
+{
+	//CD3DX12_RESOURCE_BARRIER preCopyBarriers[2];
+	//preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	Resource->GetResource(),
+	//	BeforeState,
+	//	D3D12_RESOURCE_STATE_COPY_SOURCE
+	//);
+	//preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+	//	D3D12_RESOURCE_STATE_COPY_DEST
+	//);
+}
+
 //------------------------IndexBuffer------------------------//
 
 D3D12IndexBuffer::D3D12IndexBuffer()

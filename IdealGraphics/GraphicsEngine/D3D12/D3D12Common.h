@@ -1,9 +1,10 @@
 #pragma once
 #include "Core/Core.h"
-#include "RHI/RHIPoolAllocator.h"
+#include "RHI/RHIPoolAllocationData.h"
+#include "d3d12.h"
 
 struct ID3D12Device;
-
+using namespace Ideal;
 namespace Ideal
 {
 

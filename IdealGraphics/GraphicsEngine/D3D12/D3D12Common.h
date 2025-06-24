@@ -5,6 +5,8 @@
 
 struct ID3D12Device;
 using namespace Ideal;
+namespace Ideal { class D3D12PoolAllocator; }
+
 namespace Ideal
 {
 
@@ -44,19 +46,23 @@ namespace Ideal
 	class D3D12DeviceChild
 	{
 	public:
-		D3D12DeviceChild(ComPtr<ID3D12Device> InDevice)
-		{
-			Device = InDevice;
-		}
+		D3D12DeviceChild(ID3D12Device* InDevice) 
+			: Device(InDevice)
+		{}
 
-		inline ComPtr<ID3D12Device> GetDevice() const
+		inline ID3D12Device* GetDevice() const
 		{
 			Check(Device != nullptr);
 			return Device;
 		}
 
+		void SetDevice(ID3D12Device* InDevice)
+		{
+			Device = InDevice;
+		}
+
 	protected:
-		ComPtr<ID3D12Device> Device;
+		ID3D12Device* Device;
 	};
 
 
@@ -64,11 +70,48 @@ namespace Ideal
 	{
 		friend class D3D12PoolAllocator;
 	public:
+		enum class ResourceLocationType : uint8 
+		{
+			eUndefined,
+			eSubAllocation,
+		};
+	public:
+		D3D12ResourceLocation(ID3D12Device* InDevice);
+
 		void Clear();
 
+		ID3D12Resource* GetResource() const { return UnderlyingResource; }
+		uint64 GetOffsetFromBaseOfResource() const { return OffsetFromBaseOfResource; }
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return GPUVirtualAddress; }
+
+		void SetType(ResourceLocationType Value) { Type = Value; }
+		void SetResource(ID3D12Resource* Value);
+
+		void SetPoolAllocator(D3D12PoolAllocator* Value) { PoolAllocator = Value; }
+		D3D12PoolAllocator* GetPoolAllocator() { return PoolAllocator; }
+		
+		void SetMappedBaseAddress(void* Value) { MappedBaseAddress = Value; }
+		void SetGPUVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS Value) { GPUVirtualAddress = Value; }
+		void SetOffsetFromBaseOfResource(uint64 Value) { OffsetFromBaseOfResource = Value; }
+		void SetSize(uint64 Value) { Size = Value; }
+
 		RHIPoolAllocationData& GetPoolAllocatorData() { return PoolData; }
+	
 	private:
+
+		template<bool bReleaseResource>
+		void InternalClear();
+
+		ID3D12Resource* UnderlyingResource;
+
+		D3D12PoolAllocator* PoolAllocator;
 		RHIPoolAllocationData PoolData;
+		ResourceLocationType Type;
+		uint64 Size;
+
+		void* MappedBaseAddress;
+		D3D12_GPU_VIRTUAL_ADDRESS GPUVirtualAddress{};
+		uint64 OffsetFromBaseOfResource;
 	};
 }
 

@@ -3,6 +3,7 @@
 // 2025.03.06
 // Descriptor 구조 변경..
 #include "GraphicsEngine/D3D12/D3D12Descriptors.h"
+#include "D3D12Common.h"
 
 struct ID3D12Resource;
 struct ID3D12Device;
@@ -142,11 +143,14 @@ namespace Ideal
 		uint32 GetElementCount() const;
 		uint32 GetElementSize() const;
 
+		D3D12ResourceLocation& GetResourceLocation() { return ResourceLocation; }
 	protected:
 		std::wstring m_name;
 		uint32 m_bufferSize;
 		uint32 m_elementSize;
 		uint32 m_elementCount;
+
+		D3D12ResourceLocation ResourceLocation;
 	};
 
 	class D3D12StructuredBuffer : public D3D12GPUBuffer
@@ -173,7 +177,7 @@ namespace Ideal
 		void Create(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, uint32 ElementSize, uint32 ElementCount, std::shared_ptr<Ideal::D3D12UploadBuffer> UploadBuffer);
 		void CreateAndCopyResource(ComPtr<ID3D12Device> Device, uint32 ElementSize, uint32 ElementCount, ComPtr<ID3D12GraphicsCommandList> CommandList, std::shared_ptr<Ideal::D3D12Resource> Resource, D3D12_RESOURCE_STATES BeforeState);
 		// ResourceLocation으로 만들 경우
-		void CreateFromResourceLocation(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer, const D3D12ResourceLocation& ResourceLocation);
+		void CreateFromResourceLocation(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer);
 
 		D3D12_VERTEX_BUFFER_VIEW GetView() const;
 

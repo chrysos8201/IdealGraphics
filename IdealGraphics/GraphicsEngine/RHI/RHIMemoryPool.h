@@ -16,7 +16,7 @@ namespace Ideal
 		static uint32 GetAlignedOffset(uint32 InOffset, uint32 InPoolAlignment, uint32 InAllocationAlignment);
 	
 	public:
-		RHIMemoryPool(uint64 InPoolSize, uint32 InPoolAlignment);
+		RHIMemoryPool(uint16 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment);
 		
 		virtual void Init();
 
@@ -32,9 +32,11 @@ namespace Ideal
 		void RemoveFromFreeBlocks(RHIPoolAllocationData* InFreeBlock);
 		void ReleaseAllocationData(RHIPoolAllocationData* InData);
 
+		RHIPoolAllocationData* GetNewAllocationData();
+
 		void Validate();
 
-
+		int16 PoolIndex;
 		const uint64 PoolSize;
 		const uint32 PoolAlignment;	// Á¤·Ä // 64KB 64MB 4kb
 
@@ -50,10 +52,12 @@ namespace Ideal
 	class D3D12MemoryPool : public RHIMemoryPool, public D3D12DeviceChild
 	{
 	public:
-		D3D12MemoryPool(ComPtr<ID3D12Device> InDevice, uint32 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment, EResourceAllocationStrategy InAllocationStrategy, D3D12ResourceInitConfig InInitConfig);
+		D3D12MemoryPool(ID3D12Device* InDevice, uint32 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment, EResourceAllocationStrategy InAllocationStrategy, D3D12ResourceInitConfig InInitConfig);
 
 		virtual void Init() override;
 
+		ID3D12Resource* GetBackingResource() { return BackingResource.Get(); }
+		ID3D12Heap* GetBackingHeap() { return BackingHeap.Get(); }
 	private:
 		EResourceAllocationStrategy AllocationStrategy;
 		D3D12ResourceInitConfig InitConfig;

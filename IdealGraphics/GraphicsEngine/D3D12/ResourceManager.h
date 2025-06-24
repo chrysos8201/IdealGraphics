@@ -7,6 +7,7 @@
 #include "GraphicsEngine/D3D12/UploadCommandListPool.h"
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 #include "D3D12Common.h"
+#include "D3D12DefaultBufferAllocator.h"
 
 namespace Ideal { class D3D12DefaultBufferAllocator; }
 // 따로 GPU에 메모리를 업로드 하는 command list를 파서 여기서 사용한다.
@@ -166,25 +167,29 @@ namespace Ideal
 				memcpy(mappedData, Vertices.data(), bufferSize);
 				uploadBuffer.UnMap();
 			}
-			OutVertexBuffer->Create(m_device.Get(),
-				m_commandList.Get(),
-				elementSize,
-				elementCount,
-				uploadBuffer
-			);
+			//OutVertexBuffer->Create(m_device.Get(),
+			//	m_commandList.Get(),
+			//	elementSize,
+			//	elementCount,
+			//	uploadBuffer
+			//);
 
 			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(elementSize * elementCount);
-			D3D12ResourceLocation resourceLocation;
 			DefaultBufferAllocator->AllocateDefaultResource(
 				D3D12_HEAP_TYPE_DEFAULT,
 				D3D12_HEAP_FLAG_NONE,
 				resourceDesc,
 				D3D12_RESOURCE_STATE_COMMON,
 				ED3D12ResourceStateMode::SingleState,
-				resourceLocation
+				OutVertexBuffer->GetResourceLocation(),
+				16);
+			OutVertexBuffer->CreateFromResourceLocation(
+				m_device.Get(), elementSize, elementCount,
+				m_commandList.Get(),
+				uploadBuffer
 			);
 
-			//// 25.06.08	// 오 성공
+			// 25.06.08	// 오 성공
 			//OutVertexBuffer->Create(
 			//	m_device.Get(),
 			//	m_heap.Get(),
@@ -194,7 +199,7 @@ namespace Ideal
 			//	elementCount,
 			//	uploadBuffer
 			//);
-			//m_heapOffset = (m_heapOffset + elementSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
+			//m_heapOffset = (m_heapOffset + bufferSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
 
 
 			//---------Execute---------//

@@ -44,6 +44,17 @@ void Ideal::RHIPoolAllocationData::InitAsAllocated(uint32 InSize, uint32 InPoolA
 	InFree->AddBefore(this);
 }
 
+void Ideal::RHIPoolAllocationData::InitAsFree(int16 InPoolIndex, uint32 InSize, uint32 InAlignment, uint32 InOffset)
+{
+	Reset();
+
+	Size = InSize;
+	Alignment = InAlignment;
+	SetAllocationType(EAllocationType::Free);
+	Offset = InOffset;
+	PoolIndex = InPoolIndex;
+}
+
 void Ideal::RHIPoolAllocationData::Merge(RHIPoolAllocationData* InOther)
 {
 	Check(IsFree() && InOther->IsFree());
@@ -69,4 +80,13 @@ void Ideal::RHIPoolAllocationData::AddBefore(RHIPoolAllocationData* InOther)
 
 	PreviousAllocation = InOther;
 	InOther->NextAllocation = this;
+}
+
+void Ideal::RHIPoolAllocationData::AddAfter(RHIPoolAllocationData* InOther)
+{
+	NextAllocation->PreviousAllocation = InOther;
+	InOther->NextAllocation = NextAllocation;
+
+	NextAllocation = InOther;
+	InOther->PreviousAllocation = this;
 }

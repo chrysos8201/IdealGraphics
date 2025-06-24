@@ -1557,7 +1557,7 @@ void ResourceManager::CreateD3D12Heap()
 
 void ResourceManager::CreateDefaultBufferAllocator()
 {
-	DefaultBufferAllocator = std::make_shared<Ideal::D3D12DefaultBufferAllocator>(m_device);
+	DefaultBufferAllocator = std::make_shared<Ideal::D3D12DefaultBufferAllocator>(m_device.Get());
 
 
 

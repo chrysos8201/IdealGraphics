@@ -1,6 +1,7 @@
 #include "RHIPoolAllocator.h"
 #include "RHIPoolAllocationData.h"
 #include "RHIMemoryPool.h"
+#include "D3D12\D3D12Util.h"
 
 Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
 	: DefaultPoolSize(InDefaultPoolSize),
@@ -24,7 +25,7 @@ bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, uint32 I
 		// 해당 Pool에서 할당할 수 있는지 확인
 		if (Pool != nullptr && !Pool->IsFull() && Pool->TryAllocate(InSizeInBytes, InAllocationAlignment, InAllocationData))
 		{
-			// TODO : 여기서 Pool Allocator 시도 하고 성공하면 true 반환.
+			// 여기서 Pool Allocator 시도 하고 성공하면 true 반환.
 			// 시도하면서 내부에서 AllocationData를 채워야 함.
 			// 성공하면 여기서 함수를 끝낸다.
 			return true;
@@ -81,8 +82,7 @@ Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocat
 
 }
 
-Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ComPtr<ID3D12Device> InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
-	: D3D12DeviceChild(InDevice),
+Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ID3D12Device* InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
 	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled),
 	InitConfig(InInitConfig),
 	AllocationStrategy(InAllocationStrategy)
@@ -112,7 +112,7 @@ bool Ideal::D3D12PoolAllocator::SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D
 	}
 }
 
-void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, const D3D12_RESOURCE_DESC& InResourceDesc, const D3D12_RESOURCE_STATES InResourceCreateState, ED3D12ResourceStateMode InResourceStateMode, uint32 InAllocationAlignment, Ideal::D3D12ResourceLocation& ResourceLocation)
+void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, const D3D12_RESOURCE_DESC& InResourceDesc, const D3D12_RESOURCE_STATES InResourceCreateState, ED3D12ResourceStateMode InResourceStateMode, uint32 InAllocationAlignment, const D3D12_CLEAR_VALUE* InClearValue, Ideal::D3D12ResourceLocation& ResourceLocation)
 {
 	uint32 InSize = InResourceDesc.Width;
 
@@ -175,7 +175,49 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 
 		RHIPoolAllocationData& AllocationData = ResourceLocation.GetPoolAllocatorData();
 		TryAllocateInternal(InSize, AllocationAlignment, AllocationData);
+
+		ResourceLocation.SetType(D3D12ResourceLocation::ResourceLocationType::eSubAllocation);
+		ResourceLocation.SetPoolAllocator(this);
+		ResourceLocation.SetSize(InSize);
+
+		AllocationData.SetOwner(&ResourceLocation);
+
+		if (AllocationStrategy == EResourceAllocationStrategy::ManualSubAllocation)
+		{
+			ID3D12Resource* BackingResource = GetBackingResource(ResourceLocation);
+
+			ResourceLocation.SetOffsetFromBaseOfResource(AllocationData.GetOffset());
+			ResourceLocation.SetResource(BackingResource);
+			ResourceLocation.SetGPUVirtualAddress(BackingResource->GetGPUVirtualAddress() + AllocationData.GetOffset());
+	
+			if (IsCPUAccessible(InitConfig.HeapType))
+			{
+				// TEST. 아직 사용 X
+				void* ResourceBaseAdress;
+				Check(BackingResource->Map(0, nullptr, &ResourceBaseAdress));
+				ResourceLocation.SetMappedBaseAddress((uint8*)ResourceBaseAdress + AllocationData.GetOffset());
+			}
+		}
+		else
+		{
+			Check(ResourceLocation.GetResource() == nullptr);
+
+			D3D12_RESOURCE_DESC Desc = InResourceDesc;
+			Desc.Alignment = AllocationAlignment;
+
+			ID3D12Resource* NewResource = CreatePlacedResource(AllocationData, Desc, InResourceCreateState, InResourceStateMode, InClearValue);
+			ResourceLocation.SetResource(NewResource);
+			ResourceLocation.SetGPUVirtualAddress(NewResource->GetGPUVirtualAddress());
+		}
 	}
+}
+
+ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const
+{
+	Check(IsOwner(InResourceLocation));
+
+	RHIPoolAllocationData& AllocationData = InResourceLocation.GetPoolAllocatorData();
+	return ((D3D12MemoryPool*)Pools[AllocationData.GetPoolIndex()])->GetBackingResource();
 }
 
 Ideal::RHIMemoryPool* Ideal::D3D12PoolAllocator::CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize)
@@ -198,4 +240,14 @@ Ideal::RHIMemoryPool* Ideal::D3D12PoolAllocator::CreateNewPool(uint32 InPoolInde
 	D3D12MemoryPool* NewPool = new D3D12MemoryPool(Device, InPoolIndex, PoolSize, PoolAlignment, AllocationStrategy, InitConfig);
 	NewPool->Init();
 	return NewPool;
+}
+
+ID3D12Resource* Ideal::D3D12PoolAllocator::CreatePlacedResource(const RHIPoolAllocationData& InAllocationData, const D3D12_RESOURCE_DESC& InDesc, D3D12_RESOURCE_STATES InCreateState, ED3D12ResourceStateMode InResourceStateMode, const D3D12_CLEAR_VALUE* InClearValue)
+{
+	ID3D12Heap* Heap = ((D3D12MemoryPool*)Pools[InAllocationData.GetPoolIndex()])->GetBackingHeap();
+	uint64 Offset = uint64(AlignDown(InAllocationData.GetOffset(), PoolAlignment));
+
+	ID3D12Resource* NewResource = nullptr;
+	Device->CreatePlacedResource(Heap, Offset, &InDesc, InCreateState, InClearValue, IID_PPV_ARGS(&NewResource));
+	return NewResource;
 }

@@ -4,28 +4,7 @@
 #include "D3D12\D3D12Common.h"
 #include "RHIPoolAllocationData.h"
 #include "D3D12\D3D12Definitions.h"
-
-template <typename T>
-constexpr T AlignArbitrary(T Val, uint64 Alignment)
-{
-	return (T)((((uint64)Val + Alignment - 1) / Alignment) * Alignment);
-}
-
-
-// Val이 주어지면 Alignment의 배수 중 가장 가까운 작은 값으로 정렬한다.
-// Alignment는 반드시 2의 거듭제곱이어야 함.
-// ex. 23, 16이면 16을 반환
-template <typename T>
-constexpr T AlignDown(T Val, uint64 Alignment)
-{
-	return (T)(((uint64)Val) & ~(Alignment - 1));
-}
-
-template <typename T>
-constexpr bool IsAligned(T Val, uint64 Alignment)
-{
-	return !((uint64)Val & (Alignment - 1));
-}
+#include "D3D12\D3D12Util.h"
 
 
 static int32 DesiredAllocationPoolSize = 32;
@@ -56,16 +35,36 @@ uint32 Ideal::RHIMemoryPool::GetAlignedOffset(uint32 InOffset, uint32 InPoolAlig
 
 //using namespace Ideal;
 
-Ideal::RHIMemoryPool::RHIMemoryPool(uint64 InPoolSize, uint32 InPoolAlignment)
-	: PoolSize(InPoolSize)
+Ideal::RHIMemoryPool::RHIMemoryPool(uint16 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment) :
+	PoolIndex(InPoolIndex)
+	, PoolSize(InPoolSize)
 	, PoolAlignment(InPoolAlignment)
+	, FreeSize(0)
+	, AlignmentWaste(0)
+	, AllocatedBlocks(0)
 {
 
 }
 
 void Ideal::RHIMemoryPool::Init()
 {
+	FreeSize = PoolSize;
 
+	AllocationDataPool.reserve(DesiredAllocationPoolSize);
+	for (int32 Index = 0; Index < DesiredAllocationPoolSize; ++Index)
+	{
+		RHIPoolAllocationData* AllocationData = new RHIPoolAllocationData();
+		AllocationData->Reset();
+		AllocationDataPool.push_back(AllocationData);
+	}
+
+	HeadBlock.InitAsHead(PoolIndex);
+	RHIPoolAllocationData* FreeBlock = GetNewAllocationData();
+	FreeBlock->InitAsFree(PoolIndex, PoolSize, PoolAlignment, 0);
+	HeadBlock.AddAfter(FreeBlock);
+	FreeBlocks.push_back(FreeBlock);
+
+	Validate();
 }
 
 
@@ -215,6 +214,22 @@ void Ideal::RHIMemoryPool::ReleaseAllocationData(RHIPoolAllocationData* InData)
 	}
 }
 
+Ideal::RHIPoolAllocationData* Ideal::RHIMemoryPool::GetNewAllocationData()
+{
+	//return(AllocationDataPool.size() > 0) ? AllocationDataPool.pop_back() : 
+
+	if (AllocationDataPool.size() > 0)
+	{
+		RHIPoolAllocationData* back = AllocationDataPool.back();
+		AllocationDataPool.pop_back();
+		return back;
+	}
+	else
+	{
+		new RHIPoolAllocationData();
+	}
+}
+
 void Ideal::RHIMemoryPool::Validate()
 {
 #ifdef RHI_POOL_ALLOCATOR_VALIDATE_LINK_LIST
@@ -263,7 +278,8 @@ void Ideal::RHIMemoryPool::Validate()
 		Check(!FreeBlock->GetPrev()->IsFree() || FreeBlock->GetPrev()->IsLocked());
 		Check(!FreeBlock->GetNext()->IsFree() || FreeBlock->GetNext()->IsLocked());
 		Check(FreeBlockIndex == (FreeBlocks.size() - 1));
-		Check(FreeBlock->GetSize() <= FreeBlocks[FreeBlockIndex + 1]->GetSize());
+		//Check(FreeBlock->GetSize() <= FreeBlocks[FreeBlockIndex + 1]->GetSize());
+		Check(IsAligned(FreeBlock->GetOffset(), PoolAlignment));
 		TotalFreeSize += FreeBlock->GetSize();
 	}
 	Check(TotalFreeSize == FreeSize);
@@ -276,14 +292,14 @@ void Ideal::RHIMemoryPool::Validate()
 /// <param name="Device"></param>
 
 Ideal::D3D12MemoryPool::D3D12MemoryPool(
-	ComPtr<ID3D12Device> InDevice
+	ID3D12Device* InDevice
 	, uint32 InPoolIndex
 	, uint64 InPoolSize
 	, uint32 InPoolAlignment
 	, EResourceAllocationStrategy InAllocationStrategy
 	, D3D12ResourceInitConfig InInitConfig
-	) : RHIMemoryPool(InPoolSize, InPoolAlignment)
-	, D3D12DeviceChild(Device)
+	) : RHIMemoryPool(InPoolIndex, InPoolSize, InPoolAlignment)
+	, D3D12DeviceChild(InDevice)
 	, PoolIndex(InPoolIndex)
 	, AllocationStrategy(InAllocationStrategy)
 	, InitConfig(InInitConfig)

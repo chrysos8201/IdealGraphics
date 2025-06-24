@@ -2,22 +2,21 @@
 #include "D3D12Definitions.h"
 #include "RHI\RHIPoolAllocator.h"
 
-Ideal::D3D12DefaultBufferAllocator::D3D12DefaultBufferAllocator(ComPtr<ID3D12Device> InDevice)
-	: D3D12DeviceChild(InDevice)
+Ideal::D3D12DefaultBufferAllocator::D3D12DefaultBufferAllocator(ID3D12Device* InDevice) : D3D12DeviceChild(InDevice)
 {
 
 }
 
 
-void Ideal::D3D12DefaultBufferAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, const D3D12_RESOURCE_DESC& InResourceDesc, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, D3D12_RESOURCE_STATES InCreateState, D3D12ResourceLocation& ResourceLocation, uint32 Alignment)
+void Ideal::D3D12DefaultBufferAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, const D3D12_RESOURCE_DESC& InResourceDesc, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, D3D12ResourceLocation& ResourceLocation, uint32 Alignment)
 {
-	// TODO : Resource Location :: Clear
+	ResourceLocation.Clear();
 
 	D3D12PoolAllocator* BufferPool = nullptr;
 	for (D3D12PoolAllocator* Pool : DefaultBufferPools)
 	{
 		// 해당 리소스를 지원하는 Pool이 있으면 꺼내오면 된다.
-		if (Pool->SupportsAllocation(InHeapType, InHeapFlags, InResourceDesc.Flags, InCreateState, InResourceStateMode, Alignment))
+		if (Pool->SupportsAllocation(InHeapType, InHeapFlags, InResourceDesc.Flags, InInitialResourceState, InResourceStateMode, Alignment))
 		{
 			BufferPool = Pool;
 			break;
@@ -30,7 +29,7 @@ void Ideal::D3D12DefaultBufferAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE
 		BufferPool = CreateBufferPool(InHeapType, InHeapFlags, InResourceDesc.Flags, InResourceStateMode, InInitialResourceState, Alignment);
 	}
 
-	BufferPool->AllocateDefaultResource(InHeapType, InResourceDesc, InInitialResourceState, InResourceStateMode, Alignment, ResourceLocation);
+	BufferPool->AllocateDefaultResource(InHeapType, InResourceDesc, InInitialResourceState, InResourceStateMode, Alignment, nullptr, ResourceLocation);
 }
 
 Ideal::D3D12PoolAllocator* Ideal::D3D12DefaultBufferAllocator::CreateBufferPool(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, D3D12_RESOURCE_STATES InInitialResourceState, uint32 Alignment)

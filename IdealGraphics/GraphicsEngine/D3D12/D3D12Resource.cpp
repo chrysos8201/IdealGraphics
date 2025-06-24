@@ -1,5 +1,6 @@
 #include "Core/Core.h"
 //#include "GraphicsEngine/D3D12/D3D12ThirdParty.h"
+#include "D3D12Common.h"
 #include <d3dx12.h>
 #include "GraphicsEngine/D3D12/D3D12Definitions.h"
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
@@ -146,7 +147,9 @@ void D3D12UploadBuffer::UnMap()
 D3D12GPUBuffer::D3D12GPUBuffer()
 	: m_bufferSize(0),
 	m_elementSize(0),
-	m_elementCount(0)
+	m_elementCount(0),
+	ResourceLocation(nullptr)
+
 {
 
 }
@@ -175,7 +178,7 @@ void Ideal::D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, uint32 ElementSiz
 	));
 }
 
-void D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, ID3D12Heap* Heap,uint32 Offset, uint32 ElementSize, uint32 ElementCount, D3D12_RESOURCE_FLAGS Flags /*= D3D12_RESOURCE_FLAG_NONE*/)
+void D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, ID3D12Heap* Heap, uint32 Offset, uint32 ElementSize, uint32 ElementCount, D3D12_RESOURCE_FLAGS Flags /*= D3D12_RESOURCE_FLAG_NONE*/)
 {
 	m_bufferSize = ElementSize * ElementCount;
 	m_elementSize = ElementSize;
@@ -195,7 +198,7 @@ void D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, ID3D12Heap* Heap,uint32 
 
 	Check(Device->CreatePlacedResource(
 		Heap,
-		Offset, 
+		Offset,
 		&resourceDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
@@ -322,7 +325,7 @@ void Ideal::D3D12VertexBuffer::CreateAndCopyResource(ComPtr<ID3D12Device> Device
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
 		D3D12_RESOURCE_STATE_COPY_DEST
 	);
-	
+
 	CommandList->ResourceBarrier(ARRAYSIZE(preCopyBarriers), preCopyBarriers);
 	CommandList->CopyResource(m_resource.Get(), Resource->GetResource());
 
@@ -339,25 +342,49 @@ void Ideal::D3D12VertexBuffer::CreateAndCopyResource(ComPtr<ID3D12Device> Device
 	);
 
 	CommandList->ResourceBarrier(ARRAYSIZE(postCopyBarriers), postCopyBarriers);
-	
+
 	m_vertexBufferView.BufferLocation = m_resource->GetGPUVirtualAddress();
 	m_vertexBufferView.SizeInBytes = m_bufferSize;
 	m_vertexBufferView.StrideInBytes = m_elementSize;
 }
 
-void D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer, const D3D12ResourceLocation& ResourceLocation)
+void Ideal::D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer)
 {
-	//CD3DX12_RESOURCE_BARRIER preCopyBarriers[2];
-	//preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-	//	Resource->GetResource(),
-	//	BeforeState,
-	//	D3D12_RESOURCE_STATE_COPY_SOURCE
-	//);
-	//preCopyBarriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
-	//	m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-	//	D3D12_RESOURCE_STATE_COPY_DEST
-	//);
+	m_bufferSize = ElementSize * ElementCount;
+	m_elementSize = ElementSize;
+	m_elementCount = ElementCount;
+
+	ResourceLocation.SetDevice(Device);
+	m_resource = ResourceLocation.GetResource();
+	D3D12GPUBuffer::SetName(L"VertexBuffer");
+
+
+	CD3DX12_RESOURCE_BARRIER resourceBarrier0
+		= CD3DX12_RESOURCE_BARRIER::Transition(
+			ResourceLocation.GetResource(),
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_COPY_DEST
+		);
+
+	CmdList->ResourceBarrier(1, &resourceBarrier0);
+
+
+	// 데이터를 복사한다
+	CmdList->CopyBufferRegion(ResourceLocation.GetResource(), ResourceLocation.GetOffsetFromBaseOfResource(), UploadBuffer.GetResource(), 0, m_bufferSize);
+
+	CD3DX12_RESOURCE_BARRIER resourceBarrier1
+		= CD3DX12_RESOURCE_BARRIER::Transition(
+			ResourceLocation.GetResource(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		);
+
+	CmdList->ResourceBarrier(1, &resourceBarrier1);
+
+	m_vertexBufferView.BufferLocation = ResourceLocation.GetGPUVirtualAddress();
+	m_vertexBufferView.SizeInBytes = m_bufferSize;
+	m_vertexBufferView.StrideInBytes = m_elementSize;
+
 }
 
 //------------------------IndexBuffer------------------------//
@@ -446,7 +473,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 
 	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
-	
+
 	Check(Device->CreateCommittedResource(
 		&heapProp,
 		D3D12_HEAP_FLAG_NONE,
@@ -456,7 +483,7 @@ void Ideal::D3D12ConstantBuffer::Create(ID3D12Device* Device, uint32 BufferSize,
 		IID_PPV_ARGS(m_resource.GetAddressOf())
 	));
 	m_resource->SetName(L"ConstantBuffer");
-	 
+
 	CD3DX12_RANGE readRange(0, 0);
 	Check(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedConstantBuffer)));
 	m_isMapped = true;

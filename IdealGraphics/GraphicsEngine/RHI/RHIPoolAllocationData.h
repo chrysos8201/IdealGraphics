@@ -1,5 +1,9 @@
 #pragma once
 #include "Core\Core.h"
+//#include "D3D12\D3D12Common.h"
+
+using namespace Ideal;
+namespace Ideal { class D3D12ResourceLocation; }
 
 namespace Ideal
 {
@@ -10,6 +14,7 @@ namespace Ideal
 
 		void InitAsHead(int16 InPoolIndex);
 		void InitAsAllocated(uint32 InSize, uint32 InPoolAlignment, uint32 InAllocationAlignment, RHIPoolAllocationData* InFree);
+		void InitAsFree(int16 InPoolIndex, uint32 InSize, uint32 InAlignment, uint32 InOffset);
 
 		RHIPoolAllocationData* GetNext() const { return NextAllocation; }
 		RHIPoolAllocationData* GetPrev() const { return PreviousAllocation; }
@@ -25,6 +30,8 @@ namespace Ideal
 		bool IsLocked() const { return (Locked == 1); }
 		void UnLock() { Check(Locked == 1); Locked = 0; }
 
+		void SetOwner(D3D12ResourceLocation* InOwner) { Owner = InOwner; }
+
 	private:
 
 		friend class RHIMemoryPool;
@@ -34,6 +41,7 @@ namespace Ideal
 
 		void RemoveFromLinkedList();
 		void AddBefore(RHIPoolAllocationData* InOther);
+		void AddAfter(RHIPoolAllocationData* InOther);
 
 		enum class EAllocationType : uint8
 		{
@@ -56,5 +64,8 @@ namespace Ideal
 		// memory pool에게서 관리받아야 한다.
 		RHIPoolAllocationData* PreviousAllocation;
 		RHIPoolAllocationData* NextAllocation;
+
+
+		D3D12ResourceLocation* Owner;
 	};
 }

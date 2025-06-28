@@ -144,6 +144,9 @@ namespace Ideal
 		uint32 GetElementSize() const;
 
 		D3D12ResourceLocation& GetResourceLocation() { return ResourceLocation; }
+		// 2025.06.25
+		// ResourceLocation으로 설정된 Virtual address를 내보낸다.
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress_ResourceLocationVer() { return ResourceLocation.GetGPUVirtualAddress(); }
 	protected:
 		std::wstring m_name;
 		uint32 m_bufferSize;

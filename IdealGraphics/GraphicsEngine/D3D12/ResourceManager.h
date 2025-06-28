@@ -174,13 +174,13 @@ namespace Ideal
 			//	uploadBuffer
 			//);
 
-			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(elementSize * elementCount);
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(elementSize * elementCount, D3D12_RESOURCE_FLAG_NONE, 0);
 			DefaultBufferAllocator->AllocateDefaultResource(
 				D3D12_HEAP_TYPE_DEFAULT,
 				D3D12_HEAP_FLAG_NONE,
 				resourceDesc,
 				D3D12_RESOURCE_STATE_COMMON,
-				ED3D12ResourceStateMode::SingleState,
+				ED3D12ResourceStateMode::MultiState,
 				OutVertexBuffer->GetResourceLocation(),
 				16);
 			OutVertexBuffer->CreateFromResourceLocation(

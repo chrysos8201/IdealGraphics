@@ -210,6 +210,7 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 			ResourceLocation.SetGPUVirtualAddress(NewResource->GetGPUVirtualAddress());
 		}
 	}
+	// TODO : else. 버퍼가 더 큰경우 그냥 하나의 committed 리소스로 만들겠다.
 }
 
 ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const

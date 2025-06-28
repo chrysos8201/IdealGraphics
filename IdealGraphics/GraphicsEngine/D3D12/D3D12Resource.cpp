@@ -358,7 +358,13 @@ void Ideal::D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, 
 	m_resource = ResourceLocation.GetResource();
 	D3D12GPUBuffer::SetName(L"VertexBuffer");
 
-
+	//static int once = 0;
+	//D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	//if (once == 0)
+	//{
+	//	once++;
+	//	resourceState = D3D12_RESOURCE_STATE_COMMON;
+	//}
 	CD3DX12_RESOURCE_BARRIER resourceBarrier0
 		= CD3DX12_RESOURCE_BARRIER::Transition(
 			ResourceLocation.GetResource(),

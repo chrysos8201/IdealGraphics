@@ -180,7 +180,7 @@ namespace Ideal
 				D3D12_HEAP_FLAG_NONE,
 				resourceDesc,
 				D3D12_RESOURCE_STATE_COMMON,
-				ED3D12ResourceStateMode::MultiState,
+				ED3D12ResourceStateMode::SingleState,
 				OutVertexBuffer->GetResourceLocation(),
 				16);
 			OutVertexBuffer->CreateFromResourceLocation(

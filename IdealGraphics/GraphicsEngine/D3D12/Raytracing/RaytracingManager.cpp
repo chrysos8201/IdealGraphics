@@ -44,6 +44,21 @@ inline void CreateSRV(ComPtr<ID3D12Device5> Device, ComPtr<ID3D12Resource> Resou
 	Device->CreateShaderResourceView(Resource.Get(), &srvDesc, Handle);
 }
 
+inline void CreateSRV(ComPtr<ID3D12Device5> Device, const D3D12ResourceLocation& ResourceLocation, D3D12_CPU_DESCRIPTOR_HANDLE Handle, uint32 NumElements, uint32 ElementSize)
+{
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	//srvDesc.Format = Resource->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Buffer.FirstElement = ResourceLocation.GetOffsetFromBaseOfResource()/ElementSize;
+	srvDesc.Buffer.NumElements = NumElements;
+	srvDesc.Buffer.StructureByteStride = ElementSize;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+	Device->CreateShaderResourceView(ResourceLocation.GetResource(), &srvDesc, Handle);
+}
+
 inline void SerializeAndCreateRootSignature(ComPtr<ID3D12Device5> Device, D3D12_ROOT_SIGNATURE_DESC& desc, ComPtr<ID3D12RootSignature>* rootSignature, LPCWSTR ResourceName = nullptr)
 {
 	ComPtr<ID3DBlob> blob;
@@ -356,7 +371,8 @@ std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> Ideal::RaytracingMan
 				}
 			}
 			blasGeometry.SRV_VertexBuffer = DescriptorManager->Allocate(1);
-			CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResource(), blasGeometry.SRV_VertexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
+			//CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResource(), blasGeometry.SRV_VertexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
+			CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResourceLocation(), blasGeometry.SRV_VertexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
 			blasGeometry.SRV_IndexBuffer = DescriptorManager->Allocate(1);
 			CreateSRV(Device, mesh->GetMeshes()[i]->GetIndexBuffer()->GetResource(), blasGeometry.SRV_IndexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetIndexBuffer()->GetElementCount(), sizeof(uint32));
 

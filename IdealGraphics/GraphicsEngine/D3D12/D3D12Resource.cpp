@@ -375,6 +375,7 @@ void Ideal::D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, 
 	CmdList->ResourceBarrier(1, &resourceBarrier0);
 
 
+	Check(ResourceLocation.GetOffsetFromBaseOfResource() + m_bufferSize <= ResourceLocation.GetResource()->GetDesc().Width);
 	// 데이터를 복사한다
 	CmdList->CopyBufferRegion(ResourceLocation.GetResource(), ResourceLocation.GetOffsetFromBaseOfResource(), UploadBuffer.GetResource(), 0, m_bufferSize);
 

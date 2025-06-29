@@ -167,12 +167,6 @@ namespace Ideal
 				memcpy(mappedData, Vertices.data(), bufferSize);
 				uploadBuffer.UnMap();
 			}
-			//OutVertexBuffer->Create(m_device.Get(),
-			//	m_commandList.Get(),
-			//	elementSize,
-			//	elementCount,
-			//	uploadBuffer
-			//);
 
 			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(elementSize * elementCount, D3D12_RESOURCE_FLAG_NONE, 0);
 			DefaultBufferAllocator->AllocateDefaultResource(
@@ -188,19 +182,6 @@ namespace Ideal
 				m_commandList.Get(),
 				uploadBuffer
 			);
-
-			// 25.06.08	// ¿À ¼º°ø
-			//OutVertexBuffer->Create(
-			//	m_device.Get(),
-			//	m_heap.Get(),
-			//	m_heapOffset,
-			//	m_commandList.Get(),
-			//	elementSize,
-			//	elementCount,
-			//	uploadBuffer
-			//);
-			//m_heapOffset = (m_heapOffset + bufferSize + (D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1);
-
 
 			//---------Execute---------//
 			m_commandList->Close();

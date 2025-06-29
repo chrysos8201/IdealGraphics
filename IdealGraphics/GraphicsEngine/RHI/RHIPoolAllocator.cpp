@@ -2,6 +2,7 @@
 #include "RHIPoolAllocationData.h"
 #include "RHIMemoryPool.h"
 #include "D3D12\D3D12Util.h"
+#include "d3dx12.h"
 
 Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
 	: DefaultPoolSize(InDefaultPoolSize),
@@ -211,6 +212,25 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 		}
 	}
 	// TODO : else. 버퍼가 더 큰경우 그냥 하나의 committed 리소스로 만들겠다.
+	else
+	{
+		ID3D12Resource* NewResource = nullptr;
+		const D3D12_HEAP_PROPERTIES HeapProps = CD3DX12_HEAP_PROPERTIES(InHeapType);
+		D3D12_RESOURCE_DESC Desc = InResourceDesc;
+		Desc.Alignment = 0;
+
+		D3D12_RESOURCE_STATES DefaultState = InResourceCreateState;
+		Device->CreateCommittedResource(
+			&HeapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&Desc,
+			InResourceCreateState,
+			nullptr,
+			IID_PPV_ARGS(&NewResource)
+			);
+
+		ResourceLocation.AsStandAlone(NewResource, HeapProps.Type ,InSize);
+	}
 }
 
 ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const

@@ -240,6 +240,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//gRenderer->ConvertAssetToMyFormat(L"cart/SM_cart.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"UVSphere/UVSphere.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"DebugPlane/Plane.fbx", false);
+		gRenderer->ConvertAssetToMyFormat(L"mcl/mcl39.fbx", false);
 
 		//gRenderer->ConvertAssetToMyFormat(L"0_Particle/Slash.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"building/building_dummy3_hanna.fbx", false);
@@ -273,6 +274,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 #pragma endregion
 
 #pragma region Sample
+		std::shared_ptr<Ideal::IMeshObject> mcl = gRenderer->CreateStaticMeshObject(L"mcl/mcl39");
+		mcl->SetTransformMatrix(
+			Matrix::CreateScale(1.f)
+			* Matrix::CreateRotationY(1.f)
+			* Matrix::CreateTranslation(Vector3(15, 2, 5)));
+
+
 		// Create Static Mesh
 		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
 		SampleCart->SetTransformMatrix(
@@ -2635,6 +2643,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 					{
 						delayHomeKey = 0.f;
 						gRenderer->ToggleFullScreenWindow();
+					}
+				}
+
+				if (GetAsyncKeyState('R') & 0x8000)
+				{
+					if (meshes.size() > 0)
+					{
+						gRenderer->DeleteMeshObject(meshes.back());
+						meshes.pop_back();
 					}
 				}
 

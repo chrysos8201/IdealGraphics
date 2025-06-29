@@ -1,4 +1,5 @@
 #include "D3D12Common.h"
+#include "D3D12Util.h"
 
 Ideal::D3D12ResourceLocation::D3D12ResourceLocation(ID3D12Device* InDevice)
 	: D3D12DeviceChild(InDevice)
@@ -42,4 +43,18 @@ void Ideal::D3D12ResourceLocation::SetResource(ID3D12Resource* Value)
 	GPUVirtualAddress = Value->GetGPUVirtualAddress();
 
 	UnderlyingResource = Value;
+}
+
+void Ideal::D3D12ResourceLocation::AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize)
+{
+	SetType(D3D12ResourceLocation::ResourceLocationType::eStandAlone);
+	SetResource(Resource);
+	SetSize(InSize);
+	
+	if (IsCPUAccessible(ResourceHeapType))
+	{
+		// TODO : Resource Map 업데이트 해야함
+		//D3D12_RANGE range = {0, Is}
+	}
+	SetGPUVirtualAddress(Resource->GetGPUVirtualAddress());
 }

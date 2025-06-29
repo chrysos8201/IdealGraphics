@@ -39,7 +39,7 @@ Ideal::RHIMemoryPool::RHIMemoryPool(uint16 InPoolIndex, uint64 InPoolSize, uint3
 	PoolIndex(InPoolIndex)
 	, PoolSize(InPoolSize)
 	, PoolAlignment(InPoolAlignment)
-	, FreeSize(0)
+	, FreeSize(0)	
 	, AlignmentWaste(0)
 	, AllocatedBlocks(0)
 {

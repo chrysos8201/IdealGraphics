@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>front_wheel_windlet</Name>
+        <DiffuseFile>front_wheel_windlet_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>front_wheel_windlet_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>suspensions</Name>
+        <DiffuseFile>suspensions_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>suspensions_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>rear_wing</Name>
+        <DiffuseFile>rear_wing_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>rear_wing_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>drs_puller</Name>
+        <DiffuseFile>drs_puller_BaseColor_sRGB.1002.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>drs_puller_Normal_Raw.1002.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.54465538" G="0.54465538" B="0.54465538" A="1"/>
+        <Specular R="0.54465538" G="0.54465538" B="0.54465538" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>front_wing</Name>
+        <DiffuseFile>front_wing_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>front_wing_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>front_wing_c</Name>
+        <DiffuseFile>front_wing_c_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>front_wing_c_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.56276393" G="0.56276393" B="0.56276393" A="1"/>
+        <Specular R="0.56276393" G="0.56276393" B="0.56276393" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>exthaust</Name>
+        <DiffuseFile>exthaust_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>exthaust_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>headrest</Name>
+        <DiffuseFile>headrest_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>headrest_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>main_body</Name>
+        <DiffuseFile>main_body_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>main_body_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.30749065" G="0.30749065" B="0.30749065" A="1"/>
+        <Specular R="0.30749065" G="0.30749065" B="0.30749065" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>halo</Name>
+        <DiffuseFile>halo_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>halo_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0.80000001" G="0.80000001" B="0.80000001" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>cam_tbone_misc</Name>
+        <DiffuseFile>cam_tbone_misc_BaseColor_sRGB.1002.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>cam_tbone_misc_Normal_Raw.1002.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0.80000001" G="0.80000001" B="0.80000001" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>mirror</Name>
+        <DiffuseFile>mirror_BaseColor_sRGB.1002.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>mirror_Normal_Raw.1002.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.49804997" G="0.49804997" B="0.49804997" A="1"/>
+        <Specular R="0.49804997" G="0.49804997" B="0.49804997" A="63.926289"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.20046079"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>rear_tire</Name>
+        <DiffuseFile>rear_tire_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>rear_tire_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.0028978505" G="0.0028978505" B="0.0028978505" A="1"/>
+        <Specular R="0.0028978505" G="0.0028978505" B="0.0028978505" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>wheel_rim</Name>
+        <DiffuseFile>wheel_rim_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>wheel_rim_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.014801023" G="0.014801023" B="0.014801023" A="1"/>
+        <Specular R="0.014801023" G="0.014801023" B="0.014801023" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>wheel_nut</Name>
+        <DiffuseFile>wheel_nut_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>wheel_nut_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.42745793" G="0.42745793" B="0.42745793" A="1"/>
+        <Specular R="0.42745793" G="0.42745793" B="0.42745793" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>wheel_screw.001</Name>
+        <DiffuseFile>wheel_screw.001_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>wheel_screw.001_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.16716726" G="0.16716726" B="0.16716726" A="1"/>
+        <Specular R="0.16716726" G="0.16716726" B="0.16716726" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>wheel_screw</Name>
+        <DiffuseFile>wheel_screw_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>wheel_screw_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.16716726" G="0.16716726" B="0.16716726" A="1"/>
+        <Specular R="0.16716726" G="0.16716726" B="0.16716726" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>rear_wheel_cover</Name>
+        <DiffuseFile>rear_wheel_cover_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>rear_wheel_cover_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.059105925" G="0.059105925" B="0.059105925" A="1"/>
+        <Specular R="0.059105925" G="0.059105925" B="0.059105925" A="89.681778"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.052995384"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>front_tire</Name>
+        <DiffuseFile>front_tire_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>front_tire_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.0061146915" G="0.0061146915" B="0.0061146915" A="1"/>
+        <Specular R="0.0061146915" G="0.0061146915" B="0.0061146915" A="25"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.5"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+    <Material>
+        <Name>front_wheel_cover</Name>
+        <DiffuseFile>front_wheel_cover_BaseColor_sRGB.1001.png</DiffuseFile>
+        <SpecularFile>DefaultAlbedo.png</SpecularFile>
+        <NormalFile>front_wheel_cover_Normal_Raw.1001.png</NormalFile>
+        <MetalicFile>DefaulBlack.png</MetalicFile>
+        <RoughnessFile>DefaulBlack.png</RoughnessFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.057482652" G="0.057482652" B="0.057482652" A="1"/>
+        <Specular R="0.057482652" G="0.057482652" B="0.057482652" A="92.319328"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+        <Metallic Factor="-1.0737418e+08"/>
+        <Roughness Factor="0.039170563"/>
+        <UseTextureInfo Diffuse="true" Normal="true" Metallic="false" Roughness="false"/>
+    </Material>
+</Materials>

@@ -73,6 +73,7 @@ namespace Ideal
 		enum class ResourceLocationType : uint8 
 		{
 			eUndefined,
+			eStandAlone, // 리소스를 혼자 사용할 경우
 			eSubAllocation,
 		};
 	public:
@@ -98,6 +99,8 @@ namespace Ideal
 
 		RHIPoolAllocationData& GetPoolAllocatorData() { return PoolData; }
 	
+		void AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize);
+
 	private:
 
 		template<bool bReleaseResource>

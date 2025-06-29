@@ -83,6 +83,7 @@ namespace Ideal
 		ID3D12Resource* GetResource() const { return UnderlyingResource; }
 		uint64 GetOffsetFromBaseOfResource() const { return OffsetFromBaseOfResource; }
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return GPUVirtualAddress; }
+		uint64 GetSize() const { return Size; }
 
 		void SetType(ResourceLocationType Value) { Type = Value; }
 		void SetResource(ID3D12Resource* Value);

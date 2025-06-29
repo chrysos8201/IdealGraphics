@@ -94,6 +94,7 @@ struct PositionNormalUVTangentColor
     float uv[2];
     XMFLOAT3 tangent;
     XMFLOAT4 color;
+    float padding;
 
 };
 

@@ -182,7 +182,7 @@ namespace Ideal
 				D3D12_RESOURCE_STATE_COMMON,
 				ED3D12ResourceStateMode::SingleState,
 				OutVertexBuffer->GetResourceLocation(),
-				16);
+				sizeof(TVertexType));
 			OutVertexBuffer->CreateFromResourceLocation(
 				m_device.Get(), elementSize, elementCount,
 				m_commandList.Get(),

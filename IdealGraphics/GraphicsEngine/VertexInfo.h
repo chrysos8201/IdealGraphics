@@ -56,6 +56,7 @@ struct BasicVertex
 	Vector2 UV;
 	Vector3 Tangent;
 	Vector4 Color;
+	float padding;
 
 	static const D3D12_INPUT_LAYOUT_DESC InputLayout;
 

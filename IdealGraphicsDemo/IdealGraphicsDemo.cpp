@@ -224,6 +224,54 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//gRenderer->ToggleFullScreenWindow();
 #pragma endregion
 
+#pragma region FBXConvert
+		//-------------------Convert FBX(Model, Animation)-------------------//
+		//gRenderer->ConvertAssetToMyFormat(L"DebugPlayer/asciiFbxAni.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"DebugPlayer/asciiFbxAni.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"MapData/1_HN_Scene2/brick_base.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"EnemyTest/idelTest.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"EnemyTest/idelTest.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"DebugPlayer/animation_ka_walk.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"DebugPlayer/animation_ka_walk.fbx");
+
+		//gRenderer->ConvertAssetToMyFormat(L"PlayerRe/SM_chronos.Main_tPose.fbx", true);
+		//gRenderer->ConvertAssetToMyFormat(L"PlayerRe/untitled.fbx", true);
+
+		//gRenderer->ConvertAssetToMyFormat(L"cart/SM_cart.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"UVSphere/UVSphere.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"DebugPlane/Plane.fbx", false);
+
+		//gRenderer->ConvertAssetToMyFormat(L"0_Particle/Slash.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"building/building_dummy3_hanna.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugCube.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugSphere.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"player/SK_Fencer_Lady_Nude@T-Pose.fbx", true);
+		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugCube.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"Kachujin/Mesh.fbx", true);
+		//gRenderer->ConvertAssetToMyFormat(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1.fbx", false);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"PlayerAnimations/Idle/idle.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"statue_chronos/SMown_chronos_statue.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"formula1/Formula 1 mesh.fbx", false);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"player/Hip Hop Dancing.fbx");
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/HipHop.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"player/SK_Fencer_Lady_Nude.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"player/Dancing Twerk.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"player2/myPlayer2.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"player2/Capoeira.fbx");
+		//ERROR : 
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"CatwalkWalkForward3/CatwalkWalkForward3.fbx");// -> Assimp Converter에서 FLAG 해제
+		//gRenderer->ConvertAssetToMyFormat(L"CatwalkWalkForward3/CatwalkWalkForward3.fbx", true);
+		//gRenderer->ConvertAssetToMyFormat(L"test2/run_.fbx", true);
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"test2/run_.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"Boss/bosshall.fbx", false, false);
+		//ReadVertexPosition(L"../Resources/Models/Tower/Tower.pos");
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Run.fbx");
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Idle.fbx");
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Slash.fbx");
+		//gRenderer->ConvertAnimationAssetToMyFormat(L"PlayerRe/Sword And Shield Slash.fbx");
+		//gRenderer->ConvertAssetToMyFormat(L"boss/bosshall.fbx", false);
+#pragma endregion
+
 #pragma region Sample
 		// Create Static Mesh
 		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");
@@ -270,53 +318,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		SampleSphere->GetMeshByIndex(0).lock()->SetMaterialObject(SampleSphereMaterial);
 		SampleSphere->AlphaClippingCheck();
 
-#pragma endregion
-
-#pragma region FBXConvert
-		//-------------------Convert FBX(Model, Animation)-------------------//
-		//gRenderer->ConvertAssetToMyFormat(L"DebugPlayer/asciiFbxAni.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"DebugPlayer/asciiFbxAni.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"MapData/1_HN_Scene2/brick_base.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"EnemyTest/idelTest.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"EnemyTest/idelTest.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"DebugPlayer/animation_ka_walk.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"DebugPlayer/animation_ka_walk.fbx");
-
-		//gRenderer->ConvertAssetToMyFormat(L"PlayerRe/SM_chronos.Main_tPose.fbx", true);
-		//gRenderer->ConvertAssetToMyFormat(L"PlayerRe/untitled.fbx", true);
-
-		//gRenderer->ConvertAssetToMyFormat(L"0_Particle/Slash.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"cart/SM_cart.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"building/building_dummy3_hanna.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"UVSphere/UVSphere.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugCube.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugSphere.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"DebugPlane/Plane.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"player/SK_Fencer_Lady_Nude@T-Pose.fbx", true);
-		//gRenderer->ConvertAssetToMyFormat(L"DebugObject/debugCube.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"Kachujin/Mesh.fbx", true);
-		//gRenderer->ConvertAssetToMyFormat(L"PlayerAnimations/ChargedAttack/M_Big_Sword@Attack_3Combo_1.fbx", false);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"PlayerAnimations/Idle/idle.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"statue_chronos/SMown_chronos_statue.fbx", false);
-		//gRenderer->ConvertAssetToMyFormat(L"formula1/Formula 1 mesh.fbx", false);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"player/Hip Hop Dancing.fbx");
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/HipHop.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"player/SK_Fencer_Lady_Nude.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"player/Dancing Twerk.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"player2/myPlayer2.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"player2/Capoeira.fbx");
-		//ERROR : 
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"CatwalkWalkForward3/CatwalkWalkForward3.fbx");// -> Assimp Converter에서 FLAG 해제
-		//gRenderer->ConvertAssetToMyFormat(L"CatwalkWalkForward3/CatwalkWalkForward3.fbx", true);
-		//gRenderer->ConvertAssetToMyFormat(L"test2/run_.fbx", true);
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"test2/run_.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"Boss/bosshall.fbx", false, false);
-		//ReadVertexPosition(L"../Resources/Models/Tower/Tower.pos");
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Run.fbx");
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Idle.fbx");
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"Kachujin/Slash.fbx");
-		//gRenderer->ConvertAnimationAssetToMyFormat(L"PlayerRe/Sword And Shield Slash.fbx");
-		//gRenderer->ConvertAssetToMyFormat(L"boss/bosshall.fbx", false);
 #pragma endregion
 
 #pragma region CreateMeshObjectAndAnimation

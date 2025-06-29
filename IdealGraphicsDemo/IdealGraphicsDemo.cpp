@@ -240,7 +240,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		//gRenderer->ConvertAssetToMyFormat(L"cart/SM_cart.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"UVSphere/UVSphere.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"DebugPlane/Plane.fbx", false);
-		gRenderer->ConvertAssetToMyFormat(L"mcl/mcl39.fbx", false);
+		//gRenderer->ConvertAssetToMyFormat(L"mcl/mcl39.fbx", false);
 
 		//gRenderer->ConvertAssetToMyFormat(L"0_Particle/Slash.fbx", false);
 		//gRenderer->ConvertAssetToMyFormat(L"building/building_dummy3_hanna.fbx", false);
@@ -274,12 +274,46 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 #pragma endregion
 
 #pragma region Sample
+		// Create MCLaren
 		std::shared_ptr<Ideal::IMeshObject> mcl = gRenderer->CreateStaticMeshObject(L"mcl/mcl39");
 		mcl->SetTransformMatrix(
 			Matrix::CreateScale(1.f)
 			* Matrix::CreateRotationY(1.f)
 			* Matrix::CreateTranslation(Vector3(15, 2, 5)));
+		
+		// Create Material
+		std::shared_ptr<Ideal::IMaterial> mclMainBodyMaterial = gRenderer->CreateMaterial();
+		std::shared_ptr<Ideal::ITexture> mclMainBodyBaseTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/main_body_BaseColor_sRGB_1001.png", true, false, false);
+		mclMainBodyMaterial->SetBaseMap(mclMainBodyBaseTexture);
+		std::shared_ptr<Ideal::ITexture> mclMainBodyNormalTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/main_body_Normal_Raw_1001.png", true, true, true);
+		mclMainBodyMaterial->SetNormalMap(mclMainBodyNormalTexture);
+		//std::shared_ptr<Ideal::ITexture> mclMainBodyRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/main_body_Metallic_Raw_1001_png-main_body_Roughness_Raw_1001.png", true, false, false);
+		std::shared_ptr<Ideal::ITexture> mclMainBodyRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", true, true, true);
+		mclMainBodyMaterial->SetMaskMap(mclMainBodyRoughnessTexture);
+		// Bind Material
+		mcl->GetMeshByIndex(8).lock()->SetMaterialObject(mclMainBodyMaterial);
 
+		std::shared_ptr<Ideal::IMaterial> mclRealWingMaterial = gRenderer->CreateMaterial();
+		std::shared_ptr<Ideal::ITexture> mclRealWingBaseTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/rear_wing_BaseColor_sRGB_1001.png", true, false, false);
+		mclRealWingMaterial->SetBaseMap(mclRealWingBaseTexture);
+		std::shared_ptr<Ideal::ITexture> mclRealWingNormalTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/rear_wing_Normal_Raw_1001.png", true, true, true);
+		mclRealWingMaterial->SetNormalMap(mclRealWingNormalTexture);
+		//std::shared_ptr<Ideal::ITexture> mclRealWingRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/rear_wing_Metallic_Raw_1001_png-rear_wing_Roughness_Raw_1001-main_body_Roughness_Raw_1001.png", true, false, false);
+		std::shared_ptr<Ideal::ITexture> mclRealWingRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", true, true, true);
+		mclRealWingMaterial->SetMaskMap(mclRealWingRoughnessTexture);
+		// Bind Material
+		mcl->GetMeshByIndex(2).lock()->SetMaterialObject(mclRealWingMaterial);
+
+		std::shared_ptr<Ideal::IMaterial> mclFrontWheelMaterial = gRenderer->CreateMaterial();
+		std::shared_ptr<Ideal::ITexture> mclFrontWheelBaseTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/front_wheel_cover_BaseColor_sRGB_1001.png", true, false, false);
+		mclFrontWheelMaterial->SetBaseMap(mclFrontWheelBaseTexture);
+		std::shared_ptr<Ideal::ITexture> mclFrontWheelNormalTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/front_wheel_cover_Normal_Raw_1001.png", true, true, true);
+		mclFrontWheelMaterial->SetNormalMap(mclFrontWheelNormalTexture);
+		//std::shared_ptr<Ideal::ITexture> mclFrontWheelRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/front_wheel_cover_Metallic_Raw_1001_png-front_wheel_cover_Ro.png", true, false, false);
+		std::shared_ptr<Ideal::ITexture> mclFrontWheelRoughnessTexture = gRenderer->CreateTexture(L"../Resources/Textures/DefaultTexture/DefaultWhite.png", true, true, true);
+		mclFrontWheelMaterial->SetMaskMap(mclFrontWheelRoughnessTexture);
+		// Bind Material
+		mcl->GetMeshByIndex(23).lock()->SetMaterialObject(mclFrontWheelMaterial);
 
 		// Create Static Mesh
 		std::shared_ptr<Ideal::IMeshObject> SampleCart = gRenderer->CreateStaticMeshObject(L"cart/SM_cart");

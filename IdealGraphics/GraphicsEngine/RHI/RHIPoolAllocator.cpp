@@ -63,6 +63,13 @@ bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, uint32 I
 	return Pools[NewPoolIndex]->TryAllocate(InSizeInBytes, InAllocationAlignment, InAllocationData);
 }
 
+void Ideal::RHIPoolAllocator::DeallocateInternal(RHIPoolAllocationData& AllocationData)
+{
+	Check(AllocationData.IsAllocated());
+	Check(AllocationData.GetPoolIndex() < Pools.size());
+	Pools[AllocationData.GetPoolIndex()]->Deallocate(AllocationData);
+}
+
 Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocationStrategy(D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment)
 {
 	if (Alignment > D3D12ManualSubAllocationAlignment)

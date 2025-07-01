@@ -113,6 +113,27 @@ bool Ideal::RHIMemoryPool::TryAllocate(uint32 InSizeInBytes, uint32 InAllocation
 	return false;
 }
 
+void Ideal::RHIMemoryPool::Deallocate(RHIPoolAllocationData& AllocationData)
+{
+	Check(AllocationData.IsLocked());
+	Check(PoolIndex == AllocationData.GetPoolIndex());
+
+	uint32 AllocationAlignment = AllocationData.GetAlignment();
+
+	bool bLocked = false;
+	uint64 AllocationSize = AllocationData.GetSize();
+
+	RHIPoolAllocationData* FreeBlock = GetNewAllocationData();
+	FreeBlock->MoveFrom(AllocationData, bLocked);
+	FreeBlock->MarkFree(PoolAlignment, AllocationAlignment);
+
+	FreeSize += FreeBlock->GetSize();
+	AlignmentWaste -= FreeBlock->GetSize() - AllocationSize;
+	AllocatedBlocks--;
+
+	AddToFreeBlocks(FreeBlock);
+}
+
 int32 Ideal::RHIMemoryPool::FindFreeBlock(uint32 InSizeInBytes, uint32 InAllocationAlignment) const
 {
 	uint32 AlignedSize = GetAlignedSize(InSizeInBytes, PoolAlignment, InAllocationAlignment);

@@ -39,6 +39,24 @@ namespace Ideal
 	// Constant Buffer의 Alignment는 256U이다. 다만 리소스가 최소 64KB인 것일 뿐...
 	const uint32 D3D12ManualSubAllocationAlignment = 256U;
 
+	struct D3D12VRAMCopyOperation
+	{
+		enum ECopyType
+		{
+			BufferRegion,
+			Resource,
+		};
+
+		ID3D12Resource* SourceResource;
+		D3D12_RESOURCE_STATES SourceResourceState;
+		uint32 SourceOffset;
+		ID3D12Resource* DestResource;
+		D3D12_RESOURCE_STATES DestResourceState;
+		uint32 DestOffset;
+		uint32 Size;
+		ECopyType CopyType;
+	};
+
 	class D3D12PoolAllocator : public RHIPoolAllocator, public D3D12DeviceChild
 	{
 	public:
@@ -49,6 +67,9 @@ namespace Ideal
 
 		bool SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment) const;
 		void AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, const D3D12_RESOURCE_DESC& InResourceDesc, const D3D12_RESOURCE_STATES InResourceCreateState, ED3D12ResourceStateMode InResourceStateMode, uint32 InAllocationAlignment, const D3D12_CLEAR_VALUE* InClearValue, Ideal::D3D12ResourceLocation& ResourceLocation);
+		void DeallocateResource(D3D12ResourceLocation& ResourceLocation, bool bDefragFree = false);
+
+		void CleanUpAllocations(uint64 InFrameLag, bool bForceFree = false);
 
 		ID3D12Resource* GetBackingResource(D3D12ResourceLocation& InResourceLocation) const;
 		bool IsOwner(D3D12ResourceLocation& ResourceLocation) const { return ResourceLocation.GetPoolAllocator() == this; }
@@ -57,8 +78,30 @@ namespace Ideal
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) override;
 		ID3D12Resource* CreatePlacedResource(const RHIPoolAllocationData& InAllocationData, const D3D12_RESOURCE_DESC& InDesc, D3D12_RESOURCE_STATES InCreateState, ED3D12ResourceStateMode InResourceStateMode, const D3D12_CLEAR_VALUE* InClearValue);
 
+		struct FrameFencedAllocationData
+		{
+			enum class EOperation
+			{
+				Invalid,
+				Deallocate,
+				Unlock,
+				Nop,
+			};
+			EOperation Operation = EOperation::Invalid;
+			ID3D12Resource* PlacedResource = nullptr;
+			uint64 FrameFence = 0;
+			RHIPoolAllocationData* AllocationData = nullptr;
+		};
+
 		EResourceAllocationStrategy AllocationStrategy;
 		D3D12ResourceInitConfig InitConfig;
+
+		std::vector<FrameFencedAllocationData> FrameFencedOperations;
+		uint64 PendingDeleteRequestSize = 0;	// FrameFencedOperations큐에 캐쉬된, 보류 중인 모든 메모리 해제 요청의 총 크기를 나타내는 변수
+
+		std::vector<D3D12VRAMCopyOperation> PendingCopyOps;
+
+		std::vector<RHIPoolAllocationData*> AllocationDataPool;	// 메모리 생성 해제 오버헤드 감소를 위한 AllocationData Pool
 	};
 }
 

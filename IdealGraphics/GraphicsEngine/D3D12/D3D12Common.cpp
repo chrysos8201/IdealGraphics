@@ -7,6 +7,11 @@ Ideal::D3D12ResourceLocation::D3D12ResourceLocation(ID3D12Device* InDevice)
 	Clear();
 }
 
+Ideal::D3D12ResourceLocation::~D3D12ResourceLocation()
+{
+
+}
+
 void Ideal::D3D12ResourceLocation::Clear()
 {
 	InternalClear<true>();
@@ -36,6 +41,28 @@ void Ideal::D3D12ResourceLocation::InternalClear()
 }
 
 
+void Ideal::D3D12ResourceLocation::ReleaseResource()
+{
+	switch (Type)
+	{
+		case ResourceLocationType::eUndefined:
+			
+			break;
+		case ResourceLocationType::eStandAlone:
+			UnderlyingResource->Release();
+			break;
+		case ResourceLocationType::eSubAllocation:
+		{
+			Check(PoolAllocator != nullptr);
+			// TODO: DeallocateResource
+			PoolAllocator->Deallo
+		}
+			break;
+		default:
+			break;
+	}
+}
+
 void Ideal::D3D12ResourceLocation::SetResource(ID3D12Resource* Value)
 {
 	Check(UnderlyingResource == nullptr);
@@ -50,7 +77,7 @@ void Ideal::D3D12ResourceLocation::AsStandAlone(ID3D12Resource* Resource, D3D12_
 	SetType(D3D12ResourceLocation::ResourceLocationType::eStandAlone);
 	SetResource(Resource);
 	SetSize(InSize);
-	
+
 	if (IsCPUAccessible(ResourceHeapType))
 	{
 		// TODO : Resource Map 업데이트 해야함

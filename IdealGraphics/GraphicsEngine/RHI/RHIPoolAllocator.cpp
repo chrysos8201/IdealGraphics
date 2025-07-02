@@ -196,6 +196,7 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 
 			ResourceLocation.SetOffsetFromBaseOfResource(AllocationData.GetOffset());
 			ResourceLocation.SetResource(BackingResource);
+			ResourceLocation.SetAllocationStrategy(EResourceAllocationStrategy::ManualSubAllocation);
 			ResourceLocation.SetGPUVirtualAddress(BackingResource->GetGPUVirtualAddress() + AllocationData.GetOffset());
 	
 			if (IsCPUAccessible(InitConfig.HeapType))
@@ -215,10 +216,10 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 
 			ID3D12Resource* NewResource = CreatePlacedResource(AllocationData, Desc, InResourceCreateState, InResourceStateMode, InClearValue);
 			ResourceLocation.SetResource(NewResource);
+			ResourceLocation.SetAllocationStrategy(EResourceAllocationStrategy::PlacedResource);
 			ResourceLocation.SetGPUVirtualAddress(NewResource->GetGPUVirtualAddress());
 		}
 	}
-	// TODO : else. 버퍼가 더 큰경우 그냥 하나의 committed 리소스로 만들겠다.
 	else
 	{
 		ID3D12Resource* NewResource = nullptr;
@@ -238,6 +239,137 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 
 		ResourceLocation.AsStandAlone(NewResource, HeapProps.Type ,InSize);
 	}
+}
+
+void Ideal::D3D12PoolAllocator::DeallocateResource(D3D12ResourceLocation& ResourceLocation, bool bDefragFree /*= false*/)
+{
+	Check(IsOwner(ResourceLocation));
+
+	RHIPoolAllocationData& AllocationData = ResourceLocation.GetPoolAllocatorData();
+	Check(AllocationData.IsAllocated());
+
+	if (AllocationData.IsLocked())
+	{
+		for (FrameFencedAllocationData& Operation : FrameFencedOperations)
+		{
+			if (Operation.AllocationData == &AllocationData)
+			{
+				Check(Operation.Operation == FrameFencedAllocationData::EOperation::Unlock);
+				Operation.Operation = FrameFencedAllocationData::EOperation::Nop;
+				Operation.AllocationData = nullptr;
+				break;
+			}
+		}
+
+		// 조각 모음 프로세스에서 수행되지 않은 비디오 메모리 복사 작업을 취소한다.
+		for (D3D12VRAMCopyOperation& CopyOperation : PendingCopyOps)
+		{
+			if (CopyOperation.SourceResource == ResourceLocation.GetResource() ||
+				CopyOperation.DestResource == ResourceLocation.GetResource())
+			{
+				CopyOperation.SourceResource = nullptr;
+				CopyOperation.DestResource = nullptr;
+				break;
+			}
+		}
+	}
+
+	int16 PoolIndex = AllocationData.GetPoolIndex();
+
+	RHIPoolAllocationData* ReleasedAllocationData = nullptr; // (AllocationDataPool.size() > 0) ? AllocationDataPool.back()
+	if (AllocationDataPool.size() > 0)
+	{
+		ReleasedAllocationData = AllocationDataPool[AllocationDataPool.size() - 1];
+		AllocationDataPool.pop_back();
+	}
+	else
+	{
+		ReleasedAllocationData = new RHIPoolAllocationData();
+	}
+
+	bool bLocked = true;
+	ReleasedAllocationData->MoveFrom(AllocationData, bLocked);
+
+	ResourceLocation.ClearAllocator();
+
+	FrameFencedAllocationData DeleteRequest;
+	DeleteRequest.Operation = FrameFencedAllocationData::EOperation::Deallocate;
+	//DeleteRequest.FrameFence = // TODO:프레임 위치 기억 // 07.02
+	DeleteRequest.AllocationData = ReleasedAllocationData;
+
+	PendingDeleteRequestSize += DeleteRequest.AllocationData->GetSize();
+	((D3D12MemoryPool*)Pools[PoolIndex])->UpdateLastUsedFrameFence(DeleteRequest.FrameFence);
+
+	// PlacedResource인 경우 Fence가 끝나면 해제할 수 있게 저장 // ManualResource인 경우 하나의 Resource를 잘라 쓰니 해제X
+	if (ResourceLocation.GetAllocationStrategy() == EResourceAllocationStrategy::PlacedResource)
+	{
+		DeleteRequest.PlacedResource = ResourceLocation.GetResource();
+	}
+	else
+	{
+		DeleteRequest.PlacedResource = nullptr;
+	}
+
+	FrameFencedOperations.push_back(DeleteRequest);
+}
+
+void Ideal::D3D12PoolAllocator::CleanUpAllocations(uint64 InFrameLag, bool bForceFree /*= false*/)
+{
+	uint32 PopCount = 0;
+	for (int32 i = 0; i < FrameFencedOperations.size(); i++)
+	{
+		FrameFencedAllocationData& Operation = FrameFencedOperations[i];
+		if (bForceFree || true/* TODO :여기서 FenceValue를 비교해서 끝났는지 확인*/)
+		{
+			switch (Operation.Operation)
+			{
+				case FrameFencedAllocationData::EOperation::Deallocate:
+				{
+					Check(PendingDeleteRequestSize >= Operation.AllocationData->GetSize());
+					PendingDeleteRequestSize -= Operation.AllocationData->GetSize();
+
+					DeallocateInternal(*Operation.AllocationData);
+					Operation.AllocationData->Reset();
+					AllocationDataPool.push_back(Operation.AllocationData);
+
+					if (AllocationStrategy == EResourceAllocationStrategy::PlacedResource)
+					{
+						Check(Operation.PlacedResource != nullptr);
+						Operation.PlacedResource->Release();
+						Operation.PlacedResource = nullptr;
+					}
+					else
+					{
+						Check(Operation.PlacedResource == nullptr);
+					}
+					break;
+				}
+				case FrameFencedAllocationData::EOperation::Unlock:
+				{
+					Operation.AllocationData->UnLock();
+					break;
+				}
+				case FrameFencedAllocationData::EOperation::Nop:
+					break;
+				default:
+					Check(false);
+					break;
+			}
+
+			PopCount = i + 1;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (PopCount)
+	{
+		FrameFencedOperations.erase(FrameFencedOperations.begin(), FrameFencedOperations.begin() + PopCount);
+	}
+
+	// TODO : 특정 프레임동안 사용하지 않은 빈 Allocator들을 해제하고 정렬해야 한다.
 }
 
 ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const

@@ -59,6 +59,8 @@ namespace Ideal
 
 		ID3D12Resource* GetBackingResource() { return BackingResource.Get(); }
 		ID3D12Heap* GetBackingHeap() { return BackingHeap.Get(); }
+
+		void UpdateLastUsedFrameFence(uint64 InFrameFence) { LastUsedFrameFence = InFrameFence; }
 	private:
 		EResourceAllocationStrategy AllocationStrategy;
 		D3D12ResourceInitConfig InitConfig;
@@ -66,5 +68,7 @@ namespace Ideal
 
 		ComPtr<ID3D12Resource> BackingResource;
 		ComPtr<ID3D12Heap> BackingHeap;
+
+		uint64 LastUsedFrameFence;
 	};
 }

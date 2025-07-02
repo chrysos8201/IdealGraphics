@@ -78,6 +78,7 @@ namespace Ideal
 		};
 	public:
 		D3D12ResourceLocation(ID3D12Device* InDevice);
+		~D3D12ResourceLocation();
 
 		void Clear();
 
@@ -92,6 +93,8 @@ namespace Ideal
 		void SetPoolAllocator(D3D12PoolAllocator* Value) { PoolAllocator = Value; }
 		D3D12PoolAllocator* GetPoolAllocator() { return PoolAllocator; }
 		
+		void ClearAllocator() { PoolAllocator = nullptr; }
+
 		void SetMappedBaseAddress(void* Value) { MappedBaseAddress = Value; }
 		void SetGPUVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS Value) { GPUVirtualAddress = Value; }
 		void SetOffsetFromBaseOfResource(uint64 Value) { OffsetFromBaseOfResource = Value; }
@@ -101,10 +104,15 @@ namespace Ideal
 	
 		void AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize);
 
+		// 리소스 전략 설정 by gyu
+		void SetAllocationStrategy(EResourceAllocationStrategy Value) { PoolAllocationStrategy = Value; }
+		EResourceAllocationStrategy GetAllocationStrategy() { return PoolAllocationStrategy; }
 	private:
 
 		template<bool bReleaseResource>
 		void InternalClear();
+
+		void ReleaseResource();
 
 		ID3D12Resource* UnderlyingResource;
 
@@ -112,6 +120,8 @@ namespace Ideal
 		RHIPoolAllocationData PoolData;
 		ResourceLocationType Type;
 		uint64 Size;
+
+		EResourceAllocationStrategy PoolAllocationStrategy;
 
 		void* MappedBaseAddress;
 		D3D12_GPU_VIRTUAL_ADDRESS GPUVirtualAddress{};

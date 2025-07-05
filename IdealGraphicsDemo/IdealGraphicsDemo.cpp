@@ -2680,6 +2680,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 					}
 				}
 
+				if (GetAsyncKeyState('T') & 0x8000)
+				{
+					
+					std::shared_ptr<Ideal::IMeshObject> plane = gRenderer->CreateStaticMeshObject(L"DebugPlane/Plane");
+					plane->GetMeshByIndex(0).lock()->SetMaterialObject(windowMaterial);
+					plane->SetTransformMatrix(DirectX::SimpleMath::Matrix::CreateTranslation(Vector3(meshes.size(), 0, 0)));
+					meshes.push_back(plane);
+					plane->AlphaClippingCheck();
+				}
 				if (GetAsyncKeyState('R') & 0x8000)
 				{
 					if (meshes.size() > 0)

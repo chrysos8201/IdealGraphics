@@ -1,5 +1,6 @@
 #include "D3D12Common.h"
 #include "D3D12Util.h"
+#include "RHI/RHIPoolAllocator.h"
 
 Ideal::D3D12ResourceLocation::D3D12ResourceLocation(ID3D12Device* InDevice)
 	: D3D12DeviceChild(InDevice)
@@ -9,7 +10,8 @@ Ideal::D3D12ResourceLocation::D3D12ResourceLocation(ID3D12Device* InDevice)
 
 Ideal::D3D12ResourceLocation::~D3D12ResourceLocation()
 {
-
+	// 일단 명시적으로 불러주게 함
+	//ReleaseResource();
 }
 
 void Ideal::D3D12ResourceLocation::Clear()
@@ -25,8 +27,7 @@ void Ideal::D3D12ResourceLocation::InternalClear()
 {
 	if (bReleaseResource)
 	{
-		// TODO :
-		// ReleaseResource();
+		ReleaseResource();
 	}
 
 	// 데이터 리셋
@@ -46,7 +47,6 @@ void Ideal::D3D12ResourceLocation::ReleaseResource()
 	switch (Type)
 	{
 		case ResourceLocationType::eUndefined:
-			
 			break;
 		case ResourceLocationType::eStandAlone:
 			UnderlyingResource->Release();
@@ -55,7 +55,7 @@ void Ideal::D3D12ResourceLocation::ReleaseResource()
 		{
 			Check(PoolAllocator != nullptr);
 			// TODO: DeallocateResource
-			PoolAllocator->Deallo
+			PoolAllocator->DeallocateResource(*this);
 		}
 			break;
 		default:

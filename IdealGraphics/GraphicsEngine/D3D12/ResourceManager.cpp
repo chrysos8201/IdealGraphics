@@ -49,6 +49,16 @@ ResourceManager::~ResourceManager()
 	
 }
 
+void ResourceManager::Begin(uint64 InFenceValue)
+{
+	DefaultBufferAllocator->Begin(InFenceValue);
+}
+
+void ResourceManager::End()
+{
+	DefaultBufferAllocator->CleanupFreeBlocks(20);
+}
+
 void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	m_device = Device;
@@ -1278,6 +1288,13 @@ void ResourceManager::DeleteStaticMeshObject(std::shared_ptr<Ideal::IdealStaticM
 		auto it = m_staticMeshes.find(key);
 		if (it != m_staticMeshes.end())
 		{
+			// 25.07.05 - ResourceLocation »èÁ¦
+			for (auto& mesh : it->second->GetMeshes())
+			{
+				mesh->GetVertexBuffer()->GetResourceLocation().Clear();
+			}
+
+
 			m_staticMeshes.erase(it);
 		}
 	}

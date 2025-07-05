@@ -90,6 +90,11 @@ Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocat
 
 }
 
+void Ideal::D3D12PoolAllocator::BeginAndSetFenceValue(uint64 InFenceValue)
+{
+	FenceValue = InFenceValue;
+}
+
 Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ID3D12Device* InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
 	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled),
 	InitConfig(InInitConfig),
@@ -294,7 +299,7 @@ void Ideal::D3D12PoolAllocator::DeallocateResource(D3D12ResourceLocation& Resour
 
 	FrameFencedAllocationData DeleteRequest;
 	DeleteRequest.Operation = FrameFencedAllocationData::EOperation::Deallocate;
-	//DeleteRequest.FrameFence = // TODO:프레임 위치 기억 // 07.02
+	DeleteRequest.FrameFence = FenceValue;
 	DeleteRequest.AllocationData = ReleasedAllocationData;
 
 	PendingDeleteRequestSize += DeleteRequest.AllocationData->GetSize();
@@ -319,7 +324,7 @@ void Ideal::D3D12PoolAllocator::CleanUpAllocations(uint64 InFrameLag, bool bForc
 	for (int32 i = 0; i < FrameFencedOperations.size(); i++)
 	{
 		FrameFencedAllocationData& Operation = FrameFencedOperations[i];
-		if (bForceFree || true/* TODO :여기서 FenceValue를 비교해서 끝났는지 확인*/)
+		if (bForceFree || Operation.FrameFence <= FenceValue)
 		{
 			switch (Operation.Operation)
 			{

@@ -13,6 +13,10 @@ namespace Ideal
 	{
 	
 	public:
+		void Begin(uint64 InFenceValue);
+		void CleanupFreeBlocks(uint64 InFrameLag);
+
+	public:
 		D3D12DefaultBufferAllocator(ID3D12Device* InDevice);
 		
 		void AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, const D3D12_RESOURCE_DESC& InResourceDesc, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, D3D12ResourceLocation& ResourceLocation, uint32 Alignment);

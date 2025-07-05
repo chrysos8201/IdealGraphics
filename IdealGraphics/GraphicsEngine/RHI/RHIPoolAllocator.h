@@ -63,12 +63,20 @@ namespace Ideal
 		static EResourceAllocationStrategy GetResourceAllocationStrategy(D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment);
 
 	public:
+		// 반드시 프레임 시작시 FenceValue를 기록한다. // by Gyu
+		void BeginAndSetFenceValue(uint64 InFenceValue);
+
+	private:
+		uint64 FenceValue = 0;
+
+	public:
 		D3D12PoolAllocator(ID3D12Device* InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled);
 
 		bool SupportsAllocation(D3D12_HEAP_TYPE InHeapType, D3D12_HEAP_FLAGS InHeapFlags, D3D12_RESOURCE_FLAGS InResourceFlags, D3D12_RESOURCE_STATES InInitialResourceState, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment) const;
 		void AllocateDefaultResource(D3D12_HEAP_TYPE InHeapType, const D3D12_RESOURCE_DESC& InResourceDesc, const D3D12_RESOURCE_STATES InResourceCreateState, ED3D12ResourceStateMode InResourceStateMode, uint32 InAllocationAlignment, const D3D12_CLEAR_VALUE* InClearValue, Ideal::D3D12ResourceLocation& ResourceLocation);
 		void DeallocateResource(D3D12ResourceLocation& ResourceLocation, bool bDefragFree = false);
 
+		// FencedValue는 완료된 Fence의 Value를 넣으면 된다.
 		void CleanUpAllocations(uint64 InFrameLag, bool bForceFree = false);
 
 		ID3D12Resource* GetBackingResource(D3D12ResourceLocation& InResourceLocation) const;

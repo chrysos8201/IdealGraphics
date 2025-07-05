@@ -107,6 +107,7 @@ namespace Ideal
 		// 리소스 전략 설정 by gyu
 		void SetAllocationStrategy(EResourceAllocationStrategy Value) { PoolAllocationStrategy = Value; }
 		EResourceAllocationStrategy GetAllocationStrategy() { return PoolAllocationStrategy; }
+
 	private:
 
 		template<bool bReleaseResource>

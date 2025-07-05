@@ -1603,6 +1603,9 @@ void Ideal::D3D12RayTracingRenderer::BeginRender()
 
 	//commandList->OMSetRenderTargets(1, &rtvHandle.GetCpuHandle(), FALSE, &dsvHandle);
 	commandList->OMSetRenderTargets(1, &rtvHandle.GetCPUDescriptorHandleByIndex(0), FALSE, nullptr);
+
+
+	m_resourceManager->Begin(m_fenceValue);
 }
 
 void Ideal::D3D12RayTracingRenderer::EndRender()
@@ -1648,6 +1651,7 @@ void Ideal::D3D12RayTracingRenderer::Present()
 
 	m_currentContextIndex = nextContextIndex;
 
+	m_resourceManager->End();
 }
 
 uint64 Ideal::D3D12RayTracingRenderer::Fence()

@@ -2,6 +2,25 @@
 #include "D3D12Definitions.h"
 #include "RHI\RHIPoolAllocator.h"
 
+void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue)
+{
+	for (D3D12PoolAllocator* Pool : DefaultBufferPools)
+	{
+		Pool->BeginAndSetFenceValue(InFenceValue);
+	}
+}
+
+void Ideal::D3D12DefaultBufferAllocator::CleanupFreeBlocks(uint64 InFrameLag)
+{
+	for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
+	{
+		if (DefaultBufferPool)
+		{
+			DefaultBufferPool->CleanUpAllocations(InFrameLag);
+		}
+	}
+}
+
 Ideal::D3D12DefaultBufferAllocator::D3D12DefaultBufferAllocator(ID3D12Device* InDevice) : D3D12DeviceChild(InDevice)
 {
 

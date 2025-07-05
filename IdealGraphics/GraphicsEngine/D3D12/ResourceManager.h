@@ -78,6 +78,11 @@ namespace Ideal
 		void SetTexturePath(const std::wstring& TexturePath) { m_texturePath = TexturePath; }
 
 	public:
+		//25.07.05
+		void Begin(uint64 InFenceValue);
+		void End();
+
+	public:
 		void Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager);
 		void Fence();
 		void WaitForFenceValue();

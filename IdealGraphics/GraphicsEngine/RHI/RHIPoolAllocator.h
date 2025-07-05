@@ -23,6 +23,8 @@ namespace Ideal
 		bool TryAllocateInternal(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& InAllocationData);
 		void DeallocateInternal(RHIPoolAllocationData& AllocationData);
 
+		void SortPools();
+
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) = 0;
 
 		std::vector<RHIMemoryPool*> Pools;

@@ -19,13 +19,18 @@ namespace Ideal
 		RHIMemoryPool(uint16 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment);
 		
 		virtual void Init();
+		virtual void Destroy();
 
 		bool TryAllocate(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& AllocationData);
 		void Deallocate(RHIPoolAllocationData& AllocationData);
 
 		uint64 GetUsedSize() const { return (PoolSize - FreeSize); }
-		bool IsFull() const { return FreeSize == 0; }
 
+		int16 GetPoolIndex() const { return PoolIndex; }
+		uint64 GetPoolSize() const { return PoolSize; }
+
+		bool IsFull() const { return FreeSize == 0; }
+		bool IsEmpty() const { return GetUsedSize() == 0; }
 	protected:
 		// Free Block 관리 함수
 		int32 FindFreeBlock(uint32 InSizeInBytes, uint32 InAllocationAlignment) const;
@@ -56,11 +61,14 @@ namespace Ideal
 		D3D12MemoryPool(ID3D12Device* InDevice, uint32 InPoolIndex, uint64 InPoolSize, uint32 InPoolAlignment, EResourceAllocationStrategy InAllocationStrategy, D3D12ResourceInitConfig InInitConfig);
 
 		virtual void Init() override;
+		virtual void Destroy() override;
 
 		ID3D12Resource* GetBackingResource() { return BackingResource.Get(); }
 		ID3D12Heap* GetBackingHeap() { return BackingHeap.Get(); }
 
+		uint64 GetLastUsedFrameFence() const { return LastUsedFrameFence; }
 		void UpdateLastUsedFrameFence(uint64 InFrameFence) { LastUsedFrameFence = InFrameFence; }
+	
 	private:
 		EResourceAllocationStrategy AllocationStrategy;
 		D3D12ResourceInitConfig InitConfig;

@@ -70,6 +70,32 @@ void Ideal::RHIPoolAllocator::DeallocateInternal(RHIPoolAllocationData& Allocati
 	Pools[AllocationData.GetPoolIndex()]->Deallocate(AllocationData);
 }
 
+void Ideal::RHIPoolAllocator::SortPools()
+{
+	std::sort(PoolAllocationOrder.begin(), PoolAllocationOrder.end(), [this](uint32 InLHS, uint32 InRHS)
+		{
+			if (bDefragEnabled)
+			{
+				uint32 LHSUsePoolSize = Pools[InLHS] ? Pools[InLHS]->GetUsedSize() : UINT32_MAX;
+				uint32 RHSUSePoolSize = Pools[InRHS] ? Pools[InRHS]->GetUsedSize() : UINT32_MAX;
+				return LHSUsePoolSize > RHSUSePoolSize;
+			}
+			else
+			{
+				uint32 LHSPoolSize = Pools[InLHS] ? Pools[InLHS]->GetPoolSize() : UINT32_MAX;
+				uint32 RHSPoolSize = Pools[InRHS] ? Pools[InRHS]->GetPoolSize() : UINT32_MAX;
+				if (LHSPoolSize != RHSPoolSize)
+				{
+					return LHSPoolSize < RHSPoolSize;
+				}
+
+				uint32 LHSPoolIndex = Pools[InLHS] ? Pools[InLHS]->GetPoolIndex() : UINT32_MAX;
+				uint32 RHSPoolIndex = Pools[InRHS] ? Pools[InRHS]->GetPoolIndex() : UINT32_MAX;
+				return LHSPoolIndex < RHSPoolIndex;
+			}
+		});
+}
+
 Ideal::EResourceAllocationStrategy Ideal::D3D12PoolAllocator::GetResourceAllocationStrategy(D3D12_RESOURCE_FLAGS InResourceFlags, ED3D12ResourceStateMode InResourceStateMode, uint32 Alignment)
 {
 	if (Alignment > D3D12ManualSubAllocationAlignment)
@@ -374,7 +400,19 @@ void Ideal::D3D12PoolAllocator::CleanUpAllocations(uint64 InFrameLag, bool bForc
 		FrameFencedOperations.erase(FrameFencedOperations.begin(), FrameFencedOperations.begin() + PopCount);
 	}
 
-	// TODO : 특정 프레임동안 사용하지 않은 빈 Allocator들을 해제하고 정렬해야 한다.
+	// 이전 N프레임동안 사용하지 않은 빈 Allocator들을 해제하고 정렬해야 한다.
+	for (int32 PoolIndex = 0; PoolIndex < Pools.size(); ++PoolIndex)
+	{
+		D3D12MemoryPool* MemoryPool = (D3D12MemoryPool*)Pools[PoolIndex];
+		if (MemoryPool != nullptr && MemoryPool->IsEmpty() && (bForceFree || (MemoryPool->GetLastUsedFrameFence() + InFrameLag <= FenceValue)))
+		{
+			MemoryPool->Destroy();
+			delete(MemoryPool);
+			Pools[PoolIndex] = nullptr;
+		}
+	}
+
+	SortPools();
 }
 
 ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const

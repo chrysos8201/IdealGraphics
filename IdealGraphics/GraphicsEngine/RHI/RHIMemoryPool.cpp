@@ -68,6 +68,21 @@ void Ideal::RHIMemoryPool::Init()
 }
 
 
+void Ideal::RHIMemoryPool::Destroy()
+{
+	for (RHIPoolAllocationData* FreeBlock : FreeBlocks)
+	{
+		ReleaseAllocationData(FreeBlock);
+	}
+	FreeBlocks.clear();
+
+	for (RHIPoolAllocationData* AllocationData : AllocationDataPool)
+	{
+		delete AllocationData;
+	}
+	AllocationDataPool.clear();
+}
+
 bool Ideal::RHIMemoryPool::TryAllocate(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& AllocationData)
 {
 	int32 FreeBlockIndex = FindFreeBlock(InSizeInBytes, InAllocationAlignment);
@@ -368,4 +383,13 @@ void Ideal::D3D12MemoryPool::Init()
 	}
 
 	RHIMemoryPool::Init();
+}
+
+void Ideal::D3D12MemoryPool::Destroy()
+{
+	RHIMemoryPool::Destroy();
+	if (BackingResource)
+	{
+		BackingResource = nullptr;
+	}
 }

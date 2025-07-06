@@ -2,6 +2,7 @@
 #include <dxgiformat.h>
 
 #define USE_BUFFER_POOL 1
+#define BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME				32*1024*1024
 
 // 스태틱 매시 key로 캐싱해둘건지
 #define CACHE_STATIC_MESH 1

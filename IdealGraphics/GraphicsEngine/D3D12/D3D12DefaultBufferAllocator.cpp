@@ -19,6 +19,25 @@ void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue)
 	{
 		Pool->BeginAndSetFenceValue(InFenceValue);
 	}
+
+	// Defrag
+	if (BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME > 0)
+	{
+		uint32 MaxCopySize = BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME;
+		uint32 CopySize = 0;
+		for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
+		{
+			if (DefaultBufferPool)
+			{
+				//DefaultBufferPool->Defrag()
+
+				if (CopySize >= MaxCopySize)
+				{
+					break;
+				}
+			}
+		}
+	}
 }
 
 void Ideal::D3D12DefaultBufferAllocator::CleanupFreeBlocks(uint64 InFrameLag)

@@ -4,6 +4,9 @@
 #include "D3D12\D3D12Util.h"
 #include "d3dx12.h"
 
+static float GRHIPoolAllocatorDefragSizeFraction = 0.9f;
+static int32 GRHIPoolAllocatorDefragMaxPoolsToClear = 1;
+
 Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
 	: DefaultPoolSize(InDefaultPoolSize),
 	PoolAlignment(InPoolAlignment),
@@ -11,6 +14,72 @@ Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoo
 	bDefragEnabled(bInDefragEnabled)
 {
 
+}
+
+Ideal::RHIPoolAllocator::~RHIPoolAllocator()
+{
+
+}
+
+void Ideal::RHIPoolAllocator::Defrag(uint32 InMaxCopySize, uint32& CurrentCopySize)
+{
+	if (!bDefragEnabled)
+	{
+		return;
+	}
+
+	std::vector<RHIMemoryPool*> SortedTargetPools;
+	SortedTargetPools.reserve(Pools.size());
+	uint32 MaxPoolsToDefrag = 0;
+	for (RHIMemoryPool* Pool : Pools)
+	{
+		// 채워지지 않은 pool을 수집
+		if (Pool && !Pool->IsFull())
+		{
+			SortedTargetPools.push_back(Pool);
+		}
+
+		float Usage = Pool ? (float)Pool->GetUsedSize() / (float)Pool->GetPoolSize() : 1.0f;
+		if (Usage < GRHIPoolAllocatorDefragSizeFraction)
+		{
+			MaxPoolsToDefrag++;
+		}
+	}
+
+	// 조각 모음이 필요한 MemoryPool의 수가 0이거나 사용 가능한 MemoryPool의 수가
+	// 2보다 작으면 조각 모음이 수행되지 않는다.
+	if (MaxPoolsToDefrag == 0 || SortedTargetPools.size() < 2)
+	{
+		return;
+	}
+
+	std::sort(SortedTargetPools.begin(), SortedTargetPools.end(),
+		[](const RHIMemoryPool* InLHS, const RHIMemoryPool* InRHS)
+	{
+		return InLHS->GetUsedSize() < InRHS->GetUsedSize();
+	});
+
+	std::vector<RHIMemoryPool*> TargetPools;
+
+	// GRHIPoolAllocatorDefragMaxPoolsToClear : 프레임당 얼마나 많은 MemoryPool을 조각 모음할 수 있는지에 대한 변수 
+	if (GRHIPoolAllocatorDefragMaxPoolsToClear < 0)
+	{
+		// 조각 모음의 목표는 덜 사용되는 MemoryPool 내용을 더 많이 사용되는 MemoryPool로 전송하는 것이다.
+		// 여기서 조각 모음을 위한 대상 메모리 풀 TargetPools가 구성되고 메모리 풀은 사용량 순으로 정렬된다.
+		// SortedTargetPools의 0번째 MemoryPool은 조각 모음할 첫 번째 메모리 풀이기 때문에 건너뛴다.
+		TargetPools.reserve(SortedTargetPools.size());
+		for (int32 PoolIndex = SortedTargetPools.size() - 1; PoolIndex > 0; --PoolIndex)
+		{
+			TargetPools.push_back(SortedTargetPools[PoolIndex]);
+		}
+		
+		// 조각 모음이 필요한 메모리 풀 탐색
+		for (int32 PoolIndex = 0; PoolIndex < SortedTargetPools.size() - 1; ++PoolIndex)
+		{
+			RHIMemoryPool* PoolToClear = SortedTargetPools[PoolIndex];
+			PoolToClear->
+		}
+	}
 }
 
 bool Ideal::RHIPoolAllocator::TryAllocateInternal(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& InAllocationData)

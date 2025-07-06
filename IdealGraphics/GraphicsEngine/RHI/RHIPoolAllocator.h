@@ -19,6 +19,9 @@ namespace Ideal
 		friend class Visualization::RHIProfiler;
 	public:
 		RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled);
+		virtual ~RHIPoolAllocator();
+
+		void Defrag(uint32 InMaxCopySize, uint32& CurrentCopySize);
 
 	protected:
 		bool TryAllocateInternal(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& InAllocationData);

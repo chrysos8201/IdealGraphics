@@ -11,7 +11,9 @@ namespace Ideal
 
 	class D3D12DefaultBufferAllocator : public D3D12DeviceChild
 	{
-	
+	public:
+		void DrawDebug();
+
 	public:
 		void Begin(uint64 InFenceValue);
 		void CleanupFreeBlocks(uint64 InFrameLag);

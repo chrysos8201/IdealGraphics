@@ -190,6 +190,7 @@
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Util.h" />
     <ClInclude Include="GraphicsEngine\D3D12\UploadCommandListPool.h" />
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
+    <ClInclude Include="GraphicsEngine\RHI\Profiler\RHIProfiler.h" />
     <ClInclude Include="GraphicsEngine\RHI\RHIPoolAllocator.h" />
     <ClInclude Include="Misc\Utils\RandomValue.h" />
     <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugLine.h" />

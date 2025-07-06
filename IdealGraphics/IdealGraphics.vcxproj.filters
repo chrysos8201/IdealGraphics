@@ -225,6 +225,7 @@
     <ClInclude Include="GraphicsEngine\RHI\RHIMemoryPool.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12Common.h" />
     <ClInclude Include="GraphicsEngine\D3D12\D3D12DefaultBufferAllocator.h" />
+    <ClInclude Include="GraphicsEngine\RHI\Profiler\RHIProfiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IdealGraphics.rc">

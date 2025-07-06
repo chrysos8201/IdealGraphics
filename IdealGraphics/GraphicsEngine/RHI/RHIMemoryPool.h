@@ -3,14 +3,17 @@
 #include "RHI\RHIPoolAllocationData.h"
 #include "d3d12.h"
 #include "D3D12\D3D12Common.h"
+using namespace Ideal;
 
 struct ID3D12Device;
-using namespace Ideal;
+namespace Ideal { namespace Visualization { class RHIProfiler; } }
 
 namespace Ideal
 {
 	class RHIMemoryPool
 	{
+	public:
+		friend class Visualization::RHIProfiler;
 	public:
 		static uint32 GetAlignedSize(uint32 InSizeInBytes, uint32 InPoolAlignment, uint32 InAllocationAlignment);
 		static uint32 GetAlignedOffset(uint32 InOffset, uint32 InPoolAlignment, uint32 InAllocationAlignment);

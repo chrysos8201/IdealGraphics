@@ -280,7 +280,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			Matrix::CreateScale(1.f)
 			* Matrix::CreateRotationY(1.f)
 			* Matrix::CreateTranslation(Vector3(15, 2, 5)));
-		
+
 		// Create Material
 		std::shared_ptr<Ideal::IMaterial> mclMainBodyMaterial = gRenderer->CreateMaterial();
 		std::shared_ptr<Ideal::ITexture> mclMainBodyBaseTexture = gRenderer->CreateTexture(L"../Resources/Textures/mcl/main_body_BaseColor_sRGB_1001.png", true, false, false);
@@ -2691,11 +2691,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				}
 				if (GetAsyncKeyState('R') & 0x8000)
 				{
-					if (meshes.size() > 0)
+					static bool Once = false;
+					if (!Once)
 					{
-						gRenderer->DeleteMeshObject(meshes.back());
-						meshes.pop_back();
+						Once = true;
+						gRenderer->DeleteMeshObject(mcl);
 					}
+					//if (meshes.size() > 0)
+					//{
+					//	gRenderer->DeleteMeshObject(meshes.back());
+					//	meshes.pop_back();
+					//}
 				}
 
 				// Animation // 역재생 안됨

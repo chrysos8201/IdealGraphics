@@ -80,6 +80,7 @@ namespace Ideal
 	public:
 		//25.07.05
 		void Begin(uint64 InFenceValue);
+		void DrawDebug();
 		void End();
 
 	public:
@@ -189,7 +190,7 @@ namespace Ideal
 			);
 
 			//---------Execute---------//
-			m_commandList->Close();
+			m_commandList->Close(); 
 			ID3D12CommandList* commandLists[] = { m_commandList.Get() };
 			m_commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 

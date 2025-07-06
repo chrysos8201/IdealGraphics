@@ -2,10 +2,9 @@
 #include "Core\Core.h"
 #include "D3D12\D3D12Common.h"
 #include "d3d12.h"
-
 using namespace Ideal;
 
-
+namespace Ideal { namespace Visualization { class RHIProfiler; } }
 namespace Ideal { struct RHIPoolAllocationData; }
 
 namespace Ideal { class RHIMemoryPool; }
@@ -16,6 +15,8 @@ namespace Ideal
 {
 	class RHIPoolAllocator
 	{
+	public:
+		friend class Visualization::RHIProfiler;
 	public:
 		RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled);
 

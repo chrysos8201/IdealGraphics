@@ -59,6 +59,11 @@ void ResourceManager::End()
 	DefaultBufferAllocator->CleanupFreeBlocks(20);
 }
 
+void ResourceManager::DrawDebug()
+{
+	DefaultBufferAllocator->DrawDebug();
+}
+
 void Ideal::ResourceManager::Init(ComPtr<ID3D12Device5> Device, std::shared_ptr<Ideal::DeferredDeleteManager> DeferredDeleteManager)
 {
 	m_device = Device;
@@ -873,9 +878,11 @@ void Ideal::ResourceManager::CreateStaticMeshObject(std::shared_ptr<Ideal::Ideal
 		staticMesh = m_staticMeshes[key];
 		if (staticMesh != nullptr)
 		{
+#if CACHE_STATIC_MESH
 			staticMesh->AddRefCount();
 			OutMesh->SetStaticMesh(staticMesh);
 			return;
+#endif
 		}
 	}
 

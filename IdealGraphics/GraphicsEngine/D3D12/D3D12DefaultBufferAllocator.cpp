@@ -2,6 +2,17 @@
 #include "D3D12Definitions.h"
 #include "RHI\RHIPoolAllocator.h"
 
+#include "RHI\Profiler\RHIProfiler.h"
+
+void Ideal::D3D12DefaultBufferAllocator::DrawDebug()
+{
+	int32 poolIndex = 0;
+	for (D3D12PoolAllocator* Pool : DefaultBufferPools)
+	{
+		Visualization::RHIProfiler::ProfilePoolAllocator(Pool, poolIndex++);
+	}
+}
+
 void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue)
 {
 	for (D3D12PoolAllocator* Pool : DefaultBufferPools)

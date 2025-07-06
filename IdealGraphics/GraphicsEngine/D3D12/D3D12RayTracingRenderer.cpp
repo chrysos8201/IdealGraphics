@@ -542,6 +542,8 @@ void Ideal::D3D12RayTracingRenderer::Render()
 	}
 
 	//---------------------Editor-------------------------//
+	m_resourceManager->DrawDebug();
+
 	if (m_isEditor)
 	{
 		ImGuiIO& io = ImGui::GetIO();

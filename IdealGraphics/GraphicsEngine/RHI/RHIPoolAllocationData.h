@@ -4,11 +4,13 @@
 
 using namespace Ideal;
 namespace Ideal { class D3D12ResourceLocation; }
-
+namespace Ideal { namespace Visualization { class RHIProfiler; } }
 namespace Ideal
 {
 	struct RHIPoolAllocationData
 	{
+	public:
+		friend class Visualization::RHIProfiler;
 	public:
 		void Reset();
 

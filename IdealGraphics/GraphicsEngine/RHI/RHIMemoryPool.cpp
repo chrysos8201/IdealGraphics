@@ -313,8 +313,12 @@ void Ideal::RHIMemoryPool::Validate()
 		RHIPoolAllocationData* FreeBlock = FreeBlocks[FreeBlockIndex];
 		Check(!FreeBlock->GetPrev()->IsFree() || FreeBlock->GetPrev()->IsLocked());
 		Check(!FreeBlock->GetNext()->IsFree() || FreeBlock->GetNext()->IsLocked());
-		Check(FreeBlockIndex == (FreeBlocks.size() - 1));
+		
+		// 아래 두개는 sort by size일때 검사하는 용도. 아니면 필요없음. 맨 아래는 언리얼 코드인데 앞에서 부터 검사해서 sortbysize가 애초에 아니면 뒤를 검사하지 않는다
+		//Check(FreeBlockIndex == (FreeBlocks.size() - 1));
 		//Check(FreeBlock->GetSize() <= FreeBlocks[FreeBlockIndex + 1]->GetSize());
+		//Check(FreeListOrder != EFreeListOrder::SortBySize || FreeBlockIndex == (FreeBlocks.Num() - 1) || FreeBlock->GetSize() <= FreeBlocks[FreeBlockIndex + 1]->GetSize());
+
 		Check(IsAligned(FreeBlock->GetOffset(), PoolAlignment));
 		TotalFreeSize += FreeBlock->GetSize();
 	}

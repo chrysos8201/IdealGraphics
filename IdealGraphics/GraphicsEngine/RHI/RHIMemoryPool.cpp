@@ -151,7 +151,37 @@ void Ideal::RHIMemoryPool::Deallocate(RHIPoolAllocationData& AllocationData)
 
 void Ideal::RHIMemoryPool::TryClear(RHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const std::vector<RHIMemoryPool*>& InTargetPools)
 {
-	// TODO : 만들기
+	// 현재 MemoryPool의 Block을 모두 탐색한다.
+	RHIPoolAllocationData* BlockToMove = HeadBlock.GetPrev();
+
+	// 한바퀴를 돌았거나 최대 CopySize를 넘어서면 종료
+	while (BlockToMove != &HeadBlock && CopySize < InMaxCopySize)
+	{
+		RHIPoolAllocationData* NextBlockToMove = BlockToMove->GetPrev();
+		
+		// BlockToMove는 할당된 상태여야 하고, 잠긴 상태가 아니어야 하며, D3D12ResourceLocation에 소속되어 있어야 한다.
+		if (BlockToMove->IsAllocated() && !BlockToMove->IsLocked() && BlockToMove->GetOwner())
+		{
+			uint64 SizeToAlloccate = BlockToMove->GetSize();
+			uint32 AllocationAlignment = BlockToMove->GetAlignment();
+
+			RHIPoolAllocationData TempTargetAllocation;
+
+			for (RHIMemoryPool* TargetPool : InTargetPools)
+			{
+				// SizeToAllocate(실제 필요한 비디오 메모리의 사이즈)등을 이용하여 사용률이 더 높은 Pool로 이동할 수 있는지를 시도한다
+				// -> 성공하면 할당된 TempTargetAllocation 사용 가능
+				if (TargetPool->TryAllocate(SizeToAlloccate, AllocationAlignment, TempTargetAllocation))
+				{
+					// TODO : HandleDefragRequest
+					//InAllocator->
+
+					CopySize += BlockToMove->GetSize();
+					break;
+				}
+			}
+		}
+	}
 }
 
 int32 Ideal::RHIMemoryPool::FindFreeBlock(uint32 InSizeInBytes, uint32 InAllocationAlignment) const

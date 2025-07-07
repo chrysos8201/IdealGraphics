@@ -34,7 +34,8 @@ namespace Ideal
 		bool IsLocked() const { return (Locked == 1); }
 		void UnLock() { Check(Locked == 1); Locked = 0; }
 
-		void SetOwner(D3D12ResourceLocation* InOwner) { Owner = InOwner; }
+		void SetOwner(RHIPoolResource* InOwner) { Owner = InOwner; }
+		RHIPoolResource* GetOwner() const { return Owner; }
 
 	private:
 
@@ -69,6 +70,6 @@ namespace Ideal
 		RHIPoolAllocationData* PreviousAllocation;
 		RHIPoolAllocationData* NextAllocation;
 
-		D3D12ResourceLocation* Owner;
+		RHIPoolResource* Owner;	// D3D12ResourceLocation으로 상속
 	};
 }

@@ -77,7 +77,7 @@ void Ideal::RHIPoolAllocator::Defrag(uint32 InMaxCopySize, uint32& CurrentCopySi
 		for (int32 PoolIndex = 0; PoolIndex < SortedTargetPools.size() - 1; ++PoolIndex)
 		{
 			RHIMemoryPool* PoolToClear = SortedTargetPools[PoolIndex];
-			PoolToClear->
+			PoolToClear->TryClear(this, InMaxCopySize, CurrentCopySize, TargetPools);
 		}
 	}
 }
@@ -522,4 +522,23 @@ ID3D12Resource* Ideal::D3D12PoolAllocator::CreatePlacedResource(const RHIPoolAll
 	ID3D12Resource* NewResource = nullptr;
 	Device->CreatePlacedResource(Heap, Offset, &InDesc, InCreateState, InClearValue, IID_PPV_ARGS(&NewResource));
 	return NewResource;
+}
+
+bool Ideal::D3D12PoolAllocator::HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock)
+{
+	// InSourceBlock Info
+	D3D12ResourceLocation* Owner = (D3D12ResourceLocation*)InSourceBlock->GetOwner();
+	uint64 CurrentOffset = Owner->GetOffsetFromBaseOfResource();
+	ID3D12Resource* CurrentResource = Owner->GetResource();
+	
+	bool bDefragFree = true;
+	DeallocateResource(*Owner, bDefragFree);
+
+	// InTmpTargetBlock의 데이터를 InSourceBlock으로 전송하고 InSourceBlock을 잠근다.
+	bool bLocked = true;
+	InSourceBlock->MoveFrom(InTmpTargetBlock, bLocked);
+	InSourceBlock->SetOwner(Owner);
+	Owner->SetPoolAllocator(this);
+
+	// TODO : Copy Operator같은 거 해야함.
 }

@@ -13,6 +13,8 @@ struct ID3D12Device;
 
 namespace Ideal
 {
+	class RHIPoolResource {};
+
 	class RHIPoolAllocator
 	{
 	public:
@@ -30,6 +32,9 @@ namespace Ideal
 		void SortPools();
 
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) = 0;
+
+		friend class RHIMemoryPool;
+		virtual bool HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) = 0;
 
 		std::vector<RHIMemoryPool*> Pools;
 
@@ -91,6 +96,8 @@ namespace Ideal
 	protected:
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) override;
 		ID3D12Resource* CreatePlacedResource(const RHIPoolAllocationData& InAllocationData, const D3D12_RESOURCE_DESC& InDesc, D3D12_RESOURCE_STATES InCreateState, ED3D12ResourceStateMode InResourceStateMode, const D3D12_CLEAR_VALUE* InClearValue);
+
+		virtual bool HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) override;
 
 		struct FrameFencedAllocationData
 		{

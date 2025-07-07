@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Core.h"
 #include "RHI/RHIPoolAllocationData.h"
+#include "RHI/RHIPoolAllocator.h"
 #include "d3d12.h"
 
 struct ID3D12Device;
@@ -66,7 +67,7 @@ namespace Ideal
 	};
 
 
-	class D3D12ResourceLocation : public D3D12DeviceChild
+	class D3D12ResourceLocation : public RHIPoolResource, public D3D12DeviceChild
 	{
 		friend class D3D12PoolAllocator;
 	public:

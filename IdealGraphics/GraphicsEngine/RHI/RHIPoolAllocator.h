@@ -50,6 +50,12 @@ namespace Ideal
 	// Constant Buffer의 Alignment는 256U이다. 다만 리소스가 최소 64KB인 것일 뿐...
 	const uint32 D3D12ManualSubAllocationAlignment = 256U;
 
+	struct D3D12HeapAndOffset
+	{
+		ID3D12Heap* Heap;
+		uint64 Offset;
+	};
+
 	struct D3D12VRAMCopyOperation
 	{
 		enum ECopyType
@@ -90,7 +96,10 @@ namespace Ideal
 		// FencedValue는 완료된 Fence의 Value를 넣으면 된다.
 		void CleanUpAllocations(uint64 InFrameLag, bool bForceFree = false);
 
+		EResourceAllocationStrategy GetAllocationStrategy() const { return AllocationStrategy; }
 		ID3D12Resource* GetBackingResource(D3D12ResourceLocation& InResourceLocation) const;
+		D3D12HeapAndOffset GetBackingHeapAndAllocationOffsetInBytes(D3D12ResourceLocation& InResourceLocation) const;
+		D3D12HeapAndOffset GetBackingHeapAndAllocationOffsetInBytes(const RHIPoolAllocationData& InAllocationData) const;
 		bool IsOwner(D3D12ResourceLocation& ResourceLocation) const { return ResourceLocation.GetPoolAllocator() == this; }
 
 	protected:

@@ -28,13 +28,17 @@ namespace Ideal
 			VertexStrideInBytes(0), IndexBufferResource(nullptr), IndexBufferGPUAddress(0), IndexCount(0)
 		{}
 		std::wstring Name;
-		ComPtr<ID3D12Resource> VertexBufferResource;
+		ComPtr<ID3D12Resource> VertexBufferResource;	// 안씀
 		D3D12_GPU_VIRTUAL_ADDRESS VertexBufferGPUAddress;
 		uint32 VertexCount;
 		uint32 VertexStrideInBytes;
-		ComPtr<ID3D12Resource> IndexBufferResource;
+		ComPtr<ID3D12Resource> IndexBufferResource;		// 안씀
 		D3D12_GPU_VIRTUAL_ADDRESS IndexBufferGPUAddress;
 		uint32 IndexCount;
+
+		// 25.07.09 // 일단 VertexBuffer만 조각모음 체크
+		std::shared_ptr<Ideal::D3D12VertexBuffer> VertexBuffer;
+		std::shared_ptr<Ideal::D3D12IndexBuffer> IndexBuffer;
 
 		// refactor
 		Ideal::D3D12DescriptorHandle2 SRV_VertexBuffer;
@@ -50,11 +54,6 @@ namespace Ideal
 
 		std::shared_ptr<Ideal::IdealMesh<BasicVertex>> BasicMesh;
 		std::shared_ptr<Ideal::IdealMesh<SkinnedVertex>> SkinnedMesh;
-	};
-
-	struct BLASData
-	{
-		std::vector<Ideal::BLASGeometry> Geometries;
 	};
 
 	class DXRAccelerationStructure
@@ -110,6 +109,9 @@ namespace Ideal
 
 		bool IsDirty() { return m_isDirty; }
 		void SetDirty(bool Dirty) { m_isDirty = Dirty; }
+
+		// vb랑 ib가 조각모음되었는지 확인 25.07.09
+		void CheckDefragged();
 
 	public:
 		void BuildGeometries(std::vector<BLASGeometry>& Geometries);

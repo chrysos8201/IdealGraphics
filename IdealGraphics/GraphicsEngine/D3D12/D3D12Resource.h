@@ -5,6 +5,7 @@
 #include "GraphicsEngine/D3D12/D3D12Descriptors.h"
 #include "D3D12Common.h"
 
+class RHIContext;
 struct ID3D12Resource;
 struct ID3D12Device;
 namespace Ideal { class D3D12ResourceLocation; }
@@ -16,6 +17,7 @@ namespace Ideal
 	class D3D12DescriptorHandle;
 	class D3D12DescriptorHandle2;
 }
+
 namespace Ideal
 {
 	class D3D12Resource
@@ -28,11 +30,6 @@ namespace Ideal
 	public:
 		ID3D12Resource* GetResource() const;
 		ComPtr<ID3D12Resource> GetResourceComPtr();
-
-	public:
-		// 2025.03.06
-		// View들을 다 여기로 옮겨버리겠다.
-		// Descriptor Handle
 
 	public:
 		// 2025.03.06
@@ -147,6 +144,10 @@ namespace Ideal
 		// 2025.06.25
 		// ResourceLocation으로 설정된 Virtual address를 내보낸다.
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress_ResourceLocationVer() { return ResourceLocation.GetGPUVirtualAddress(); }
+
+	public:
+		void ResourceRenamed(const D3D12Context& Context);
+
 	protected:
 		std::wstring m_name;
 		uint32 m_bufferSize;

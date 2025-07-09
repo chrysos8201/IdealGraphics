@@ -492,6 +492,20 @@ ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocat
 	return ((D3D12MemoryPool*)Pools[AllocationData.GetPoolIndex()])->GetBackingResource();
 }
 
+Ideal::D3D12HeapAndOffset Ideal::D3D12PoolAllocator::GetBackingHeapAndAllocationOffsetInBytes(D3D12ResourceLocation& InResourceLocation) const
+{
+	Check(IsOwner(InResourceLocation));
+	return GetBackingHeapAndAllocationOffsetInBytes(InResourceLocation.GetPoolAllocatorData());
+}
+
+Ideal::D3D12HeapAndOffset Ideal::D3D12PoolAllocator::GetBackingHeapAndAllocationOffsetInBytes(const RHIPoolAllocationData& InAllocationData) const
+{
+	D3D12HeapAndOffset HeapAndOffset;
+	HeapAndOffset.Heap = ((D3D12MemoryPool*)Pools[InAllocationData.GetPoolIndex()])->GetBackingHeap();
+	HeapAndOffset.Offset = uint64(AlignDown(InAllocationData.GetOffset(), PoolAlignment));
+	return HeapAndOffset;
+}
+
 Ideal::RHIMemoryPool* Ideal::D3D12PoolAllocator::CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize)
 {
 	uint32 PoolSize = DefaultPoolSize;
@@ -541,4 +555,6 @@ bool Ideal::D3D12PoolAllocator::HandleDefragRequest(RHIPoolAllocationData* InSou
 	Owner->SetPoolAllocator(this);
 
 	// TODO : Copy Operator같은 거 해야함.
+	// -> 이렇게 되면 BLAS에서 사용하던 것들도 다시 갱신해주어야 한다. // 07.08
+	//D3D12_RESOURCE_STATES DestCreateState = 
 }

@@ -178,6 +178,15 @@ void Ideal::D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, uint32 ElementSiz
 	));
 }
 
+void Ideal::D3D12GPUBuffer::ResourceRenamed(const D3D12Context& Context)
+{
+	// TODO : View를 업데이트해줘야한다.
+	if (m_srvHandle2.IsValid())
+	{
+		Context.CreateSRV(ResourceLocation, m_srvHandle2.GetCPUDescriptorHandleStart(), m_elementCount, m_elementSize);
+	}
+}
+
 void D3D12GPUBuffer::CreateBuffer(ID3D12Device* Device, ID3D12Heap* Heap, uint32 Offset, uint32 ElementSize, uint32 ElementCount, D3D12_RESOURCE_FLAGS Flags /*= D3D12_RESOURCE_FLAG_NONE*/)
 {
 	m_bufferSize = ElementSize * ElementCount;

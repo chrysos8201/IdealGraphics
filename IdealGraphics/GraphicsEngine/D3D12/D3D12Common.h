@@ -2,14 +2,37 @@
 #include "Core/Core.h"
 #include "RHI/RHIPoolAllocationData.h"
 #include "RHI/RHIPoolAllocator.h"
+#include "RHI/RHIResource.h"
+
 #include "d3d12.h"
 
 struct ID3D12Device;
+namespace Ideal { class D3D12Resource; }
 using namespace Ideal;
 namespace Ideal { class D3D12PoolAllocator; }
 
 namespace Ideal
 {
+	class D3D12Context : public Ideal::RHIContext
+	{
+	public:
+		ID3D12Device* Device;
+		ID3D12CommandList* CommandList;
+
+		inline void CreateSRV(const D3D12ResourceLocation& InResourceLocation, D3D12_CPU_DESCRIPTOR_HANDLE Handle, uint32 InNumElements, uint32 InElementSize) const
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Buffer.FirstElement = InResourceLocation.GetOffsetFromBaseOfResource() / InElementSize;
+			SRVDesc.Buffer.NumElements = InNumElements;
+			SRVDesc.Buffer.StructureByteStride = InElementSize;
+			SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+			SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+			Device->CreateShaderResourceView(InResourceLocation.GetResource(), &SRVDesc, Handle);
+		}
+	};
 
 	enum class EResourceAllocationStrategy
 	{
@@ -83,6 +106,9 @@ namespace Ideal
 
 		void Clear();
 
+		void SetOwner(std::shared_ptr<D3D12GPUBuffer> InOwner) { Owner = InOwner; }
+
+
 		ID3D12Resource* GetResource() const { return UnderlyingResource; }
 		uint64 GetOffsetFromBaseOfResource() const { return OffsetFromBaseOfResource; }
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return GPUVirtualAddress; }
@@ -102,7 +128,10 @@ namespace Ideal
 		void SetSize(uint64 Value) { Size = Value; }
 
 		RHIPoolAllocationData& GetPoolAllocatorData() { return PoolData; }
-	
+		void* GetMappedBaseAddress() const { return MappedBaseAddress; }
+
+		bool OnAllocationMoved(const RHIContext& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState);
+
 		void AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize);
 
 		// 리소스 전략 설정 by gyu
@@ -116,6 +145,7 @@ namespace Ideal
 
 		void ReleaseResource();
 
+		std::weak_ptr<Ideal::D3D12GPUBuffer> Owner;
 		ID3D12Resource* UnderlyingResource;
 
 		D3D12PoolAllocator* PoolAllocator;

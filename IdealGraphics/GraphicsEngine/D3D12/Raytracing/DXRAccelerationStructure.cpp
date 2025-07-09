@@ -123,6 +123,16 @@ void Ideal::DXRBottomLevelAccelerationStructure::Build(ComPtr<ID3D12GraphicsComm
 	m_isBuilt = true;	// 이미 만들어졌다고 저장
 }
 
+void Ideal::DXRBottomLevelAccelerationStructure::CheckDefragged()
+{
+	// VertexBuffer의 Defrag 체크
+	for (const auto& geometry : m_geometries)
+	{
+		geometry.VertexBuffer->GetResourceLocation();
+		//TODO : 리소스 DirtyCheck 후 Blas를 다시 빌드하게 할지 결정
+	}
+}
+
 void Ideal::DXRBottomLevelAccelerationStructure::BuildGeometries(std::vector<BLASGeometry>& Geometries)
 {
 	D3D12_RAYTRACING_GEOMETRY_DESC geometryDescTemplate = {};

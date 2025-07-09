@@ -192,6 +192,7 @@
     <ClInclude Include="GraphicsEngine\IdealLayer.h" />
     <ClInclude Include="GraphicsEngine\RHI\Profiler\RHIProfiler.h" />
     <ClInclude Include="GraphicsEngine\RHI\RHIPoolAllocator.h" />
+    <ClInclude Include="GraphicsEngine\RHI\RHIResource.h" />
     <ClInclude Include="Misc\Utils\RandomValue.h" />
     <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugLine.h" />
     <ClInclude Include="GraphicsEngine\Resource\DebugMesh\DebugMeshManager.h" />

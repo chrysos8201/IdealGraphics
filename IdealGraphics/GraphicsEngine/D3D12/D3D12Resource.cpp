@@ -86,6 +86,16 @@ Ideal::D3D12DescriptorHandle2 D3D12Resource::GetDSV2() const
 	return m_dsvHandle2;
 }
 
+void D3D12Resource::TransitionResourceState(ID3D12GraphicsCommandList* CommandList, D3D12_RESOURCE_STATES NextResourceState)
+{
+	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_resource.Get(),
+		ResourceState,
+		NextResourceState
+	);
+	CommandList->ResourceBarrier(1, &Barrier);
+}
+
 //------------------------UploadBuffer------------------------//
 
 D3D12UploadBuffer::D3D12UploadBuffer()

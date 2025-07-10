@@ -23,7 +23,7 @@ namespace Ideal
 		RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled);
 		virtual ~RHIPoolAllocator();
 
-		void Defrag(uint32 InMaxCopySize, uint32& CurrentCopySize);
+		void Defrag(const RHIContext& Context, uint32 InMaxCopySize, uint32& CurrentCopySize);
 
 	protected:
 		bool TryAllocateInternal(uint32 InSizeInBytes, uint32 InAllocationAlignment, RHIPoolAllocationData& InAllocationData);
@@ -34,7 +34,7 @@ namespace Ideal
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) = 0;
 
 		friend class RHIMemoryPool;
-		virtual bool HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) = 0;
+		virtual bool HandleDefragRequest(const RHIContext& Context, RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) = 0;
 
 		std::vector<RHIMemoryPool*> Pools;
 
@@ -49,6 +49,24 @@ namespace Ideal
 
 	// Constant Buffer의 Alignment는 256U이다. 다만 리소스가 최소 64KB인 것일 뿐...
 	const uint32 D3D12ManualSubAllocationAlignment = 256U;
+
+	struct D3D12VRAMCopyOperation
+	{
+		enum ECopyType
+		{
+			BufferRegion,
+			Resource,
+		};
+
+		ID3D12Resource* SourceResource;
+		D3D12_RESOURCE_STATES SourceResourceState;
+		uint32 SourceOffset;
+		ID3D12Resource* DestResource;
+		D3D12_RESOURCE_STATES DestResourceState;
+		uint32 DestOffset;
+		uint32 Size;
+		ECopyType CopyType;
+	};
 
 	struct D3D12HeapAndOffset
 	{
@@ -106,7 +124,7 @@ namespace Ideal
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) override;
 		ID3D12Resource* CreatePlacedResource(const RHIPoolAllocationData& InAllocationData, const D3D12_RESOURCE_DESC& InDesc, D3D12_RESOURCE_STATES InCreateState, ED3D12ResourceStateMode InResourceStateMode, const D3D12_CLEAR_VALUE* InClearValue);
 
-		virtual bool HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) override;
+		virtual bool HandleDefragRequest(const RHIContext& Context, RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) override;
 
 		struct FrameFencedAllocationData
 		{

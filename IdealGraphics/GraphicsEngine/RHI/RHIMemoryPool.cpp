@@ -149,7 +149,7 @@ void Ideal::RHIMemoryPool::Deallocate(RHIPoolAllocationData& AllocationData)
 	AddToFreeBlocks(FreeBlock);
 }
 
-void Ideal::RHIMemoryPool::TryClear(RHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const std::vector<RHIMemoryPool*>& InTargetPools)
+void Ideal::RHIMemoryPool::TryClear(const RHIContext& Context, RHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const std::vector<RHIMemoryPool*>& InTargetPools)
 {
 	// 현재 MemoryPool의 Block을 모두 탐색한다.
 	RHIPoolAllocationData* BlockToMove = HeadBlock.GetPrev();
@@ -174,14 +174,18 @@ void Ideal::RHIMemoryPool::TryClear(RHIPoolAllocator* InAllocator, uint32 InMaxC
 				if (TargetPool->TryAllocate(SizeToAlloccate, AllocationAlignment, TempTargetAllocation))
 				{
 					// TODO : HandleDefragRequest
-					//InAllocator->
+					InAllocator->HandleDefragRequest(Context, BlockToMove, TempTargetAllocation);
 
 					CopySize += BlockToMove->GetSize();
 					break;
 				}
 			}
 		}
+
+		BlockToMove = NextBlockToMove;
 	}
+
+	Validate();
 }
 
 int32 Ideal::RHIMemoryPool::FindFreeBlock(uint32 InSizeInBytes, uint32 InAllocationAlignment) const

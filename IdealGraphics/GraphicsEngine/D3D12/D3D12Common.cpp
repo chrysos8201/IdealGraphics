@@ -73,7 +73,7 @@ void Ideal::D3D12ResourceLocation::SetResource(ID3D12Resource* Value)
 	UnderlyingResource = Value;
 }
 
-bool Ideal::D3D12ResourceLocation::OnAllocationMoved(const RHIContext& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState)
+bool Ideal::D3D12ResourceLocation::OnAllocationMoved(const D3D12Context& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState)
 {
 	RHIPoolAllocationData& AllocationData = GetPoolAllocatorData();
 	Check(InNewData == &AllocationData);
@@ -122,7 +122,7 @@ bool Ideal::D3D12ResourceLocation::OnAllocationMoved(const RHIContext& Context, 
 	// TODO!!!!!!!
 	// 해당 프레임 내에서 GPU 데이터 복사가 즉시 예약되어 실행될 것이 보장한다고 하는데 나중에 확인 해봐야함
 	// -> Copy Operator가 같이 실행되는지 확인할 것
-	Owner.lock()->ResourceRenamed((D3D12Context&)Context);
+	Owner.lock()->ResourceRenamed(Context);
 
 	// 이제 밖으로 나가서 Copy Opperator 만들자. 07.08 TODO 
 

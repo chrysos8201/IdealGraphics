@@ -32,7 +32,7 @@ namespace Ideal
 
 		// Bookkeeping and clearing
 		//RHICORE_API void TryClear(FRHIContextArray const& Contexts, FRHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const TArray<FRHIMemoryPool*>& InTargetPools);
-		void TryClear(RHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const std::vector<RHIMemoryPool*>& InTargetPools);
+		void TryClear(const RHIContext& Context, RHIPoolAllocator* InAllocator, uint32 InMaxCopySize, uint32& CopySize, const std::vector<RHIMemoryPool*>& InTargetPools);
 
 		uint64 GetUsedSize() const { return (PoolSize - FreeSize); }
 

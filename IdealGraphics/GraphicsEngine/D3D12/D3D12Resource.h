@@ -46,6 +46,8 @@ namespace Ideal
 
 		virtual void Free();
 
+		void TransitionResourceState(ID3D12GraphicsCommandList* CommandList, D3D12_RESOURCE_STATES NextResourceState);
+		D3D12_RESOURCE_STATES GetResourceState() const { return ResourceState; }
 	protected:
 		D3D12DescriptorHandle2 m_srvHandle2;
 		D3D12DescriptorHandle2 m_rtvHandle2;
@@ -54,6 +56,7 @@ namespace Ideal
 
 	protected:
 		ComPtr<ID3D12Resource> m_resource = nullptr;
+		D3D12_RESOURCE_STATES ResourceState = D3D12_RESOURCE_STATE_COMMON;
 	};
 
 	// 업로드용 임시 버퍼; 업로드 힙에 잡힌다. cpu write gpu read

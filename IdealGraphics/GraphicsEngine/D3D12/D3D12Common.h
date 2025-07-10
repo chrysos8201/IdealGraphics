@@ -7,6 +7,7 @@
 #include "d3d12.h"
 
 struct ID3D12Device;
+namespace Ideal { class D3D12GPUBuffer; }
 namespace Ideal { class D3D12Resource; }
 using namespace Ideal;
 namespace Ideal { class D3D12PoolAllocator; }
@@ -107,7 +108,7 @@ namespace Ideal
 		void Clear();
 
 		void SetOwner(std::shared_ptr<D3D12GPUBuffer> InOwner) { Owner = InOwner; }
-
+		std::weak_ptr<D3D12GPUBuffer> GetOwner() const { return Owner; }
 
 		ID3D12Resource* GetResource() const { return UnderlyingResource; }
 		uint64 GetOffsetFromBaseOfResource() const { return OffsetFromBaseOfResource; }
@@ -130,7 +131,7 @@ namespace Ideal
 		RHIPoolAllocationData& GetPoolAllocatorData() { return PoolData; }
 		void* GetMappedBaseAddress() const { return MappedBaseAddress; }
 
-		bool OnAllocationMoved(const RHIContext& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState);
+		bool OnAllocationMoved(const D3D12Context& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState);
 
 		void AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize);
 
@@ -158,6 +159,15 @@ namespace Ideal
 		void* MappedBaseAddress;
 		D3D12_GPU_VIRTUAL_ADDRESS GPUVirtualAddress{};
 		uint64 OffsetFromBaseOfResource;
+
+
+		// GYU
+	public:
+		void SetResourceStateMode(ED3D12ResourceStateMode InResourceStateMode) { ResourceStateMode = InResourceStateMode; };
+		ED3D12ResourceStateMode GetResourceStateMode() const { return ResourceStateMode; }
+
+	private:
+		ED3D12ResourceStateMode ResourceStateMode = ED3D12ResourceStateMode::Default;
 	};
 }
 

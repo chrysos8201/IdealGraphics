@@ -4,6 +4,8 @@
 #include "D3D12\D3D12Util.h"
 #include "d3dx12.h"
 
+#include "D3D12/D3D12Resource.h"
+
 static float GRHIPoolAllocatorDefragSizeFraction = 0.9f;
 static int32 GRHIPoolAllocatorDefragMaxPoolsToClear = 1;
 
@@ -21,7 +23,7 @@ Ideal::RHIPoolAllocator::~RHIPoolAllocator()
 
 }
 
-void Ideal::RHIPoolAllocator::Defrag(uint32 InMaxCopySize, uint32& CurrentCopySize)
+void Ideal::RHIPoolAllocator::Defrag(const RHIContext& Context, uint32 InMaxCopySize, uint32& CurrentCopySize)
 {
 	if (!bDefragEnabled)
 	{
@@ -77,7 +79,7 @@ void Ideal::RHIPoolAllocator::Defrag(uint32 InMaxCopySize, uint32& CurrentCopySi
 		for (int32 PoolIndex = 0; PoolIndex < SortedTargetPools.size() - 1; ++PoolIndex)
 		{
 			RHIMemoryPool* PoolToClear = SortedTargetPools[PoolIndex];
-			PoolToClear->TryClear(this, InMaxCopySize, CurrentCopySize, TargetPools);
+			PoolToClear->TryClear(Context, this, InMaxCopySize, CurrentCopySize, TargetPools);
 		}
 	}
 }
@@ -237,6 +239,8 @@ void Ideal::D3D12PoolAllocator::AllocateDefaultResource(D3D12_HEAP_TYPE InHeapTy
 		// RTAS의 경우 하나의 상태만 가져야 한다.
 		Check(InResourceStateMode == ED3D12ResourceStateMode::SingleState);
 	}
+
+	ResourceLocation.SetResourceStateMode(InResourceStateMode);
 
 	// AllocateResource
 	ResourceLocation.Clear();
@@ -538,13 +542,15 @@ ID3D12Resource* Ideal::D3D12PoolAllocator::CreatePlacedResource(const RHIPoolAll
 	return NewResource;
 }
 
-bool Ideal::D3D12PoolAllocator::HandleDefragRequest(RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock)
+bool Ideal::D3D12PoolAllocator::HandleDefragRequest(const RHIContext& Context, RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock)
 {
 	// InSourceBlock Info
 	D3D12ResourceLocation* Owner = (D3D12ResourceLocation*)InSourceBlock->GetOwner();
 	uint64 CurrentOffset = Owner->GetOffsetFromBaseOfResource();
 	ID3D12Resource* CurrentResource = Owner->GetResource();
-	
+
+	D3D12_RESOURCE_STATES SourceResourceState = Owner->GetOwner().lock()->GetResourceState();;
+
 	bool bDefragFree = true;
 	DeallocateResource(*Owner, bDefragFree);
 
@@ -556,5 +562,40 @@ bool Ideal::D3D12PoolAllocator::HandleDefragRequest(RHIPoolAllocationData* InSou
 
 	// TODO : Copy Operator같은 거 해야함.
 	// -> 이렇게 되면 BLAS에서 사용하던 것들도 다시 갱신해주어야 한다. // 07.08
-	//D3D12_RESOURCE_STATES DestCreateState = 
+	D3D12_RESOURCE_STATES DestCreateState = D3D12_RESOURCE_STATE_COMMON;
+	Owner->OnAllocationMoved((D3D12Context&)Context, InSourceBlock, DestCreateState);
+
+	if (Owner->GetResourceStateMode() == ED3D12ResourceStateMode::MultiState)
+	{
+		// Tracking
+		DestCreateState = D3D12_RESOURCE_STATE_COMMON;
+	}
+	else
+	{
+		DestCreateState = SourceResourceState;
+	}
+
+	FrameFencedAllocationData UnlockRequest = {};
+	UnlockRequest.Operation = FrameFencedAllocationData::EOperation::Unlock;
+	UnlockRequest.FrameFence = FenceValue;
+	UnlockRequest.AllocationData = InSourceBlock;
+	FrameFencedOperations.push_back(UnlockRequest);
+
+	// InSourceBlock의 원본 리소스에서 InTmpTargetBlock의 대상 리소스로 비디오 메모리 복사 작업 추가
+	// 이 복사 작업은 PoolAllocator의 조각 모음 과정이 끝난 직후 실행된다.
+	D3D12VRAMCopyOperation CopyOp;
+	CopyOp.SourceResource = CurrentResource;
+	CopyOp.SourceResourceState = SourceResourceState;
+	CopyOp.SourceOffset = CurrentOffset;
+	CopyOp.DestResource = Owner->GetResource();
+	CopyOp.DestResourceState = DestCreateState;	// 일단 복사되면 기존 리소스의 State와 같이 설정하도록 두겠다(25.07.10)
+	CopyOp.DestOffset = Owner->GetOffsetFromBaseOfResource();
+	CopyOp.Size = InSourceBlock->GetSize();
+	CopyOp.CopyType = AllocationStrategy == EResourceAllocationStrategy::ManualSubAllocation ? D3D12VRAMCopyOperation::ECopyType::BufferRegion : D3D12VRAMCopyOperation::ECopyType::Resource;
+	Check(CopyOp.SourceResource != nullptr);
+	Check(CopyOp.DestResource != nullptr);
+	PendingCopyOps.push_back(CopyOp);
+
+
+	return true;
 }

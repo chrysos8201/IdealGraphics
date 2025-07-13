@@ -22,36 +22,47 @@ void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue, D3D12Context
 		Pool->BeginAndSetFenceValue(InFenceValue);
 	}
 
-	// Defrag
-	if (BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME > 0)
-	{
-		uint32 MaxCopySize = BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME;
-		uint32 CopySize = 0;
-		for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
-		{
-			if (DefaultBufferPool)
-			{
-				DefaultBufferPool->Defrag(Context, MaxCopySize, CopySize);
+#if USE_DEFRAG
 
-				if (CopySize >= MaxCopySize)
+	if (GetAsyncKeyState('M') & 0x8000)
+	{
+		// Defrag
+		if (BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME > 0)
+		{
+			uint32 MaxCopySize = BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME;
+			uint32 CopySize = 0;
+			for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
+			{
+				if (DefaultBufferPool)
 				{
-					break;
+					DefaultBufferPool->Defrag(Context, MaxCopySize, CopySize);
+
+					if (CopySize >= MaxCopySize)
+					{
+						break;
+					}
+				}
+			}
+
+			if (CopySize)
+			{
+				int a = 3;
+			}
+		}
+
+		{
+			// TODO 
+			// FlushPendingCopyOps
+			for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
+			{
+				if (DefaultBufferPool)
+				{
+					DefaultBufferPool->FlushPendingCopyOps(Context);
 				}
 			}
 		}
 	}
-
-	{
-		// TODO 
-		// FlushPendingCopyOps
-		for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
-		{
-			if (DefaultBufferPool)
-			{
-				DefaultBufferPool->FlushPendingCopyOps(Context);
-			}
-		}
-	}
+#endif
 }
 
 void Ideal::D3D12DefaultBufferAllocator::CleanupFreeBlocks(uint64 InFrameLag)

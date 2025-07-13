@@ -369,6 +369,9 @@ void Ideal::D3D12VertexBuffer::CreateAndCopyResource(ComPtr<ID3D12Device> Device
 
 void Ideal::D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, uint32 ElementSize, uint32 ElementCount, ID3D12GraphicsCommandList* CmdList, const D3D12UploadBuffer& UploadBuffer)
 {
+	ResourceLocation.SetOwner(std::static_pointer_cast<D3D12GPUBuffer>(shared_from_this()));
+
+
 	m_bufferSize = ElementSize * ElementCount;
 	m_elementSize = ElementSize;
 	m_elementCount = ElementCount;

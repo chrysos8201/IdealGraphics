@@ -19,6 +19,7 @@ namespace Ideal
 				int PoolIndex = 0;
 				for (const auto& Allocator : PoolAllocator->Pools)
 				{
+					if (Allocator == nullptr) continue;
 					ImGui::PushID(PoolIndex++);
 
 					ImDrawList* DrawList = ImGui::GetWindowDrawList();

@@ -376,9 +376,10 @@ std::shared_ptr<Ideal::DXRBottomLevelAccelerationStructure> Ideal::RaytracingMan
 					//		memcpy(&blasGeometry.C_MaterialInfo, &material->GetMaterialInfo(), sizeof(CB_MaterialInfo));
 				}
 			}
-			blasGeometry.SRV_VertexBuffer = DescriptorManager->Allocate(1);
+			blasGeometry.VertexBuffer = mesh->GetMeshes()[i]->GetVertexBuffer();
+			blasGeometry.VertexBuffer->EmplaceSRV2(DescriptorManager->Allocate(1));
 			//CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResource(), blasGeometry.SRV_VertexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
-			CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResourceLocation(), blasGeometry.SRV_VertexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
+			CreateSRV(Device, mesh->GetMeshes()[i]->GetVertexBuffer()->GetResourceLocation(), blasGeometry.VertexBuffer->GetSRV2().GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetVertexBuffer()->GetElementCount(), sizeof(BasicVertex));
 			blasGeometry.SRV_IndexBuffer = DescriptorManager->Allocate(1);
 			CreateSRV(Device, mesh->GetMeshes()[i]->GetIndexBuffer()->GetResource(), blasGeometry.SRV_IndexBuffer.GetCPUDescriptorHandleStart(), mesh->GetMeshes()[i]->GetIndexBuffer()->GetElementCount(), sizeof(uint32));
 
@@ -663,7 +664,8 @@ void Ideal::RaytracingManager::BuildShaderTables(ComPtr<ID3D12Device5> Device, s
 				}
 
 				Ideal::LocalRootSignature::RootArgument rootArguments;
-				rootArguments.SRV_Vertices = blasGeometry.SRV_VertexBuffer.GetGPUDescriptorHandleStart();
+				//rootArguments.SRV_Vertices = blasGeometry.SRV_VertexBuffer.GetGPUDescriptorHandleStart();
+				rootArguments.SRV_Vertices = blasGeometry.VertexBuffer->GetSRV2().GetGPUDescriptorHandleStart();
 				rootArguments.SRV_Indices = blasGeometry.SRV_IndexBuffer.GetGPUDescriptorHandleStart();
 				rootArguments.SRV_BaseTexture = blasGeometry.Material.lock()->GetBaseTextureHandleInRayTracing().GetGPUDescriptorHandleStart();
 				rootArguments.SRV_NormalTexture = blasGeometry.Material.lock()->GetNormalTextureHandleInRayTracing().GetGPUDescriptorHandleStart();

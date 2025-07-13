@@ -64,6 +64,13 @@ void Ideal::D3D12ResourceLocation::ReleaseResource()
 	}
 }
 
+bool Ideal::D3D12ResourceLocation::GetDefragDirtyCheckForBLASAndDirtyToFalse()
+{
+	bool ret = bDefragDirtyCheckForBLAS;
+	bDefragDirtyCheckForBLAS = false;
+	return ret;
+}
+
 void Ideal::D3D12ResourceLocation::SetResource(ID3D12Resource* Value)
 {
 	Check(UnderlyingResource == nullptr);
@@ -127,6 +134,14 @@ bool Ideal::D3D12ResourceLocation::OnAllocationMoved(const D3D12Context& Context
 	// 이제 밖으로 나가서 Copy Opperator 만들자. 07.08 TODO 
 
 	return true;
+}
+
+void Ideal::D3D12ResourceLocation::UnlockPoolData()
+{
+	if (Type == ResourceLocationType::eSubAllocation)
+	{
+		GetPoolAllocatorData().UnLock();
+	}
 }
 
 void Ideal::D3D12ResourceLocation::AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize)

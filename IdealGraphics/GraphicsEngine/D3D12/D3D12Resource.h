@@ -20,7 +20,7 @@ namespace Ideal
 
 namespace Ideal
 {
-	class D3D12Resource
+	class D3D12Resource : public std::enable_shared_from_this<D3D12Resource>
 	{
 	public:
 		D3D12Resource();

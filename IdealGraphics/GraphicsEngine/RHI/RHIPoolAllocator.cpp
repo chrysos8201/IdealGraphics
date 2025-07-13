@@ -586,7 +586,7 @@ void Ideal::D3D12PoolAllocator::FlushPendingCopyOps(D3D12Context& InContext)
 
 			CD3DX12_RESOURCE_BARRIER barrierDestToResource = CD3DX12_RESOURCE_BARRIER::Transition(
 				CopyOperation.DestResource,
-				CopyOperation.DestResourceState,
+				D3D12_RESOURCE_STATE_COPY_DEST,
 				CopyOperation.SourceResourceState
 			);
 
@@ -710,6 +710,8 @@ bool Ideal::D3D12PoolAllocator::HandleDefragRequest(const RHIContext& Context, R
 	Check(CopyOp.DestResource != nullptr);
 	PendingCopyOps.push_back(CopyOp);
 
+	// 25.07.13 Defrag Dirty
+	Owner->SetDefragDirtyCheckForBLAS(true);
 
 	return true;
 }

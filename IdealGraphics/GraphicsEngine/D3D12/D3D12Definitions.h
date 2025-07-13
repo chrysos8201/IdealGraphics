@@ -1,6 +1,7 @@
 #pragma once
 #include <dxgiformat.h>
 
+#define USE_DEFRAG 1
 #define USE_BUFFER_POOL 1
 #define BUFFER_POOL_DEFRAG_MAX_COPY_SIZE_PER_FRAME				32*1024*1024
 

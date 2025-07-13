@@ -164,9 +164,14 @@ void Ideal::DXRAccelerationStructureManager::Build(ComPtr<ID3D12Device5> Device,
 	// Build BLAS
 	for (auto& blas : m_blasVector)
 	{
+		// Defrag Dirty Check
+		blas->CheckDefragged();
+
 		// 처음에 빌드해야하거나 blas 정보가 수정되어 다시 빌드해야 할 경우
 		if (ForceBuild || blas->IsDirty())
 		{
+			// 25.07.13 추가
+			blas->BuildGeometries(blas->GetGeometries());
 			// ver2
 			blas->Build(CommandList, m_scratchBuffers[m_currentIndex]->GetResource());
 			CD3DX12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(blas->GetResource().Get());

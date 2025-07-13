@@ -196,6 +196,8 @@ namespace Ideal
 
 			Fence();
 			WaitForFenceValue();
+
+			OutVertexBuffer->GetResourceLocation().UnlockPoolData();
 #endif
 #ifdef USE_UPLOAD_CONTAINER
 			const uint32 elementSize = sizeof(TVertexType);

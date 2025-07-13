@@ -73,7 +73,8 @@ void Ideal::DXRBottomLevelAccelerationStructure::FreeMyHandle()
 		//geometry.SRV_IndexBuffer.Free();
 		//geometry.SRV_VertexBuffer.Free();
 		geometry.SRV_IndexBuffer.Free();
-		geometry.SRV_VertexBuffer.Free();
+		//geometry.SRV_VertexBuffer.Free();
+		geometry.VertexBuffer->GetSRV2().Free();
 	}
 
 	m_geometries.clear();
@@ -128,8 +129,11 @@ void Ideal::DXRBottomLevelAccelerationStructure::CheckDefragged()
 	// VertexBuffer의 Defrag 체크
 	for (const auto& geometry : m_geometries)
 	{
-		geometry.VertexBuffer->GetResourceLocation();
-		//TODO : 리소스 DirtyCheck 후 Blas를 다시 빌드하게 할지 결정
+		bool defragged = geometry.VertexBuffer->GetResourceLocation().GetDefragDirtyCheckForBLASAndDirtyToFalse();
+		if (defragged)
+		{
+			SetDirty(true);
+		}
 	}
 }
 
@@ -165,7 +169,8 @@ void Ideal::DXRBottomLevelAccelerationStructure::BuildGeometries(std::vector<BLA
 		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 		geometryDesc.Triangles.IndexBuffer = geometry.IndexBufferGPUAddress;
 		geometryDesc.Triangles.IndexCount = geometry.IndexCount;
-		geometryDesc.Triangles.VertexBuffer.StartAddress = geometry.VertexBufferGPUAddress;
+		//geometryDesc.Triangles.VertexBuffer.StartAddress = geometry.VertexBufferGPUAddress;
+		geometryDesc.Triangles.VertexBuffer.StartAddress = geometry.VertexBuffer->GetResourceLocation().GetGPUVirtualAddress();
 		geometryDesc.Triangles.VertexBuffer.StrideInBytes = geometry.VertexStrideInBytes;
 		geometryDesc.Triangles.VertexCount = geometry.VertexCount;
 

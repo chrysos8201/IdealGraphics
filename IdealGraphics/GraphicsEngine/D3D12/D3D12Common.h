@@ -122,6 +122,7 @@ namespace Ideal
 		void* GetMappedBaseAddress() const { return MappedBaseAddress; }
 
 		bool OnAllocationMoved(const D3D12Context& Context, RHIPoolAllocationData* InNewData, D3D12_RESOURCE_STATES& OutCreateState);
+		void UnlockPoolData();
 
 		void AsStandAlone(ID3D12Resource* Resource, D3D12_HEAP_TYPE ResourceHeapType, uint64 InSize);
 
@@ -156,8 +157,13 @@ namespace Ideal
 		void SetResourceStateMode(ED3D12ResourceStateMode InResourceStateMode) { ResourceStateMode = InResourceStateMode; };
 		ED3D12ResourceStateMode GetResourceStateMode() const { return ResourceStateMode; }
 
+		// 더티체크되어있는지 확인하고 기존 더티체크는 False로 바꾼다.
+		bool GetDefragDirtyCheckForBLASAndDirtyToFalse();
+		void SetDefragDirtyCheckForBLAS(bool InValue) { bDefragDirtyCheckForBLAS = InValue; }
 	private:
 		ED3D12ResourceStateMode ResourceStateMode = ED3D12ResourceStateMode::Default;
+
+		bool bDefragDirtyCheckForBLAS = false;
 	};
 }
 

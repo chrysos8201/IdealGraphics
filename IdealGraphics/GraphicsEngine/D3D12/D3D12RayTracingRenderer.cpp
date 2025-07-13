@@ -136,18 +136,18 @@ void Ideal::D3D12RayTracingRenderer::Init()
 
 #if defined(_DEBUG)
 	{
-		//ComPtr<ID3D12Debug> debugController;
-		//ComPtr<ID3D12Debug1> debugController1;
-		//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-		//{
-		//	debugController->EnableDebugLayer();
-		//
-		//	if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
-		//	{
-		//		debugController1->SetEnableGPUBasedValidation(FALSE);
-		//	}
-		//	dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-		//}
+		ComPtr<ID3D12Debug> debugController;
+		ComPtr<ID3D12Debug1> debugController1;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+		{
+			debugController->EnableDebugLayer();
+
+			if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
+			{
+				debugController1->SetEnableGPUBasedValidation(FALSE);
+			}
+			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+		}
 	}
 #endif
 

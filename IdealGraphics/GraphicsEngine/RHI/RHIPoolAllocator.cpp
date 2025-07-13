@@ -3,7 +3,6 @@
 #include "RHIMemoryPool.h"
 #include "D3D12\D3D12Util.h"
 #include "d3dx12.h"
-
 #include "D3D12/D3D12Resource.h"
 
 static float GRHIPoolAllocatorDefragSizeFraction = 0.9f;
@@ -11,6 +10,7 @@ static int32 GRHIPoolAllocatorDefragMaxPoolsToClear = 1;
 
 Ideal::RHIPoolAllocator::RHIPoolAllocator(uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled)
 	: DefaultPoolSize(InDefaultPoolSize),
+	LastDefragPoolIndex(0),
 	PoolAlignment(InPoolAlignment),
 	MaxAllocationSize(InMaxAllocationSize),
 	bDefragEnabled(bInDefragEnabled)
@@ -57,9 +57,9 @@ void Ideal::RHIPoolAllocator::Defrag(const RHIContext& Context, uint32 InMaxCopy
 
 	std::sort(SortedTargetPools.begin(), SortedTargetPools.end(),
 		[](const RHIMemoryPool* InLHS, const RHIMemoryPool* InRHS)
-	{
-		return InLHS->GetUsedSize() < InRHS->GetUsedSize();
-	});
+		{
+			return InLHS->GetUsedSize() < InRHS->GetUsedSize();
+		});
 
 	std::vector<RHIMemoryPool*> TargetPools;
 
@@ -74,12 +74,61 @@ void Ideal::RHIPoolAllocator::Defrag(const RHIContext& Context, uint32 InMaxCopy
 		{
 			TargetPools.push_back(SortedTargetPools[PoolIndex]);
 		}
-		
+
 		// 조각 모음이 필요한 메모리 풀 탐색
 		for (int32 PoolIndex = 0; PoolIndex < SortedTargetPools.size() - 1; ++PoolIndex)
 		{
 			RHIMemoryPool* PoolToClear = SortedTargetPools[PoolIndex];
 			PoolToClear->TryClear(Context, this, InMaxCopySize, CurrentCopySize, TargetPools);
+
+			TargetPools.pop_back();
+
+			if (CurrentCopySize >= InMaxCopySize)
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		if (LastDefragPoolIndex >= Pools.size())
+		{
+			LastDefragPoolIndex = 0;
+		}
+		int32 DefraggedPoolCount = 0;
+		for (; LastDefragPoolIndex < Pools.size(); LastDefragPoolIndex++)
+		{
+			RHIMemoryPool* PoolToClear = Pools[LastDefragPoolIndex];
+
+			// invalid이거나 사용률이 일정 수준 이상이면 넘어간다.
+			float Usage = PoolToClear ? (float)PoolToClear->GetUsedSize() / (float)PoolToClear->GetPoolSize() : 1.0f;
+			if (Usage >= GRHIPoolAllocatorDefragSizeFraction)
+			{
+				continue;
+			}
+
+			TargetPools.clear();
+			for (int32 SortedPoolIndex = SortedTargetPools.size() - 1; SortedPoolIndex >= 0; --SortedPoolIndex)
+			{
+				RHIMemoryPool* TargetPool = SortedTargetPools[SortedPoolIndex];
+				if (PoolToClear == TargetPool)
+				{
+					break;
+				}
+				TargetPools.push_back(TargetPool);
+			}
+
+			if (TargetPools.size() == 0)
+			{
+				continue;
+			}
+
+			PoolToClear->TryClear(Context, this, InMaxCopySize, CurrentCopySize, TargetPools);
+			DefraggedPoolCount++;
+			if (CurrentCopySize >= InMaxCopySize || (DefraggedPoolCount >= GRHIPoolAllocatorDefragMaxPoolsToClear))
+			{
+				break;
+			}
 		}
 	}
 }
@@ -192,7 +241,8 @@ void Ideal::D3D12PoolAllocator::BeginAndSetFenceValue(uint64 InFenceValue)
 	FenceValue = InFenceValue;
 }
 
-Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ID3D12Device* InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) : D3D12DeviceChild(InDevice),
+Ideal::D3D12PoolAllocator::D3D12PoolAllocator(ID3D12Device* InDevice, const D3D12ResourceInitConfig& InInitConfig, EResourceAllocationStrategy InAllocationStrategy, uint64 InDefaultPoolSize, uint32 InPoolAlignment, uint32 InMaxAllocationSize, bool bInDefragEnabled) 
+	: D3D12DeviceChild(InDevice),
 	RHIPoolAllocator(InDefaultPoolSize, InPoolAlignment, InMaxAllocationSize, bInDefragEnabled),
 	InitConfig(InInitConfig),
 	AllocationStrategy(InAllocationStrategy)
@@ -488,6 +538,65 @@ void Ideal::D3D12PoolAllocator::CleanUpAllocations(uint64 InFrameLag, bool bForc
 	SortPools();
 }
 
+void Ideal::D3D12PoolAllocator::FlushPendingCopyOps(D3D12Context& InContext)
+{
+	for (D3D12VRAMCopyOperation& CopyOperation : PendingCopyOps)
+	{
+		if (CopyOperation.SourceResource == nullptr || CopyOperation.DestResource == nullptr)
+		{
+			continue;
+		}
+
+		{
+			CD3DX12_RESOURCE_BARRIER barrierSource = CD3DX12_RESOURCE_BARRIER::Transition(
+				CopyOperation.SourceResource,
+				CopyOperation.SourceResourceState,
+				D3D12_RESOURCE_STATE_COPY_SOURCE
+			);
+			CD3DX12_RESOURCE_BARRIER barrierDest = CD3DX12_RESOURCE_BARRIER::Transition(
+				CopyOperation.DestResource,
+				CopyOperation.DestResourceState,
+				D3D12_RESOURCE_STATE_COPY_DEST
+			);
+			CD3DX12_RESOURCE_BARRIER Barriers[2] = { barrierSource, barrierDest };
+			InContext.CommandList->ResourceBarrier(2, Barriers);
+
+			switch (CopyOperation.CopyType)
+			{
+				case D3D12VRAMCopyOperation::BufferRegion:
+				{
+					InContext.CommandList->CopyBufferRegion(
+						CopyOperation.DestResource,
+						CopyOperation.DestOffset,
+						CopyOperation.SourceResource,
+						CopyOperation.SourceOffset,
+						CopyOperation.Size
+					);
+					break;
+				}
+				case D3D12VRAMCopyOperation::Resource:
+				{
+					InContext.CommandList->CopyResource(
+						CopyOperation.DestResource,
+						CopyOperation.SourceResource
+					);
+					break;
+				}
+			}
+
+			CD3DX12_RESOURCE_BARRIER barrierDestToResource = CD3DX12_RESOURCE_BARRIER::Transition(
+				CopyOperation.DestResource,
+				CopyOperation.DestResourceState,
+				CopyOperation.SourceResourceState
+			);
+
+			InContext.CommandList->ResourceBarrier(1, &barrierDestToResource);
+		}
+	}
+
+	PendingCopyOps.clear();
+}
+
 ID3D12Resource* Ideal::D3D12PoolAllocator::GetBackingResource(D3D12ResourceLocation& InResourceLocation) const
 {
 	Check(IsOwner(InResourceLocation));
@@ -500,6 +609,11 @@ Ideal::D3D12HeapAndOffset Ideal::D3D12PoolAllocator::GetBackingHeapAndAllocation
 {
 	Check(IsOwner(InResourceLocation));
 	return GetBackingHeapAndAllocationOffsetInBytes(InResourceLocation.GetPoolAllocatorData());
+}
+
+bool Ideal::D3D12PoolAllocator::IsOwner(D3D12ResourceLocation& ResourceLocation) const
+{
+	return ResourceLocation.GetPoolAllocator() == this;
 }
 
 Ideal::D3D12HeapAndOffset Ideal::D3D12PoolAllocator::GetBackingHeapAndAllocationOffsetInBytes(const RHIPoolAllocationData& InAllocationData) const

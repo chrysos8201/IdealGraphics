@@ -1,5 +1,7 @@
 #pragma once
 #include "Core\Core.h"
+
+namespace Ideal { class RHIPoolResource; }
 //#include "D3D12\D3D12Common.h"
 
 using namespace Ideal;

@@ -15,7 +15,7 @@ namespace Ideal
 		void DrawDebug();
 
 	public:
-		void Begin(uint64 InFenceValue);
+		void Begin(uint64 InFenceValue, D3D12Context& Context);
 		void CleanupFreeBlocks(uint64 InFrameLag);
 
 	public:

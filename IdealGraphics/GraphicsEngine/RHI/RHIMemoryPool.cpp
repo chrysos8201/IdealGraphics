@@ -5,7 +5,7 @@
 #include "RHIPoolAllocationData.h"
 #include "D3D12\D3D12Definitions.h"
 #include "D3D12\D3D12Util.h"
-
+#include "RHI\RHIPoolAllocator.h"
 
 static int32 DesiredAllocationPoolSize = 32;
 
@@ -301,7 +301,7 @@ Ideal::RHIPoolAllocationData* Ideal::RHIMemoryPool::GetNewAllocationData()
 	}
 	else
 	{
-		new RHIPoolAllocationData();
+		return new RHIPoolAllocationData();
 	}
 }
 

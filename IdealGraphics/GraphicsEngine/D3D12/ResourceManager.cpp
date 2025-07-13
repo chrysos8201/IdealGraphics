@@ -49,9 +49,12 @@ ResourceManager::~ResourceManager()
 	
 }
 
-void ResourceManager::Begin(uint64 InFenceValue)
+void Ideal::ResourceManager::Begin(uint64 InFenceValue, ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList)
 {
-	DefaultBufferAllocator->Begin(InFenceValue);
+	D3D12Context Context = {};
+	Context.Device = Device;
+	Context.CommandList = CommandList;
+	DefaultBufferAllocator->Begin(InFenceValue, Context);
 }
 
 void ResourceManager::End()

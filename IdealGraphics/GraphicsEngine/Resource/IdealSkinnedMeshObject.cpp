@@ -12,7 +12,6 @@
 #include "GraphicsEngine/D3D12/D3D12Resource.h"
 #include "GraphicsEngine/D3D12/Raytracing/RaytracingManager.h"
 #include "GraphicsEngine/D3D12/Raytracing/DXRAccelerationStructure.h"
-#include "GraphicsEngine/D3D12/D3D12Resource.h"
 #include "GraphicsEngine/D3D12/ResourceManager.h"
 #include "GraphicsEngine/D3D12/D3D12DynamicConstantBufferAllocator.h"
 #include "GraphicsEngine/D3D12/D3D12UAV.h"

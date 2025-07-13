@@ -1,14 +1,15 @@
 #pragma once
 #include "Core/Core.h"
-#include "RHI/RHIPoolAllocationData.h"
-#include "RHI/RHIPoolAllocator.h"
 #include "RHI/RHIResource.h"
+#include "RHI/RHIPoolAllocationData.h"
+//#include "RHI/RHIPoolAllocator.h"
 
 #include "d3d12.h"
 
 struct ID3D12Device;
 namespace Ideal { class D3D12GPUBuffer; }
 namespace Ideal { class D3D12Resource; }
+namespace Ideal { class D3D12ResourceLocation; }
 using namespace Ideal;
 namespace Ideal { class D3D12PoolAllocator; }
 
@@ -18,21 +19,10 @@ namespace Ideal
 	{
 	public:
 		ID3D12Device* Device;
-		ID3D12CommandList* CommandList;
+		ID3D12GraphicsCommandList* CommandList;
 
-		inline void CreateSRV(const D3D12ResourceLocation& InResourceLocation, D3D12_CPU_DESCRIPTOR_HANDLE Handle, uint32 InNumElements, uint32 InElementSize) const
-		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			SRVDesc.Buffer.FirstElement = InResourceLocation.GetOffsetFromBaseOfResource() / InElementSize;
-			SRVDesc.Buffer.NumElements = InNumElements;
-			SRVDesc.Buffer.StructureByteStride = InElementSize;
-			SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
-			SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-
-			Device->CreateShaderResourceView(InResourceLocation.GetResource(), &SRVDesc, Handle);
-		}
+		void CreateSRV(const D3D12ResourceLocation& InResourceLocation, D3D12_CPU_DESCRIPTOR_HANDLE Handle, uint32 InNumElements, uint32 InElementSize) const;
+		
 	};
 
 	enum class EResourceAllocationStrategy

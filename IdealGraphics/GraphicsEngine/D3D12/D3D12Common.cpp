@@ -142,3 +142,17 @@ void Ideal::D3D12ResourceLocation::AsStandAlone(ID3D12Resource* Resource, D3D12_
 	}
 	SetGPUVirtualAddress(Resource->GetGPUVirtualAddress());
 }
+
+void Ideal::D3D12Context::CreateSRV(const D3D12ResourceLocation& InResourceLocation, D3D12_CPU_DESCRIPTOR_HANDLE Handle, uint32 InNumElements, uint32 InElementSize) const
+{
+	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	SRVDesc.Buffer.FirstElement = InResourceLocation.GetOffsetFromBaseOfResource() / InElementSize;
+	SRVDesc.Buffer.NumElements = InNumElements;
+	SRVDesc.Buffer.StructureByteStride = InElementSize;
+	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+	Device->CreateShaderResourceView(InResourceLocation.GetResource(), &SRVDesc, Handle);
+}

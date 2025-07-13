@@ -56,6 +56,11 @@ namespace Ideal
 		std::shared_ptr<Ideal::IdealMesh<SkinnedVertex>> SkinnedMesh;
 	};
 
+	struct BLASData
+	{
+		std::vector<Ideal::BLASGeometry> Geometries;
+	};
+
 	class DXRAccelerationStructure
 	{
 	public:

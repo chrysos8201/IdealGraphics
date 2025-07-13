@@ -79,7 +79,7 @@ namespace Ideal
 
 	public:
 		//25.07.05
-		void Begin(uint64 InFenceValue);
+		void Begin(uint64 InFenceValue, ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
 		void DrawDebug();
 		void End();
 

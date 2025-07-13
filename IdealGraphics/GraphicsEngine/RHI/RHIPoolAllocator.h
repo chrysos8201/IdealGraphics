@@ -2,10 +2,12 @@
 #include "Core\Core.h"
 #include "D3D12\D3D12Common.h"
 #include "d3d12.h"
-using namespace Ideal;
 
+//using namespace Ideal;
 namespace Ideal { namespace Visualization { class RHIProfiler; } }
 namespace Ideal { struct RHIPoolAllocationData; }
+namespace Ideal { struct RHIContext; }
+namespace Ideal { struct D3D12ResourceLocation; }
 
 namespace Ideal { class RHIMemoryPool; }
 
@@ -13,7 +15,7 @@ struct ID3D12Device;
 
 namespace Ideal
 {
-	class RHIPoolResource {};
+	
 
 	class RHIPoolAllocator
 	{
@@ -37,6 +39,9 @@ namespace Ideal
 		virtual bool HandleDefragRequest(const RHIContext& Context, RHIPoolAllocationData* InSourceBlock, RHIPoolAllocationData& InTmpTargetBlock) = 0;
 
 		std::vector<RHIMemoryPool*> Pools;
+
+		// CPU의 오버헤드를 줄이기 위해 조각모음을 여러 프레임에 나눠서 한다.
+		int32 LastDefragPoolIndex;
 
 		const uint64 DefaultPoolSize;
 		const uint32 PoolAlignment;
@@ -74,24 +79,6 @@ namespace Ideal
 		uint64 Offset;
 	};
 
-	struct D3D12VRAMCopyOperation
-	{
-		enum ECopyType
-		{
-			BufferRegion,
-			Resource,
-		};
-
-		ID3D12Resource* SourceResource;
-		D3D12_RESOURCE_STATES SourceResourceState;
-		uint32 SourceOffset;
-		ID3D12Resource* DestResource;
-		D3D12_RESOURCE_STATES DestResourceState;
-		uint32 DestOffset;
-		uint32 Size;
-		ECopyType CopyType;
-	};
-
 	class D3D12PoolAllocator : public RHIPoolAllocator, public D3D12DeviceChild
 	{
 	public:
@@ -113,12 +100,13 @@ namespace Ideal
 
 		// FencedValue는 완료된 Fence의 Value를 넣으면 된다.
 		void CleanUpAllocations(uint64 InFrameLag, bool bForceFree = false);
+		void FlushPendingCopyOps(D3D12Context& InContext);
 
 		EResourceAllocationStrategy GetAllocationStrategy() const { return AllocationStrategy; }
 		ID3D12Resource* GetBackingResource(D3D12ResourceLocation& InResourceLocation) const;
 		D3D12HeapAndOffset GetBackingHeapAndAllocationOffsetInBytes(D3D12ResourceLocation& InResourceLocation) const;
 		D3D12HeapAndOffset GetBackingHeapAndAllocationOffsetInBytes(const RHIPoolAllocationData& InAllocationData) const;
-		bool IsOwner(D3D12ResourceLocation& ResourceLocation) const { return ResourceLocation.GetPoolAllocator() == this; }
+		bool IsOwner(D3D12ResourceLocation& ResourceLocation) const;
 
 	protected:
 		virtual RHIMemoryPool* CreateNewPool(uint32 InPoolIndex, uint32 InMinimumAllocationSize) override;

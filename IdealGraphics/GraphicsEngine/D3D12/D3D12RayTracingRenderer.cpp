@@ -1607,7 +1607,7 @@ void Ideal::D3D12RayTracingRenderer::BeginRender()
 	commandList->OMSetRenderTargets(1, &rtvHandle.GetCPUDescriptorHandleByIndex(0), FALSE, nullptr);
 
 
-	m_resourceManager->Begin(m_fenceValue);
+	m_resourceManager->Begin(m_fenceValue, m_device.Get(), commandList.Get());
 }
 
 void Ideal::D3D12RayTracingRenderer::EndRender()

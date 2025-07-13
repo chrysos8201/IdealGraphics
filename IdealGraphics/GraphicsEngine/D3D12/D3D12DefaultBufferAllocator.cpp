@@ -13,8 +13,10 @@ void Ideal::D3D12DefaultBufferAllocator::DrawDebug()
 	}
 }
 
-void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue)
+void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue, D3D12Context& Context)
 {
+	
+
 	for (D3D12PoolAllocator* Pool : DefaultBufferPools)
 	{
 		Pool->BeginAndSetFenceValue(InFenceValue);
@@ -29,12 +31,24 @@ void Ideal::D3D12DefaultBufferAllocator::Begin(uint64 InFenceValue)
 		{
 			if (DefaultBufferPool)
 			{
-				//DefaultBufferPool->Defrag()
+				DefaultBufferPool->Defrag(Context, MaxCopySize, CopySize);
 
 				if (CopySize >= MaxCopySize)
 				{
 					break;
 				}
+			}
+		}
+	}
+
+	{
+		// TODO 
+		// FlushPendingCopyOps
+		for (D3D12PoolAllocator* DefaultBufferPool : DefaultBufferPools)
+		{
+			if (DefaultBufferPool)
+			{
+				DefaultBufferPool->FlushPendingCopyOps(Context);
 			}
 		}
 	}

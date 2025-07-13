@@ -377,40 +377,17 @@ void Ideal::D3D12VertexBuffer::CreateFromResourceLocation(ID3D12Device* Device, 
 	m_resource = ResourceLocation.GetResource();
 	D3D12GPUBuffer::SetName(L"VertexBuffer");
 
-	//static int once = 0;
-	//D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	//if (once == 0)
-	//{
-	//	once++;
-	//	resourceState = D3D12_RESOURCE_STATE_COMMON;
-	//}
-	CD3DX12_RESOURCE_BARRIER resourceBarrier0
-		= CD3DX12_RESOURCE_BARRIER::Transition(
-			ResourceLocation.GetResource(),
-			D3D12_RESOURCE_STATE_COMMON,
-			D3D12_RESOURCE_STATE_COPY_DEST
-		);
-
-	CmdList->ResourceBarrier(1, &resourceBarrier0);
-
+	TransitionResourceState(CmdList, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	Check(ResourceLocation.GetOffsetFromBaseOfResource() + m_bufferSize <= ResourceLocation.GetResource()->GetDesc().Width);
 	// 데이터를 복사한다
 	CmdList->CopyBufferRegion(ResourceLocation.GetResource(), ResourceLocation.GetOffsetFromBaseOfResource(), UploadBuffer.GetResource(), 0, m_bufferSize);
-
-	CD3DX12_RESOURCE_BARRIER resourceBarrier1
-		= CD3DX12_RESOURCE_BARRIER::Transition(
-			ResourceLocation.GetResource(),
-			D3D12_RESOURCE_STATE_COPY_DEST,
-			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		);
-
-	CmdList->ResourceBarrier(1, &resourceBarrier1);
+	
+	TransitionResourceState(CmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
 	m_vertexBufferView.BufferLocation = ResourceLocation.GetGPUVirtualAddress();
 	m_vertexBufferView.SizeInBytes = m_bufferSize;
 	m_vertexBufferView.StrideInBytes = m_elementSize;
-
 }
 
 //------------------------IndexBuffer------------------------//

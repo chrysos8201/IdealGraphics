@@ -7,4 +7,6 @@ namespace Ideal
 	public:
 
 	};
+
+	class RHIPoolResource {};
 }
